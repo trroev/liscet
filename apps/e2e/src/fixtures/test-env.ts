@@ -1,5 +1,4 @@
 import { randomBytes } from "node:crypto"
-import type { DbDriver } from "@repo/env/database"
 
 const DEFAULT_BASE_URL = "http://localhost:3000"
 
@@ -9,7 +8,6 @@ const DEFAULT_BASE_URL = "http://localhost:3000"
  * so the setup and teardown sides cannot drift apart.
  */
 const TEST_ENV_KEYS = {
-  driver: "E2E_DB_DRIVER",
   dbName: "E2E_RUN_DB_NAME",
   dbUri: "E2E_DB_URI",
   adminUri: "E2E_PG_ADMIN_URI",
@@ -17,10 +15,9 @@ const TEST_ENV_KEYS = {
 } as const satisfies Record<string, string>
 
 type TestEnv = {
-  readonly driver: DbDriver
   readonly dbName: string
   readonly dbUri: string
-  readonly adminUri: string | null
+  readonly adminUri: string
   readonly baseUrl: string
 }
 
@@ -66,85 +63,60 @@ const buildAdminUri = ({ baseUri }: { readonly baseUri: string }): string => {
   return url.toString()
 }
 
-/**
- * The schema is provisioned by migrations, so any Payload connection in this
- * process (notably the `globalSetup` seed's `getPayload`) must skip the Postgres
- * adapter's dev-mode schema `push`: that sync only knows Payload's tables and
- * would drop the Better Auth (Drizzle) tables the migrations created.
- * `PAYLOAD_MIGRATING` is the adapter's signal for "migrations own the schema".
- */
-const markPostgresMigrating = async (driver: DbDriver): Promise<void> => {
-  const { DB_DRIVERS } = await import("@repo/env/database")
-  if (driver === DB_DRIVERS.postgres) {
-    process.env.PAYLOAD_MIGRATING = "true"
-  }
+const markPayloadMigrating = (): void => {
+  // The schema is provisioned by migrations, so any Payload connection in this
+  // process (notably the `globalSetup` seed's `getPayload`) must skip the
+  // Postgres adapter's dev-mode schema `push`: that sync only knows Payload's
+  // tables and would drop the Better Auth (Drizzle) tables the migrations
+  // created. `PAYLOAD_MIGRATING` is the adapter's signal for "migrations own
+  // the schema".
+  process.env.PAYLOAD_MIGRATING = "true"
 }
 
 /**
- * Resolve (and on first call, initialise) the per-run database for the active
- * backend.
+ * Resolve (and on first call, initialise) the per-run database.
  *
  * The active connection string is rewritten to a fresh per-run database BEFORE
  * `@repo/env/database` is first evaluated: that module captures its runtime env
- * eagerly on import, so it is imported dynamically here — after the rewrite — to
- * ensure the in-process seed and the resolver both see the per-run database
- * rather than the shared base one. Backend selection reuses the resolver, so the
- * MongoDB-vs-Postgres semantics (exactly one of `MONGODB_URI` / `DATABASE_URL`,
- * both/neither throws) stay identical to the runtime.
+ * eagerly on import, so the rewrite must precede any import that pulls it in.
  *
  * Idempotent: the first call performs the rewrite and persists per-run state in
  * `process.env`; later same-process calls (e.g. from `globalSetup`) read it back.
  */
-export const getOrInitTestEnv = async (): Promise<InitTestEnv> => {
-  const existingDriver = process.env[TEST_ENV_KEYS.driver] as
-    | DbDriver
-    | undefined
+export const getOrInitTestEnv = (): InitTestEnv => {
   const existingDbName = process.env[TEST_ENV_KEYS.dbName]
   const existingUri = process.env[TEST_ENV_KEYS.dbUri]
-  if (existingDriver && existingDbName && existingUri) {
-    await markPostgresMigrating(existingDriver)
+  const existingAdminUri = process.env[TEST_ENV_KEYS.adminUri]
+  if (existingDbName && existingUri && existingAdminUri) {
+    markPayloadMigrating()
     return {
-      driver: existingDriver,
       dbName: existingDbName,
       dbUri: existingUri,
-      adminUri: process.env[TEST_ENV_KEYS.adminUri] ?? null,
+      adminUri: existingAdminUri,
       baseUrl: process.env[TEST_ENV_KEYS.baseUrl] ?? DEFAULT_BASE_URL,
       isInitialRun: false,
     }
   }
 
-  // Rewrite whichever backend URI(s) are present to the per-run database, then
-  // delegate validation + driver selection to the resolver below. Grabbing the
-  // raw strings here is only to derive the per-run URI — the both/neither/which
-  // branching stays owned by `resolveDatabase`.
-  const rawMongoUri = process.env.MONGODB_URI
-  const rawPostgresUri = process.env.DATABASE_URL
+  const rawUri = process.env.DATABASE_URL
+  if (!rawUri) {
+    throw new Error(
+      "E2E suite requires DATABASE_URL pointing at a Postgres instance."
+    )
+  }
   const dbName = buildTestDbName()
-  if (rawMongoUri) {
-    process.env.MONGODB_URI = buildDbUri({ baseUri: rawMongoUri, dbName })
-  }
-  if (rawPostgresUri) {
-    process.env.DATABASE_URL = buildDbUri({ baseUri: rawPostgresUri, dbName })
-  }
-
-  const { DB_DRIVERS, resolveDatabase } = await import("@repo/env/database")
-  const { driver, url: dbUri } = resolveDatabase()
-  const adminUri =
-    driver === DB_DRIVERS.postgres && rawPostgresUri
-      ? buildAdminUri({ baseUri: rawPostgresUri })
-      : null
+  const dbUri = buildDbUri({ baseUri: rawUri, dbName })
+  const adminUri = buildAdminUri({ baseUri: rawUri })
+  process.env.DATABASE_URL = dbUri
   const baseUrl = process.env[TEST_ENV_KEYS.baseUrl] ?? DEFAULT_BASE_URL
 
-  process.env[TEST_ENV_KEYS.driver] = driver
   process.env[TEST_ENV_KEYS.dbName] = dbName
   process.env[TEST_ENV_KEYS.dbUri] = dbUri
-  if (adminUri) {
-    process.env[TEST_ENV_KEYS.adminUri] = adminUri
-  }
+  process.env[TEST_ENV_KEYS.adminUri] = adminUri
   process.env[TEST_ENV_KEYS.baseUrl] = baseUrl
-  await markPostgresMigrating(driver)
+  markPayloadMigrating()
 
-  return { driver, dbName, dbUri, adminUri, baseUrl, isInitialRun: true }
+  return { dbName, dbUri, adminUri, baseUrl, isInitialRun: true }
 }
 
 export type { InitTestEnv, TestEnv }

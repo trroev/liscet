@@ -9,29 +9,23 @@ const dirname = path.dirname(fileURLToPath(import.meta.url))
 // Resolve and provision the per-run database here, in config evaluation, so it
 // completes before Playwright launches the web server (which boots in
 // production mode with Postgres `push` off and therefore needs a migrated
-// schema already in place). `getOrInitTestEnv` rewrites the connection string
-// before `@repo/env/database` is first evaluated, so it (and `DB_DRIVERS`
-// below) is imported dynamically rather than statically.
-const testEnv = await getOrInitTestEnv()
+// schema already in place).
+const testEnv = getOrInitTestEnv()
 // Only the run-initializing evaluation provisions; worker/retry processes
 // re-import this config but inherit the per-run env and must not re-create it.
 if (testEnv.isInitialRun) {
   await provisionTestDatabase(testEnv)
 }
 
-const { DB_DRIVERS } = await import("@repo/env/database")
-const { driver, dbUri, baseUrl } = testEnv
-// The schema is provisioned by migrations, so the Postgres adapter must not
-// run its dev-mode schema `push` on connect: that sync only knows Payload's
-// tables and would drop the Better Auth (Drizzle) tables the migrations
-// created. `PAYLOAD_MIGRATING=true` is the adapter's explicit "migrations own
-// the schema, skip push" signal — used here instead of `NODE_ENV=production`
+const { dbUri, baseUrl } = testEnv
+// `PAYLOAD_MIGRATING=true` tells the Postgres adapter "migrations own the
+// schema, skip the dev-mode push" — used here instead of `NODE_ENV=production`
 // because `next start` runs under dotenvx's nextjs convention, which resets
 // NODE_ENV to development before the adapter connects.
-const webServerEnv: Record<string, string> =
-  driver === DB_DRIVERS.postgres
-    ? { DATABASE_URL: dbUri, PAYLOAD_MIGRATING: "true" }
-    : { MONGODB_URI: dbUri }
+const webServerEnv: Record<string, string> = {
+  DATABASE_URL: dbUri,
+  PAYLOAD_MIGRATING: "true",
+}
 
 const isCi = !!process.env.CI
 

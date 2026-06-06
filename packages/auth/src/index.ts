@@ -1,29 +1,20 @@
 import { env } from "@repo/env/auth"
-import { DB_DRIVERS, resolveDatabase } from "@repo/env/database"
+import { env as databaseEnv } from "@repo/env/database"
 import { type BetterAuthOptions, betterAuth } from "better-auth"
 import { drizzleAdapter } from "better-auth/adapters/drizzle"
-import { mongodbAdapter } from "better-auth/adapters/mongodb"
 import { drizzle } from "drizzle-orm/node-postgres"
-import { MongoClient } from "mongodb"
 import { Pool } from "pg"
-import { match } from "ts-pattern"
 import { account, session, user, verification } from "./schema"
 
 const schema = { account, session, user, verification }
 
-const createDatabaseAdapter = (): BetterAuthOptions["database"] =>
-  match(resolveDatabase())
-    .with({ driver: DB_DRIVERS.postgres }, ({ url }) => {
-      const db = drizzle({
-        client: new Pool({ connectionString: url }),
-        schema,
-      })
-      return drizzleAdapter(db, { provider: "pg", schema })
-    })
-    .with({ driver: DB_DRIVERS.mongodb }, ({ url }) =>
-      mongodbAdapter(new MongoClient(url).db(), { transaction: false })
-    )
-    .exhaustive()
+const createDatabaseAdapter = (): BetterAuthOptions["database"] => {
+  const db = drizzle({
+    client: new Pool({ connectionString: databaseEnv.DATABASE_URL }),
+    schema,
+  })
+  return drizzleAdapter(db, { provider: "pg", schema })
+}
 
 export function createAuth(
   extraOptions?: Readonly<Partial<BetterAuthOptions>>

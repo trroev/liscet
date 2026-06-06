@@ -13,7 +13,6 @@
   "dependencies": {
     "@repo/env": "workspace:*",
     "@repo/payload": "workspace:*",
-    "mongodb": "^6.10.0",
     "payload": "^3.85.0",
     "pg": "catalog:"
   },

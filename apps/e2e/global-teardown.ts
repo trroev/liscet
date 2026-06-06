@@ -1,23 +1,5 @@
-import { DB_DRIVERS } from "@repo/env/database"
-import { MongoClient } from "mongodb"
 import { Client } from "pg"
 import { TEST_ENV_KEYS } from "./src/fixtures/test-env"
-
-const dropMongoDatabase = async ({
-  uri,
-  dbName,
-}: {
-  readonly uri: string
-  readonly dbName: string
-}): Promise<void> => {
-  const client = new MongoClient(uri)
-  try {
-    await client.connect()
-    await client.db(dbName).dropDatabase()
-  } finally {
-    await client.close()
-  }
-}
 
 const dropPostgresDatabase = async ({
   adminUri,
@@ -57,23 +39,12 @@ const dropPostgresDatabase = async ({
 }
 
 const globalTeardown = async (): Promise<void> => {
-  const driver = process.env[TEST_ENV_KEYS.driver]
   const dbName = process.env[TEST_ENV_KEYS.dbName]
-  const dbUri = process.env[TEST_ENV_KEYS.dbUri]
-  if (!(driver && dbName && dbUri)) {
+  const adminUri = process.env[TEST_ENV_KEYS.adminUri]
+  if (!(dbName && adminUri)) {
     return
   }
-
-  if (driver === DB_DRIVERS.postgres) {
-    const adminUri = process.env[TEST_ENV_KEYS.adminUri]
-    if (!adminUri) {
-      return
-    }
-    await dropPostgresDatabase({ adminUri, dbName })
-    return
-  }
-
-  await dropMongoDatabase({ uri: dbUri, dbName })
+  await dropPostgresDatabase({ adminUri, dbName })
 }
 
 export default globalTeardown

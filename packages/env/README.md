@@ -9,8 +9,9 @@ Per-subsystem environment validation built on [`@t3-oss/env-nextjs`](https://env
 | Subpath | Owns |
 |---|---|
 | `@repo/env/app` | `BASE_URL` (required), `REVALIDATION_SECRET`, Sentry keys, `NODE_ENV` |
-| `@repo/env/auth` | `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL`, `MONGODB_URI` |
+| `@repo/env/auth` | `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL` |
 | `@repo/env/cloudinary` | `CLOUDINARY_*` |
+| `@repo/env/database` | `DATABASE_URL` (Postgres connection string, required) |
 | `@repo/env/fetch` | `BASE_URL` (optional) |
 | `@repo/env/logger` | `LOG_LEVEL`, `NODE_ENV` (with default) |
 | `@repo/env/payload` | `PAYLOAD_*` |

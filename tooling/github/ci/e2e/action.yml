@@ -1,12 +1,6 @@
 name: 'E2E'
 description: 'Run Playwright end-to-end suite against a built Next.js server'
 
-inputs:
-  backend:
-    description: 'Database backend under test (used to label uploaded artifacts)'
-    required: false
-    default: 'mongodb'
-
 runs:
   using: composite
   steps:
@@ -39,7 +33,7 @@ runs:
       if: always()
       uses: actions/upload-artifact@v4
       with:
-        name: playwright-report-${{ inputs.backend }}
+        name: playwright-report
         path: |
           apps/e2e/playwright-report
           apps/e2e/test-results

@@ -20,7 +20,6 @@
     "@sentry/nextjs": "^10.53.1",
     "better-auth": "^1.2.8",
     "drizzle-orm": "catalog:",
-    "mongodb": "^6.16.0",
     "pg": "catalog:",
     "ts-pattern": "^5.9.0"
   },

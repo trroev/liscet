@@ -35,8 +35,7 @@ Spin up a new repo from this template:
 gh repo create my-app --template trroev/next-payload-starter --public
 cd my-app
 pnpm install
-pnpm db:select postgres                # optional — use Postgres instead of the MongoDB default
-docker compose up -d                   # start the local DB service(s)
+docker compose up -d postgres          # local Postgres on :5432
 pnpm dev                               # app at :3000, admin at /admin
 ```
 
@@ -44,11 +43,11 @@ pnpm dev                               # app at :3000, admin at /admin
 
 - Node.js ≥ 24
 - pnpm (managed via corepack — `corepack enable`)
-- Docker (for local MongoDB)
+- Docker (for local Postgres)
 
 ### Environment
 
-Env loading goes through [dotenvx](https://dotenvx.com) (`--convention=nextjs`). The committed `apps/web/.env.development` ships **working dummy defaults** — a local Mongo URI, dev-only secrets — so a fresh clone runs `pnpm dev` with no env setup. Override anything per-machine in the gitignored `apps/web/.env.development.local` (or `.env.local`); those win over the committed defaults.
+Env loading goes through [dotenvx](https://dotenvx.com) (`--convention=nextjs`). The committed `apps/web/.env.development` ships **working dummy defaults** — a local Postgres URL, dev-only secrets — so a fresh clone runs `pnpm dev` with no env setup. Override anything per-machine in the gitignored `apps/web/.env.development.local` (or `.env.local`); those win over the committed defaults.
 
 The dev-only `PAYLOAD_SECRET` / `BETTER_AUTH_SECRET` are placeholders — **replace them before deploying anywhere real.** For shared or production secrets, put real values in `apps/web/.env.production` (or `.env.development`) and encrypt them in place:
 
@@ -65,24 +64,16 @@ dotenvx set SOME_SECRET "value" -f .env.production
 
 Each `@repo/env/<subsystem>` module validates only the keys it owns; see [`packages/env/README.md`](./packages/env/README.md) for the subpath map.
 
-### Database (MongoDB or Postgres)
+### Database (Postgres)
 
-The starter supports either MongoDB (the default) or Postgres for both Payload and Better Auth. The active backend is selected at runtime by which connection URL is set — `MONGODB_URI` or `DATABASE_URL` — and setting both raises a clear startup error rather than silently picking one. Switch backends with:
+Payload and Better Auth share one Postgres connection, configured via `DATABASE_URL` in the env files. `docker-compose.yml` ships a local `postgres` service (`:5432`) — start it with `docker compose up -d postgres`. Production deploys point at a managed Postgres (e.g. a Neon database).
 
-```sh
-pnpm db:select postgres   # or `mongodb`; omit the argument for an interactive prompt
-```
+### Migrations
 
-This flips the URLs across your env files (activating one, commenting the other) and prints the backend-specific next steps. Both adapters ship installed, so selection is purely configuration. `docker-compose.yml` provides local `mongodb` (`:27017`) and `postgres` (`:5432`) services — start the one for your backend with `docker compose up -d <service>`.
-
-For a hosted MongoDB, see [`docs/atlas-setup.md`](./docs/atlas-setup.md) for the full Atlas provisioning runbook (cluster, network access, per-database users).
-
-### Migrations (Postgres)
-
-MongoDB is schemaless and needs no migrations. Postgres does, and the model is **auto-push in dev, versioned migrations in production**:
+The model is **auto-push in dev, versioned migrations in production**:
 
 - **Local dev** — Payload auto-pushes its schema on boot; sync the Better Auth tables once with `pnpm --filter @repo/auth db:push`. No migration files needed to iterate.
-- **Production** — `pnpm migrate` applies pending Payload *and* Better Auth migrations. It is gated on `DATABASE_URL`, so it is a clean no-op on the MongoDB backend. `apps/web/vercel.json` runs it ahead of the build, so a deploy migrates before serving traffic.
+- **Production** — `pnpm migrate` applies pending Payload *and* Better Auth migrations. `apps/web/vercel.json` runs it ahead of the build, so a deploy migrates before serving traffic.
 
 Initial migrations are committed in `packages/payload/src/migrations` and `packages/auth/drizzle`. After changing a collection or the auth schema, regenerate and commit:
 
@@ -119,7 +110,7 @@ next-payload-starter/
 ├── tooling/
 │   └── github/               # Composite GitHub Actions
 └── docs/
-    ├── atlas-setup.md
+    ├── north-star.md
     └── decisions/            # Investigation outcomes (#27, #28, #29, …)
 ```
 

@@ -2,8 +2,8 @@
 
 [Playwright](https://playwright.dev) end-to-end suite that drives
 [`apps/web`](../web/README.md). The Playwright config boots `apps/web` via
-`pnpm build && pnpm start`, seeds a per-run MongoDB database, and tears it
-down on exit.
+`pnpm build && pnpm start`, provisions a per-run Postgres database (creating
+the schema by replaying the production migrations), and tears it down on exit.
 
 ## Run locally
 
@@ -12,9 +12,10 @@ pnpm --filter @repo/e2e e2e            # headless
 pnpm --filter @repo/e2e e2e:ui         # Playwright UI mode
 ```
 
-The first run downloads browsers. Tests assume Docker MongoDB is up
-(`docker compose up -d` from the repo root) — `global-setup.ts` connects to
-the URI configured for the test env and provisions a scratch database.
+The first run downloads browsers. Tests assume Docker Postgres is up
+(`docker compose up -d postgres` from the repo root) — `playwright.config.ts`
+creates a uniquely-named scratch database against `DATABASE_URL`'s host and
+runs migrations into it before launching the web server.
 
 ## Scripts
 
@@ -28,7 +29,7 @@ the URI configured for the test env and provisions a scratch database.
 
 - `src/e2e/` — Test specs.
 - `src/page-objects/` — Page-object wrappers around the app's screens.
-- `src/fixtures/` — Test-env resolution, Mongo helpers, seed factories.
+- `src/fixtures/` — Per-run Postgres provisioning, env resolution, seed factories.
 - `global-setup.ts` / `global-teardown.ts` — One-time provisioning hooks
   referenced by `playwright.config.ts`.
 

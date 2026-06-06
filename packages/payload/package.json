@@ -24,7 +24,6 @@
   },
   "dependencies": {
     "@better-fetch/fetch": "catalog:",
-    "@payloadcms/db-mongodb": "^3.85.0",
     "@payloadcms/db-postgres": "catalog:",
     "@payloadcms/plugin-cloud-storage": "^3.85.0",
     "@payloadcms/plugin-seo": "^3.85.0",

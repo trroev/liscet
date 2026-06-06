@@ -42,8 +42,8 @@ import { SessionProvider } from "@repo/auth/session"
 
 ## Constraints
 
-- `MONGODB_URI`, `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL` are validated by
-  [`@repo/env/auth`](../env/README.md). Importing this package eagerly opens a
-  Mongo client — Node-only.
+- `DATABASE_URL` is validated by [`@repo/env/database`](../env/README.md) and
+  `BETTER_AUTH_SECRET` / `BETTER_AUTH_URL` by [`@repo/env/auth`](../env/README.md).
+  Importing this package eagerly opens a Postgres pool — Node-only.
 - Server actions invoked from the client rely on Next.js 16's same-origin /
   `Origin`-header CSRF check; no custom CSRF token layer.

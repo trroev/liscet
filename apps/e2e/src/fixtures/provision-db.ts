@@ -44,9 +44,7 @@ const createPostgresDatabase = async ({
  */
 const runPostgresMigrations = ({ dbUri }: { readonly dbUri: string }): void => {
   const script = path.resolve(repoRoot, "scripts", "migrate-deploy.mjs")
-  // Ensure the orchestrator sees Postgres, not a stale Mongo URI from the shell.
   const env = { ...process.env, DATABASE_URL: dbUri }
-  Reflect.deleteProperty(env, "MONGODB_URI")
   const result = spawnSync("node", [script], {
     stdio: "inherit",
     env,
@@ -59,29 +57,11 @@ const runPostgresMigrations = ({ dbUri }: { readonly dbUri: string }): void => {
   }
 }
 
-/**
- * Provision the per-run database before the web server boots. MongoDB is
- * schemaless and auto-creates on first write, so only Postgres needs explicit
- * creation + migration here.
- */
 export const provisionTestDatabase = async ({
-  driver,
   dbName,
   dbUri,
   adminUri,
 }: TestEnv): Promise<void> => {
-  // Imported dynamically (not statically) so `@repo/env/database` is first
-  // evaluated only after the per-run rewrite in `getOrInitTestEnv`; see the note
-  // there. By the time this runs, the module is already cached with per-run env.
-  const { DB_DRIVERS } = await import("@repo/env/database")
-  if (driver !== DB_DRIVERS.postgres) {
-    return
-  }
-  if (!adminUri) {
-    throw new Error(
-      "Postgres provisioning requires a maintenance connection URI (E2E_PG_ADMIN_URI)."
-    )
-  }
   await createPostgresDatabase({ adminUri, dbName })
   runPostgresMigrations({ dbUri })
 }

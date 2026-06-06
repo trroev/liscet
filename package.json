@@ -9,7 +9,6 @@
     "clean": "turbo run clean",
     "clean:workspaces": "turbo run clean && bash scripts/clean-workspaces.sh",
     "coverage": "turbo run coverage",
-    "db:select": "node scripts/setup-db.mjs",
     "dev": "dotenvx run --convention=nextjs -- turbo run dev",
     "e2e": "dotenvx run --convention=nextjs -- pnpm --filter @repo/e2e run e2e",
     "e2e:ui": "dotenvx run --convention=nextjs -- pnpm --filter @repo/e2e run e2e:ui",

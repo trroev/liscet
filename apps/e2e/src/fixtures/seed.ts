@@ -65,11 +65,11 @@ export const seedPublishedPost = async (): Promise<SeededPost> => {
   // the process. Attach a no-op listener rather than closing the pool — pool
   // `end()` can hang waiting on a client the adapter never releases. Teardown's
   // ALLOW_CONNECTIONS-false + force-drop prevents the pool from reconnecting, so
-  // ignoring the termination is safe. No-op on MongoDB (no `pool`).
+  // ignoring the termination is safe.
   const { pool } = payload.db as {
-    pool?: { on: (event: "error", listener: () => void) => void }
+    pool: { on: (event: "error", listener: () => void) => void }
   }
-  pool?.on("error", () => {
+  pool.on("error", () => {
     // Connection terminated by teardown's DROP DATABASE; safe to ignore.
   })
   return {

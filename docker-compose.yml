@@ -1,11 +1,4 @@
 services:
-  mongodb:
-    image: mongo:8
-    ports:
-      - "27017:27017"
-    volumes:
-      - mongodb_data:/data/db
-
   postgres:
     image: postgres:17
     ports:
@@ -18,5 +11,4 @@ services:
       - postgres_data:/var/lib/postgresql/data
 
 volumes:
-  mongodb_data:
   postgres_data:

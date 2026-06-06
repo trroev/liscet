@@ -70,18 +70,8 @@ jobs:
 
   e2e:
     runs-on: ubuntu-latest
-    name: E2E (${{ matrix.backend }})
-    strategy:
-      fail-fast: false
-      matrix:
-        backend: [mongodb, postgres]
-    # Both containers run on every leg; the "Configure backend" step sets only
-    # the env var for the leg's backend, so the resolver sees exactly one.
+    name: E2E
     services:
-      mongo:
-        image: mongo:7
-        ports:
-          - 27017:27017
       postgres:
         image: postgres:16
         env:
@@ -103,29 +93,22 @@ jobs:
       CLOUDINARY_CLOUD_NAME: e2e-cloud
       CLOUDINARY_API_KEY: e2e-key
       CLOUDINARY_API_SECRET: e2e-secret
+      DATABASE_URL: postgres://postgres:postgres@localhost:5432/e2e
     steps:
       - uses: actions/checkout@v6
-      - name: Configure backend
+      - name: Strip committed DATABASE_URL
         if: env.ACT != 'true'
         shell: bash
+        # The committed app env files pin DATABASE_URL to a localhost default
+        # loaded by dotenvx (generate:types) and @next/env (next start). Strip
+        # it on the runner so the workflow-level value (pointing at the
+        # postgres service container) wins.
         run: |
-          # The committed app env files pin a backend (MONGODB_URI by default),
-          # which is loaded by dotenvx (generate:types) and @next/env (next
-          # start). Strip both connection vars on the runner so the suite uses
-          # exactly the backend selected below — otherwise the postgres leg sees
-          # both DATABASE_URL and MONGODB_URI and the resolver rejects it.
           for f in apps/web/.env.development apps/web/.env.production; do
             if [ -f "$f" ]; then
-              sed -i -E '/^(MONGODB_URI|DATABASE_URL)=/d' "$f"
+              sed -i -E '/^DATABASE_URL=/d' "$f"
             fi
           done
-          if [ "${{ matrix.backend }}" = "postgres" ]; then
-            echo "DATABASE_URL=postgres://postgres:postgres@localhost:5432/e2e" >> "$GITHUB_ENV"
-          else
-            echo "MONGODB_URI=mongodb://localhost:27017/e2e" >> "$GITHUB_ENV"
-          fi
       - name: E2E
         if: env.ACT != 'true'
         uses: ./tooling/github/ci/e2e
-        with:
-          backend: ${{ matrix.backend }}
