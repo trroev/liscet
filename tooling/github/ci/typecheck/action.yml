@@ -1,0 +1,14 @@
+name: 'Typecheck'
+description: 'Typecheck'
+
+runs:
+  using: composite
+  steps:
+    - name: Setup
+      uses: ./tooling/github/setup
+
+    - name: Typecheck
+      shell: bash
+      run: pnpm typecheck --affected
+      env:
+        SKIP_ENV_VALIDATION: 'true'

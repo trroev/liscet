@@ -1,0 +1,33 @@
+packages:
+  - "apps/*"
+  - "packages/*"
+
+catalog:
+  '@better-fetch/fetch': 1.1.21
+  '@payloadcms/db-postgres': ^3.85.0
+  '@payloadcms/richtext-lexical': 3.85.0
+  '@types/pg': ^8.20.0
+  "@types/react": 19.2.2
+  "@types/react-dom": 19.2.2
+  drizzle-kit: ^0.31.10
+  drizzle-orm: ^0.45.2
+  next: 16.2.7
+  pg: ^8.21.0
+  react: ^19.2.0
+  react-dom: ^19.2.0
+  typescript: ^6.0.3
+
+# Make `pnpm add` write a catalog reference for deps the catalog already owns,
+# rather than a literal version — so drift is hard to introduce in the first
+# place. This only governs the `pnpm add` flow; it does NOT fail `pnpm install`
+# on a literal version that lands in a committed package.json by other means
+# (hand-edit, copy-paste, merge). That CI gate is `pnpm catalog:check`
+# (scripts/check-catalog.mjs). `prefer` over `strict`: strict forces *every*
+# dep into the catalog at add-time, broader than the convention we enforce.
+catalogMode: prefer
+
+catalogs:
+  peers:
+    next: ^16.0.0
+    react: ^19.0.0
+    react-dom: ^19.0.0

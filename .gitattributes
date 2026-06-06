@@ -1,0 +1,14 @@
+# Generated, committed artifacts. These ARE the source of truth for deploys and
+# migration history, so they are version-controlled — but marking them
+# `linguist-generated` collapses them in GitHub pull-request diffs and excludes
+# them from repo language stats. They are also excluded from Biome (see
+# biome.json `files.includes`). Do not hand-edit; regenerate with the documented
+# commands (see README → "Migrations (Postgres)").
+
+# Database migrations
+packages/auth/drizzle/** linguist-generated=true
+packages/payload/src/migrations/** linguist-generated=true
+
+# Payload-generated code
+packages/payload/src/types/payload-types.ts linguist-generated=true
+**/importMap.js linguist-generated=true

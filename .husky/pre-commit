@@ -1,0 +1,2 @@
+pnpm lint-staged
+pnpm exec turbo run typecheck --affected

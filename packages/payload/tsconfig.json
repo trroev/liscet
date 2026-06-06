@@ -1,0 +1,22 @@
+{
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "types": ["vitest/globals"],
+    "paths": {
+      "@repo/payload/access/*": ["./src/access/*/index.ts"],
+      "@repo/payload/adapters/*": ["./src/adapters/*/index.ts"],
+      "@repo/payload/blocks/*": ["./src/blocks/*/index.ts"],
+      "@repo/payload/collections/*": ["./src/collections/*/index.ts"],
+      "@repo/payload/components/*": ["./src/components/*/index.ts"],
+      "@repo/payload/fields/*": ["./src/fields/*/index.ts"],
+      "@repo/payload/globals/*": ["./src/globals/*/index.ts"],
+      "@repo/payload/helpers/*": ["./src/helpers/*/index.ts"],
+      "@repo/payload/hooks/*": ["./src/hooks/*/index.ts"],
+      "@repo/payload/payload-config": ["./src/payload.config.ts"],
+      "@repo/payload/payload-types": ["./src/types/payload-types.ts"]
+    }
+  },
+  "extends": "@repo/tsconfig/library.json",
+  "include": ["src", "test", "vitest.config.ts"],
+  "exclude": ["node_modules", "dist"]
+}

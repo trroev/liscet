@@ -1,0 +1,4 @@
+{
+  "buildCommand": "cd ../.. && pnpm migrate && pnpm turbo run build --filter=web",
+  "ignoreCommand": "cd ../.. && npx turbo-ignore web"
+}

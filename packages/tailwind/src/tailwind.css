@@ -1,0 +1,54 @@
+@import "tailwindcss";
+@import "./tailwind.theme.css";
+@import "./tailwind.utilities.css";
+
+/*
+  Scan shared packages so their Tailwind classes are included in the build.
+  Paths are relative to this file (packages/tailwind/src/).
+*/
+@source "../../**/src/**/**";
+
+/*
+  Safelist every step of each color scale so all --color-{scale}-{step}
+  CSS variables are emitted to :root, not only those referenced by a
+  semantic token. Without this, unused steps are tree-shaken and
+  var(--color-accent-50) etc. resolves to nothing.
+*/
+@source inline("{bg,text,border}-{neutral,accent,sage}-{50,100,200,300,400,500,600,700,800,900}");
+
+@layer base {
+  html {
+    @apply scroll-smooth;
+  }
+
+  body {
+    font-synthesis-weight: none;
+    text-rendering: optimizeLegibility;
+    @apply relative overscroll-none antialiased bg-background;
+  }
+
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
+
+  .root {
+    isolation: isolate;
+  }
+
+  /* Custom scrollbar styles for WebKit browsers and Firefox */
+  ::-webkit-scrollbar {
+    width: 5px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--color-border);
+    border-radius: 5px;
+  }
+  * {
+    scrollbar-color: var(--color-border) transparent;
+    scrollbar-width: thin;
+  }
+}

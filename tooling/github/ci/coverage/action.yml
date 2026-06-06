@@ -1,0 +1,36 @@
+name: 'Coverage'
+description: 'Coverage'
+
+runs:
+  using: composite
+  steps:
+    - name: Setup
+      uses: ./tooling/github/setup
+
+    - name: Coverage
+      shell: bash
+      run: pnpm coverage --affected
+
+    - name: Discover coverage reports
+      id: discover
+      shell: bash
+      run: |
+        files=""
+        flags=""
+        while IFS= read -r path; do
+          flag=$(basename "$(dirname "$(dirname "$path")")")
+          files="${files:+$files,}$path"
+          flags="${flags:+$flags,}$flag"
+        done < <(find packages -maxdepth 3 -path '*/coverage/lcov.info' | sort)
+        echo "Discovered coverage files: ${files:-<none>}"
+        echo "Derived Codecov flags:     ${flags:-<none>}"
+        echo "files=$files" >> "$GITHUB_OUTPUT"
+        echo "flags=$flags" >> "$GITHUB_OUTPUT"
+
+    - name: Upload to Codecov
+      if: steps.discover.outputs.files != ''
+      uses: codecov/codecov-action@v5
+      with:
+        files: ${{ steps.discover.outputs.files }}
+        flags: ${{ steps.discover.outputs.flags }}
+        fail_ci_if_error: false

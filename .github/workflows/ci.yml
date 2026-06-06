@@ -1,0 +1,131 @@
+name: CI
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+  pull_request:
+
+env:
+  ACT: "${{ false }}"
+  # Vercel Remote Cache — turbo reads these from the environment automatically.
+  # Workflow-level env flows into composite actions (the secrets context does not).
+  TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+  TURBO_TEAM: ${{ vars.TURBO_TEAM }}
+
+permissions:
+  contents: read
+
+jobs:
+  generate-types:
+    runs-on: ubuntu-latest
+    name: Generate Types
+    steps:
+      - uses: actions/checkout@v6
+      - name: Generate Types
+        if: env.ACT != 'true'
+        uses: ./tooling/github/ci/generate-types
+
+  lint:
+    runs-on: ubuntu-latest
+    name: Lint
+    steps:
+      - uses: actions/checkout@v6
+      - name: Lint
+        if: env.ACT != 'true'
+        uses: ./tooling/github/ci/lint
+
+  typecheck:
+    runs-on: ubuntu-latest
+    name: Typecheck
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 2
+      - name: Typecheck
+        if: env.ACT != 'true'
+        uses: ./tooling/github/ci/typecheck
+
+  test:
+    runs-on: ubuntu-latest
+    name: Test
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 2
+      - name: Test
+        if: env.ACT != 'true'
+        uses: ./tooling/github/ci/test
+
+  coverage:
+    runs-on: ubuntu-latest
+    name: Coverage
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 2
+      - name: Coverage
+        if: env.ACT != 'true'
+        uses: ./tooling/github/ci/coverage
+
+  e2e:
+    runs-on: ubuntu-latest
+    name: E2E (${{ matrix.backend }})
+    strategy:
+      fail-fast: false
+      matrix:
+        backend: [mongodb, postgres]
+    # Both containers run on every leg; the "Configure backend" step sets only
+    # the env var for the leg's backend, so the resolver sees exactly one.
+    services:
+      mongo:
+        image: mongo:7
+        ports:
+          - 27017:27017
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      BETTER_AUTH_SECRET: e2e-better-auth-secret-min-32-chars-long
+      BETTER_AUTH_URL: http://localhost:3000
+      BASE_URL: http://localhost:3000
+      PAYLOAD_SECRET: e2e-payload-secret-min-32-characters-long
+      CLOUDINARY_CLOUD_NAME: e2e-cloud
+      CLOUDINARY_API_KEY: e2e-key
+      CLOUDINARY_API_SECRET: e2e-secret
+    steps:
+      - uses: actions/checkout@v6
+      - name: Configure backend
+        if: env.ACT != 'true'
+        shell: bash
+        run: |
+          # The committed app env files pin a backend (MONGODB_URI by default),
+          # which is loaded by dotenvx (generate:types) and @next/env (next
+          # start). Strip both connection vars on the runner so the suite uses
+          # exactly the backend selected below — otherwise the postgres leg sees
+          # both DATABASE_URL and MONGODB_URI and the resolver rejects it.
+          for f in apps/web/.env.development apps/web/.env.production; do
+            if [ -f "$f" ]; then
+              sed -i -E '/^(MONGODB_URI|DATABASE_URL)=/d' "$f"
+            fi
+          done
+          if [ "${{ matrix.backend }}" = "postgres" ]; then
+            echo "DATABASE_URL=postgres://postgres:postgres@localhost:5432/e2e" >> "$GITHUB_ENV"
+          else
+            echo "MONGODB_URI=mongodb://localhost:27017/e2e" >> "$GITHUB_ENV"
+          fi
+      - name: E2E
+        if: env.ACT != 'true'
+        uses: ./tooling/github/ci/e2e
+        with:
+          backend: ${{ matrix.backend }}

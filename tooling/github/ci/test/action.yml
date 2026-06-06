@@ -1,0 +1,12 @@
+name: 'Test'
+description: 'Test'
+
+runs:
+  using: composite
+  steps:
+    - name: Setup
+      uses: ./tooling/github/setup
+
+    - name: Test
+      shell: bash
+      run: pnpm test --affected

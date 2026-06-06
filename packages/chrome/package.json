@@ -1,0 +1,38 @@
+{
+  "name": "@repo/chrome",
+  "version": "0.0.0",
+  "private": true,
+  "license": "MIT",
+  "type": "module",
+  "exports": {
+    "./components/*": "./src/components/*/index.ts",
+    "./utils/*": "./src/utils/*/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf .turbo .next dist storybook-static coverage *.tsbuildinfo test-results playwright-report"
+  },
+  "dependencies": {
+    "@repo/payload": "workspace:*",
+    "@repo/types": "workspace:*",
+    "@repo/ui": "workspace:*",
+    "@repo/utils": "workspace:*",
+    "@remixicon/react": "^4.9.0",
+    "react": "catalog:",
+    "schema-dts": "^2.0.0",
+    "ts-pattern": "^5.9.0"
+  },
+  "devDependencies": {
+    "@repo/tsconfig": "workspace:*",
+    "@types/node": "^22.15.3",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "next": "catalog:",
+    "payload": "^3.85.0",
+    "typescript": "catalog:"
+  },
+  "peerDependencies": {
+    "next": "catalog:peers",
+    "react": "catalog:"
+  }
+}

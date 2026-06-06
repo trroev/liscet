@@ -1,0 +1,223 @@
+{
+  "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
+  "extends": [
+    "ultracite/biome/core",
+    "ultracite/biome/react",
+    "ultracite/biome/next"
+  ],
+  "files": {
+    "includes": [
+      "!**/payload-types.ts",
+      "!**/importMap.js",
+      "!**/app/(payload)",
+      "!**/migrations",
+      "!packages/auth/drizzle"
+    ]
+  },
+  "javascript": {
+    "formatter": {
+      "semicolons": "asNeeded"
+    }
+  },
+  "linter": {
+    "rules": {
+      "style": {
+        "useConsistentTypeDefinitions": {
+          "level": "error",
+          "options": {
+            "style": "type"
+          }
+        },
+        "useConsistentArrayType": {
+          "level": "error",
+          "options": {
+            "syntax": "generic"
+          }
+        },
+        "noDefaultExport": "error"
+      }
+    }
+  },
+  "overrides": [
+    {
+      "includes": [
+        "apps/**/app/**/*.ts",
+        "apps/**/app/**/*.tsx",
+        "apps/**/middleware.ts",
+        "apps/storybook/.storybook/**/*.ts",
+        "apps/storybook/.storybook/**/*.tsx",
+        "**/*.stories.ts",
+        "**/*.stories.tsx",
+        "**/*.config.ts",
+        "**/*.config.js",
+        "**/*.config.mjs",
+        "**/*.config.cjs",
+        "apps/e2e/global-setup.ts",
+        "apps/e2e/global-teardown.ts",
+        "apps/e2e/payload-config.ts"
+      ],
+      "linter": {
+        "rules": {
+          "style": {
+            "noDefaultExport": "off"
+          }
+        }
+      }
+    },
+    {
+      "includes": [
+        "apps/storybook/.storybook/preview.tsx",
+        "packages/ui/src/components/*/index.ts",
+        "packages/ui/src/utils/*/index.ts",
+        "packages/chrome/src/components/*/index.ts",
+        "packages/chrome/src/utils/*/index.ts",
+        "packages/payload/src/components/*/index.ts",
+        "packages/testing/src/render/index.tsx",
+        "packages/testing/src/msw/index.ts",
+        "packages/logger/src/index.ts",
+        "packages/logger/src/logger/index.ts",
+        "packages/logger/src/test-transport/index.ts",
+        "apps/web/src/features/*/components/*/index.ts",
+        "apps/web/src/features/*/hooks/*/index.ts",
+        "apps/web/src/components/*/index.ts"
+      ],
+      "linter": {
+        "rules": {
+          "performance": {
+            "noBarrelFile": "off"
+          }
+        }
+      }
+    },
+    {
+      "includes": [
+        "packages/ui/**",
+        "packages/chrome/**",
+        "packages/utils/**",
+        "packages/types/**",
+        "packages/logger/**",
+        "packages/payload/src/components/**",
+        "apps/web/src/components/**",
+        "apps/web/src/features/*/components/**"
+      ],
+      "linter": {
+        "rules": {
+          "style": {
+            "useFilenamingConvention": {
+              "level": "error",
+              "options": {
+                "requireAscii": true,
+                "filenameCases": ["kebab-case"]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "includes": [
+        "packages/utils/**",
+        "packages/types/**",
+        "packages/env/**",
+        "packages/logger/**"
+      ],
+      "linter": {
+        "rules": {
+          "style": {
+            "noRestrictedImports": {
+              "level": "error",
+              "options": {
+                "patterns": [
+                  {
+                    "group": [
+                      "@repo/ui",
+                      "@repo/ui/**",
+                      "@repo/chrome",
+                      "@repo/chrome/**",
+                      "@repo/payload",
+                      "@repo/payload/**",
+                      "@repo/auth",
+                      "@repo/auth/**"
+                    ],
+                    "message": "Foundation packages (utils, types, env, logger) must not import from higher layers (ui, chrome, payload, auth). Move shared code down the stack instead."
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "includes": ["packages/ui/**"],
+      "linter": {
+        "rules": {
+          "style": {
+            "noRestrictedImports": {
+              "level": "error",
+              "options": {
+                "patterns": [
+                  {
+                    "group": [
+                      "@repo/chrome",
+                      "@repo/chrome/**",
+                      "@repo/payload",
+                      "@repo/payload/**",
+                      "**/apps/**"
+                    ],
+                    "message": "@repo/ui must not depend on @repo/chrome, @repo/payload, or any app. UI primitives are the lowest visual layer."
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "includes": ["packages/chrome/**"],
+      "linter": {
+        "rules": {
+          "style": {
+            "noRestrictedImports": {
+              "level": "error",
+              "options": {
+                "patterns": [
+                  {
+                    "group": ["**/apps/**"],
+                    "message": "@repo/chrome must not import from any app. Apps depend on chrome, never the other way around."
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "includes": ["apps/web/src/features/**"],
+      "linter": {
+        "rules": {
+          "style": {
+            "noRestrictedImports": {
+              "level": "error",
+              "options": {
+                "patterns": [
+                  {
+                    "group": [
+                      "~/features",
+                      "~/features/**",
+                      "~/app",
+                      "~/app/**"
+                    ],
+                    "message": "Code inside apps/web/src/features/** must not import via the `~/features/*` alias (cross-feature imports are banned, and intra-feature imports must use relative paths) and must not import from `~/app/**`. Hoist shared code into `~/lib` or `~/components`."
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
+}

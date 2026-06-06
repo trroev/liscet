@@ -1,0 +1,39 @@
+{
+  "name": "@repo/auth",
+  "version": "0.0.0",
+  "private": true,
+  "license": "MIT",
+  "exports": {
+    ".": "./src/index.ts",
+    "./client": "./src/client.ts",
+    "./session": "./src/session.tsx"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "db:generate": "pnpm dlx @better-auth/cli generate --config ./src/index.ts --output ./src/schema.ts",
+    "db:push": "drizzle-kit push",
+    "db:migrate": "drizzle-kit migrate",
+    "clean": "rm -rf .turbo .next dist storybook-static coverage *.tsbuildinfo test-results playwright-report"
+  },
+  "dependencies": {
+    "@repo/env": "workspace:*",
+    "@sentry/nextjs": "^10.53.1",
+    "better-auth": "^1.2.8",
+    "drizzle-orm": "catalog:",
+    "mongodb": "^6.16.0",
+    "pg": "catalog:",
+    "ts-pattern": "^5.9.0"
+  },
+  "peerDependencies": {
+    "react": "catalog:peers"
+  },
+  "devDependencies": {
+    "@repo/tsconfig": "workspace:*",
+    "@types/node": "^22.15.3",
+    "@types/pg": "catalog:",
+    "@types/react": "catalog:",
+    "drizzle-kit": "catalog:",
+    "react": "catalog:",
+    "typescript": "catalog:"
+  }
+}

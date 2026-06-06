@@ -1,0 +1,52 @@
+{
+  "$schema": "https://turborepo.dev/schema.json",
+  "ui": "tui",
+  "globalEnv": [
+    "BASE_URL",
+    "BETTER_AUTH_SECRET",
+    "BETTER_AUTH_URL",
+    "CI",
+    "CLOUDINARY_API_KEY",
+    "CLOUDINARY_API_SECRET",
+    "CLOUDINARY_CLOUD_NAME",
+    "MONGODB_URI",
+    "NEXT_PUBLIC_SENTRY_DSN",
+    "NODE_ENV",
+    "PAYLOAD_ADMIN_EMAIL",
+    "PAYLOAD_ADMIN_PASSWORD",
+    "PAYLOAD_ADMIN_PREFILL_ONLY",
+    "PAYLOAD_SECRET",
+    "REVALIDATION_SECRET",
+    "SENTRY_AUTH_TOKEN",
+    "SENTRY_ORG",
+    "SENTRY_PROJECT",
+    "VERCEL_URL"
+  ],
+  "globalPassThroughEnv": ["SKIP_ENV_VALIDATION"],
+  "tasks": {
+    "build": {
+      "dependsOn": ["^build"],
+      "inputs": ["$TURBO_DEFAULT$", ".env*"]
+    },
+    "transit": {
+      "dependsOn": ["^transit"]
+    },
+    "typecheck": {
+      "dependsOn": ["transit"]
+    },
+    "dev": {
+      "cache": false,
+      "persistent": true
+    },
+    "generate:types": {
+      "cache": false
+    },
+    "test": {},
+    "coverage": {
+      "outputs": ["coverage/**"]
+    },
+    "clean": {
+      "cache": false
+    }
+  }
+}

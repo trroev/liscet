@@ -1,0 +1,13 @@
+{
+  "extends": "@repo/tsconfig/library.json",
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "paths": {
+      "payload": ["./node_modules/payload"],
+      "@repo/chrome/components/*": ["./src/components/*/index.ts"],
+      "@repo/chrome/utils/*": ["./src/utils/*/index.ts"]
+    }
+  },
+  "include": ["src"],
+  "exclude": ["node_modules", "dist"]
+}

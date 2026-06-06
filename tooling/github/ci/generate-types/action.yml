@@ -1,0 +1,23 @@
+name: 'Generate Types'
+description: 'Generate Payload types and assert they are not stale'
+
+runs:
+  using: composite
+  steps:
+    - name: Setup
+      uses: ./tooling/github/setup
+
+    - name: Generate Payload types
+      shell: bash
+      # Invoke payload directly (no dotenvx) — CI has no private key.
+      run: pnpm --filter web exec payload generate:types
+      env:
+        SKIP_ENV_VALIDATION: 'true'
+
+    - name: Check for stale Payload types
+      shell: bash
+      run: |
+        if ! git diff --exit-code packages/payload/src/types/payload-types.ts; then
+          echo "::error file=packages/payload/src/types/payload-types.ts::Payload types are stale. Run \`pnpm generate:types\` and commit the result."
+          exit 1
+        fi

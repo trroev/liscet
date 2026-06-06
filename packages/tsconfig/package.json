@@ -1,0 +1,14 @@
+{
+  "name": "@repo/tsconfig",
+  "version": "0.0.0",
+  "private": true,
+  "license": "MIT",
+  "exports": {
+    "./base.json": "./base.json",
+    "./library.json": "./library.json",
+    "./nextjs.json": "./nextjs.json"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

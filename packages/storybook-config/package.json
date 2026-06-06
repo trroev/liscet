@@ -1,0 +1,23 @@
+{
+  "name": "@repo/storybook-config",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./preview": "./src/preview.tsx"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf .turbo .next dist storybook-static coverage *.tsbuildinfo test-results playwright-report"
+  },
+  "devDependencies": {
+    "@repo/tsconfig": "workspace:*",
+    "@storybook/nextjs-vite": "^10.3.6",
+    "@types/react": "catalog:",
+    "typescript": "catalog:"
+  },
+  "dependencies": {
+    "@repo/tailwind": "workspace:*",
+    "react": "catalog:"
+  }
+}

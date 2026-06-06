@@ -1,0 +1,16 @@
+{
+  "extends": "@repo/tsconfig/library.json",
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "outDir": "dist",
+    "noEmit": true,
+    "types": ["vitest/globals"],
+    "paths": {
+      "@repo/ui/components/*": ["./src/components/*/index.ts"],
+      "@repo/ui/utils/*": ["./src/utils/*/index.ts"],
+      "@repo/ui/test/*": ["./test/*.ts"]
+    }
+  },
+  "include": ["src", "test", "vitest.config.ts"],
+  "exclude": ["node_modules", "dist"]
+}

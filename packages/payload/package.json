@@ -1,0 +1,57 @@
+{
+  "name": "@repo/payload",
+  "version": "0.0.0",
+  "private": true,
+  "license": "MIT",
+  "type": "module",
+  "exports": {
+    "./access/*": "./src/access/*/index.ts",
+    "./adapters/*": "./src/adapters/*/index.ts",
+    "./blocks/*": "./src/blocks/*/index.ts",
+    "./collections/*": "./src/collections/*/index.ts",
+    "./components/*": "./src/components/*/index.ts",
+    "./fields/*": "./src/fields/*/index.ts",
+    "./globals/*": "./src/globals/*/index.ts",
+    "./helpers/*": "./src/helpers/*/index.ts",
+    "./hooks/*": "./src/hooks/*/index.ts",
+    "./payload-config": "./src/payload.config.ts",
+    "./payload-types": "./src/types/payload-types.ts"
+  },
+  "scripts": {
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf .turbo .next dist storybook-static coverage *.tsbuildinfo test-results playwright-report"
+  },
+  "dependencies": {
+    "@better-fetch/fetch": "catalog:",
+    "@payloadcms/db-mongodb": "^3.85.0",
+    "@payloadcms/db-postgres": "catalog:",
+    "@payloadcms/plugin-cloud-storage": "^3.85.0",
+    "@payloadcms/plugin-seo": "^3.85.0",
+    "@payloadcms/richtext-lexical": "catalog:",
+    "@repo/env": "workspace:*",
+    "@repo/logger": "workspace:*",
+    "@repo/ui": "workspace:*",
+    "cloudinary": "^2.10.0",
+    "lexical": "0.41.0",
+    "ts-pattern": "^5.9.0"
+  },
+  "peerDependencies": {
+    "next": "catalog:peers",
+    "react": "catalog:peers"
+  },
+  "devDependencies": {
+    "@repo/testing": "workspace:*",
+    "@repo/tsconfig": "workspace:*",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
+    "@types/node": "^22.15.3",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "@vitejs/plugin-react": "^5.2.0",
+    "jsdom": "^29.1.1",
+    "payload": "^3.85.0",
+    "typescript": "catalog:",
+    "vitest": "^3.2.4"
+  }
+}

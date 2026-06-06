@@ -1,0 +1,14 @@
+{
+  "extends": "@repo/tsconfig/library.json",
+  "compilerOptions": {
+    "types": ["node"]
+  },
+  "include": [
+    "src",
+    "playwright.config.ts",
+    "global-setup.ts",
+    "global-teardown.ts",
+    "payload-config.ts"
+  ],
+  "exclude": ["node_modules"]
+}

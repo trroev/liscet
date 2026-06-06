@@ -1,0 +1,20 @@
+name: 'Lint'
+description: 'Lint'
+
+runs:
+  using: composite
+  steps:
+    - name: Setup
+      uses: ./tooling/github/setup
+
+    - name: Lint
+      shell: bash
+      run: pnpm lint
+
+    - name: Boundaries
+      shell: bash
+      run: pnpm boundaries
+
+    - name: Catalog convention
+      shell: bash
+      run: pnpm catalog:check
