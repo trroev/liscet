@@ -23,8 +23,14 @@ import "@repo/tailwind"
 That single import gives consumers:
 
 - Tailwind v4's base layer
-- The design-token theme (`--color-neutral-*`, `--color-accent-*`, `--color-sage-*`, semantic tokens)
+- The design-token theme: color scales (`--color-neutral-*`, `--color-accent-*`, `--color-sage-*`) and the semantic token set (`background`, `surface`, `surface-raised`, `border`, `border-strong`, `text-primary/secondary/muted`, `accent` + `-hover` + `-foreground`, `secondary` + `-hover` + `-foreground`, and status colors `success` / `warning` / `info` / `destructive` each with `-hover` + `-foreground`)
 - Repo-specific utilities defined in `tailwind.utilities.css`
+
+## Dark mode
+
+Semantic tokens resolve via two themes: `:root` (light, default) and
+`[data-theme="dark"]`. Toggle by setting the attribute on any ancestor (the
+app wires this through `next-themes` configured with `attribute="data-theme"`).
 
 ## Constraints
 

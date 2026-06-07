@@ -1,15 +1,16 @@
 /*
-  Design tokens for Mise (RECIPE-022).
-  Kinfolk-inspired: muted warm neutrals, terracotta accent, sage secondary,
-  generous spacing.
+  Liscet design tokens.
 
   - Static tokens (color scales, typography, spacing, radius) live in @theme {}.
-  - Semantic tokens that swap with dark mode live on :root and .dark, then
-    re-export via @theme inline {} so utilities (bg-background, ...) stay live.
-  - Font family tokens reference CSS variables set via next/font (RECIPE-023).
+  - Semantic tokens that swap with dark mode live on :root and
+    [data-theme="dark"], then re-export via @theme inline {} so utilities
+    (bg-background, ...) stay live.
+  - Font family tokens reference CSS variables set via next/font.
+  - The dark selector is the [data-theme="dark"] attribute so it aligns with
+    `next-themes` configured with `attribute="data-theme"` (wired in #25).
 */
 
-@custom-variant dark (&:where(.dark, .dark *));
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
 
 @theme {
   /* COLORS — neutral scale (warm-tinted) */
@@ -24,7 +25,7 @@
   --color-neutral-800: oklch(0.25 0.007 60);
   --color-neutral-900: oklch(0.16 0.006 60);
 
-  /* COLORS — terracotta accent scale */
+  /* COLORS — accent scale (placeholder; #2 swaps in locked v1 hue) */
   --color-accent-50: oklch(0.97 0.015 40);
   --color-accent-100: oklch(0.93 0.035 40);
   --color-accent-200: oklch(0.87 0.06 40);
@@ -36,7 +37,7 @@
   --color-accent-800: oklch(0.37 0.09 40);
   --color-accent-900: oklch(0.28 0.065 40);
 
-  /* COLORS — sage secondary (earthy green) */
+  /* COLORS — sage secondary (placeholder) */
   --color-sage-50: oklch(0.97 0.008 140);
   --color-sage-100: oklch(0.94 0.012 140);
   --color-sage-200: oklch(0.88 0.02 140);
@@ -48,7 +49,7 @@
   --color-sage-800: oklch(0.32 0.028 140);
   --color-sage-900: oklch(0.22 0.02 140);
 
-  /* TYPOGRAPHY — families (CSS vars wired in RECIPE-023) */
+  /* TYPOGRAPHY — families (CSS vars wired via next/font) */
   --font-display: var(--font-cormorant), ui-serif, Georgia, serif;
   --font-sans: var(--font-manrope), ui-sans-serif, system-ui, sans-serif;
 
@@ -93,10 +94,12 @@
   /* SEMANTIC — light */
   --semantic-background: var(--color-neutral-50);
   --semantic-surface: oklch(1 0 0);
+  --semantic-surface-raised: oklch(0.99 0.003 80);
   --semantic-text-primary: var(--color-neutral-900);
   --semantic-text-secondary: var(--color-neutral-700);
   --semantic-text-muted: var(--color-neutral-500);
   --semantic-border: var(--color-neutral-200);
+  --semantic-border-strong: var(--color-neutral-400);
   --semantic-accent: var(--color-accent-600);
   --semantic-accent-hover: var(--color-accent-700);
   --semantic-accent-foreground: var(--color-neutral-50);
@@ -106,15 +109,26 @@
   --semantic-destructive: oklch(0.55 0.18 27);
   --semantic-destructive-hover: oklch(0.48 0.19 27);
   --semantic-destructive-foreground: var(--color-neutral-50);
+  --semantic-success: oklch(0.55 0.14 150);
+  --semantic-success-hover: oklch(0.48 0.15 150);
+  --semantic-success-foreground: var(--color-neutral-50);
+  --semantic-warning: oklch(0.7 0.14 75);
+  --semantic-warning-hover: oklch(0.63 0.15 75);
+  --semantic-warning-foreground: var(--color-neutral-900);
+  --semantic-info: oklch(0.6 0.14 230);
+  --semantic-info-hover: oklch(0.53 0.15 230);
+  --semantic-info-foreground: var(--color-neutral-50);
 }
 
-.dark {
+[data-theme="dark"] {
   --semantic-background: var(--color-neutral-900);
   --semantic-surface: var(--color-neutral-800);
+  --semantic-surface-raised: var(--color-neutral-700);
   --semantic-text-primary: var(--color-neutral-50);
   --semantic-text-secondary: var(--color-neutral-200);
   --semantic-text-muted: var(--color-neutral-400);
   --semantic-border: var(--color-neutral-700);
+  --semantic-border-strong: var(--color-neutral-500);
   --semantic-accent: var(--color-accent-400);
   --semantic-accent-hover: var(--color-accent-300);
   --semantic-accent-foreground: var(--color-neutral-900);
@@ -124,16 +138,27 @@
   --semantic-destructive: oklch(0.65 0.18 27);
   --semantic-destructive-hover: oklch(0.72 0.17 27);
   --semantic-destructive-foreground: var(--color-neutral-900);
+  --semantic-success: oklch(0.7 0.14 150);
+  --semantic-success-hover: oklch(0.76 0.13 150);
+  --semantic-success-foreground: var(--color-neutral-900);
+  --semantic-warning: oklch(0.78 0.14 75);
+  --semantic-warning-hover: oklch(0.83 0.13 75);
+  --semantic-warning-foreground: var(--color-neutral-900);
+  --semantic-info: oklch(0.7 0.14 230);
+  --semantic-info-hover: oklch(0.76 0.13 230);
+  --semantic-info-foreground: var(--color-neutral-900);
 }
 
 @theme inline {
-  /* COLORS — semantic (re-exported so they remain reactive to .dark) */
+  /* COLORS — semantic (re-exported so they remain reactive to [data-theme="dark"]) */
   --color-background: var(--semantic-background);
   --color-surface: var(--semantic-surface);
+  --color-surface-raised: var(--semantic-surface-raised);
   --color-text-primary: var(--semantic-text-primary);
   --color-text-secondary: var(--semantic-text-secondary);
   --color-text-muted: var(--semantic-text-muted);
   --color-border: var(--semantic-border);
+  --color-border-strong: var(--semantic-border-strong);
   --color-accent: var(--semantic-accent);
   --color-accent-hover: var(--semantic-accent-hover);
   --color-accent-foreground: var(--semantic-accent-foreground);
@@ -143,4 +168,13 @@
   --color-destructive: var(--semantic-destructive);
   --color-destructive-hover: var(--semantic-destructive-hover);
   --color-destructive-foreground: var(--semantic-destructive-foreground);
+  --color-success: var(--semantic-success);
+  --color-success-hover: var(--semantic-success-hover);
+  --color-success-foreground: var(--semantic-success-foreground);
+  --color-warning: var(--semantic-warning);
+  --color-warning-hover: var(--semantic-warning-hover);
+  --color-warning-foreground: var(--semantic-warning-foreground);
+  --color-info: var(--semantic-info);
+  --color-info-hover: var(--semantic-info-hover);
+  --color-info-foreground: var(--semantic-info-foreground);
 }

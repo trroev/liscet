@@ -5,7 +5,7 @@ import "@repo/tailwind"
 const withTheme: Decorator = (Story, context) => {
   const isDark = context.globals.theme === "dark"
   if (typeof document !== "undefined") {
-    document.documentElement.classList.toggle("dark", isDark)
+    document.documentElement.dataset.theme = isDark ? "dark" : "light"
   }
   return (
     <div className="font-sans">

@@ -66,8 +66,7 @@ apps/
   web/                      Next.js app + Payload, marketing + product + admin
 packages/
   ui/                       Base UI–wrapped primitives, Storybook
-  tailwind/                 Tailwind config / preset
-  design-tokens/            Semantic tokens, emits Tailwind preset + TS exports
+  tailwind/                 Tailwind v4 config + semantic design tokens (CSS-only)
   rules-engine/             Pure functions: evaluateCourse, summarizeLicense
   emails/                   React Email templates
   db-seed/                  Idempotent seeder for local + preview branches
@@ -173,7 +172,7 @@ Both are pure, both live in `packages/rules-engine`.
 
 ## UI architecture
 
-- **Semantic tokens only.** `packages/design-tokens` exports `bg`, `surface`, `surface-raised`, `border`, `border-strong`, `text-primary`, `text-muted`, `accent`, status colors. Two themes resolve them.
+- **Semantic tokens only.** `@repo/tailwind` defines the semantic set: `background`, `surface`, `surface-raised`, `border`, `border-strong`, `text-primary`, `text-secondary`, `text-muted`, `accent` (+ `-hover`, `-foreground`), `secondary` (+ `-hover`, `-foreground`), and status colors `success` / `warning` / `info` / `destructive` (each with `-hover` + `-foreground`).
 - **Tailwind + CSS variables.** `:root` and `[data-theme="dark"]` swap variable values.
 - **`next-themes`** for switching. System default, three-way toggle, persisted.
 - **Storybook builds every story in both themes** via toolbar addon.
@@ -271,7 +270,7 @@ Adopt as we go: **Vitest** for unit (rules engine first — that's where bugs co
 | Domain purchase (`liscet.com`)                                            | Resend setup, marketing pages, OG template, email sender config |
 | CO scope clarification with CO partner                                    | Modeling the CO license/registration in the rules engine        |
 | First-license-type rule sets authored with each state's therapist partner | Rules engine config files, dashboard design pass                |
-| Accent color decision                                                     | Design tokens, first dashboard pass                             |
+| Accent color decision                                                     | Final brand identity in production (token structure already in place; #2 swaps in the locked OKLCH values) |
 
 **Resolved:** name locked to Liscet; USPTO TESS clear (Class 9 + Class 42); `liscet.com` available; repo bootstrapped at `trroev/liscet` from `next-payload-starter`.
 
