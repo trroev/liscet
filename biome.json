@@ -96,6 +96,7 @@
         "packages/utils/**",
         "packages/types/**",
         "packages/logger/**",
+        "packages/rules-engine/**",
         "packages/payload/src/components/**",
         "apps/web/src/components/**",
         "apps/web/src/features/*/components/**"
@@ -211,6 +212,42 @@
                       "~/app/**"
                     ],
                     "message": "Code inside apps/web/src/features/** must not import via the `~/features/*` alias (cross-feature imports are banned, and intra-feature imports must use relative paths) and must not import from `~/app/**`. Hoist shared code into `~/lib` or `~/components`."
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "includes": ["packages/rules-engine/**"],
+      "linter": {
+        "rules": {
+          "style": {
+            "noRestrictedImports": {
+              "level": "error",
+              "options": {
+                "patterns": [
+                  {
+                    "group": [
+                      "@payloadcms/*",
+                      "next",
+                      "next/**",
+                      "react",
+                      "react/**",
+                      "react-dom",
+                      "react-dom/**",
+                      "@repo/ui",
+                      "@repo/ui/**",
+                      "@repo/chrome",
+                      "@repo/chrome/**",
+                      "@repo/payload",
+                      "@repo/payload/**",
+                      "@repo/auth",
+                      "@repo/auth/**"
+                    ],
+                    "message": "@repo/rules-engine is pure TypeScript — no Payload, no Next, no React, no UI/chrome/payload/auth workspace packages. Only @repo/{utils,types,env,logger} foundation packages may be imported."
                   }
                 ]
               }

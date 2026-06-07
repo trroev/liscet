@@ -543,6 +543,27 @@ importers:
         specifier: ^3.2.4
         version: 3.2.4(@types/debug@4.1.13)(@types/node@22.15.3)(happy-dom@20.9.0)(jiti@2.6.1)(jsdom@29.1.1(@noble/hashes@2.2.0))(lightningcss@1.32.0)(msw@2.14.6(@types/node@22.15.3)(typescript@6.0.3))(sass@1.77.4)(terser@5.48.0)(tsx@4.21.0)(yaml@2.9.0)
 
+  packages/rules-engine:
+    devDependencies:
+      '@repo/testing':
+        specifier: workspace:*
+        version: link:../testing
+      '@repo/tsconfig':
+        specifier: workspace:*
+        version: link:../tsconfig
+      '@repo/types':
+        specifier: workspace:*
+        version: link:../types
+      '@vitest/coverage-v8':
+        specifier: ^3.2.4
+        version: 3.2.4(vitest@3.2.4(@types/debug@4.1.13)(@types/node@22.19.19)(happy-dom@20.9.0)(jiti@2.6.1)(jsdom@29.1.1(@noble/hashes@2.2.0))(lightningcss@1.32.0)(msw@2.14.6(@types/node@22.19.19)(typescript@6.0.3))(sass@1.77.4)(terser@5.48.0)(tsx@4.21.0)(yaml@2.9.0))
+      typescript:
+        specifier: 'catalog:'
+        version: 6.0.3
+      vitest:
+        specifier: ^3.2.4
+        version: 3.2.4(@types/debug@4.1.13)(@types/node@22.19.19)(happy-dom@20.9.0)(jiti@2.6.1)(jsdom@29.1.1(@noble/hashes@2.2.0))(lightningcss@1.32.0)(msw@2.14.6(@types/node@22.19.19)(typescript@6.0.3))(sass@1.77.4)(terser@5.48.0)(tsx@4.21.0)(yaml@2.9.0)
+
   packages/storybook-config:
     dependencies:
       '@repo/tailwind':
