@@ -64,6 +64,7 @@ export function createPayloadConfig({ baseDir }: CreatePayloadConfigOptions) {
       idType: "uuid",
       migrationDir: path.resolve(dirname, "migrations"),
       pool: { connectionString: databaseEnv.DATABASE_URL },
+      tablesFilter: ["!user", "!session", "!account", "!verification"],
     }),
     editor: lexicalEditor(),
     plugins: cloudinaryConfig
