@@ -1,1 +1,1 @@
-export { preview } from "@repo/storybook-config/preview"
+export { preview as default } from "@repo/storybook-config/preview"

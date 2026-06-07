@@ -3,7 +3,7 @@ import { type Decorator, definePreview } from "@storybook/nextjs-vite"
 import "@repo/tailwind"
 
 const withTheme: Decorator = (Story, context) => {
-  const isDark = context.globals.theme === "dark"
+  const isDark = context.globals.backgrounds?.value === "dark"
   if (typeof document !== "undefined") {
     document.documentElement.dataset.theme = isDark ? "dark" : "light"
   }
@@ -26,29 +26,14 @@ export const preview = definePreview({
     },
     backgrounds: {
       options: {
-        light: { name: "Light", value: "var(--color-background, #ffffff)" },
-        dark: { name: "Dark", value: "var(--color-background, #0b0b0b)" },
+        light: { name: "Light", value: "var(--color-background)" },
+        dark: { name: "Dark", value: "var(--color-background)" },
       },
     },
     a11y: { test: "todo" },
   },
   initialGlobals: {
     backgrounds: { value: "light" },
-  },
-  globalTypes: {
-    theme: {
-      description: "Theme",
-      defaultValue: "light",
-      toolbar: {
-        title: "Theme",
-        icon: "circlehollow",
-        items: [
-          { value: "light", title: "Light" },
-          { value: "dark", title: "Dark" },
-        ],
-        dynamicTitle: true,
-      },
-    },
   },
   decorators: [withTheme],
 })
