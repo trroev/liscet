@@ -28,9 +28,6 @@ export const UserMenu = ({ auth }: UserMenuProps) => (
       <Menu.LinkItem closeOnClick render={<Link href="/profile" />}>
         Profile
       </Menu.LinkItem>
-      <Menu.LinkItem closeOnClick render={<Link href="/submit" />}>
-        Submit post
-      </Menu.LinkItem>
       <Menu.Separator />
       <Menu.Item onClick={auth.onSignOut} variant="destructive">
         Sign out

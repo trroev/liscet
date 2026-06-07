@@ -75,18 +75,6 @@ export const SiteHeader = ({
             onValueChange={(value) => setNavValue(value)}
             value={navValue}
           >
-            {/* Desktop nav links */}
-            <NavigationMenu.List className="hidden gap-6 md:flex">
-              <NavigationMenu.Item>
-                <NavigationMenu.Link
-                  className="text-body text-text-secondary hover:text-text-primary"
-                  render={<Link href="/posts" />}
-                >
-                  Posts
-                </NavigationMenu.Link>
-              </NavigationMenu.Item>
-            </NavigationMenu.List>
-
             <MobileNav authSlot={mobileAuthSlot} isOpen={isMobileNavOpen} />
           </NavigationMenu.Root>
 

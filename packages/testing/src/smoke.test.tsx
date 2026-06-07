@@ -9,13 +9,8 @@ vi.mock("@repo/auth/client", () => ({
   },
 }))
 
-import { buildPost, buildUser, resetFactoryCounter } from "./factories"
-import {
-  authGetSessionHandler,
-  authSignOutHandler,
-  payloadListHandler,
-  server,
-} from "./msw"
+import { buildUser, resetFactoryCounter } from "./factories"
+import { authGetSessionHandler, authSignOutHandler, server } from "./msw"
 import { renderWithProviders } from "./render"
 
 const SessionConsumer = () => {
@@ -32,12 +27,9 @@ describe("@repo/testing", () => {
   it("factories produce deterministic objects with overrides", () => {
     resetFactoryCounter()
     const user = buildUser({ name: "Alice" })
-    const post = buildPost({ title: "Hello, world" })
 
     expect(user.name).toBe("Alice")
     expect(user.email.endsWith("@example.com")).toBe(true)
-    expect(post.title).toBe("Hello, world")
-    expect(post.sections).toHaveLength(1)
   })
 
   it("renderWithProviders mounts children inside SessionProvider", () => {
@@ -53,6 +45,5 @@ describe("@repo/testing", () => {
     expect(typeof server.listen).toBe("function")
     expect(authGetSessionHandler(null)).toBeDefined()
     expect(authSignOutHandler()).toBeDefined()
-    expect(payloadListHandler("posts", [buildPost()])).toBeDefined()
   })
 })

@@ -1,8 +1,6 @@
 import { RiCloseLine, RiMenuLine } from "@remixicon/react"
 import { NavigationMenu } from "@repo/ui/components/NavigationMenu"
-import { Separator } from "@repo/ui/components/Separator"
 import { cn } from "@repo/ui/utils/cn"
-import Link from "next/link"
 import type React from "react"
 
 export type MobileNavProps = {
@@ -41,19 +39,7 @@ export const MobileNav = ({ isOpen, authSlot }: MobileNavProps) => (
               "data-ending-style:duration-150 data-ending-style:ease-in"
             )}
           >
-            <ul className="flex flex-col space-y-4">
-              <NavigationMenu.Item>
-                <NavigationMenu.Link
-                  className="text-heading-md text-text-primary hover:text-text-secondary"
-                  closeOnClick
-                  render={<Link href="/posts" />}
-                >
-                  Posts
-                </NavigationMenu.Link>
-              </NavigationMenu.Item>
-              <Separator />
-              {authSlot}
-            </ul>
+            <ul className="flex flex-col space-y-4">{authSlot}</ul>
           </NavigationMenu.Popup>
         </NavigationMenu.Positioner>
       </NavigationMenu.Portal>

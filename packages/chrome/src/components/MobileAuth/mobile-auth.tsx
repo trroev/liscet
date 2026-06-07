@@ -38,15 +38,6 @@ export const MobileAuth = ({ auth }: MobileAuthProps) => {
         </NavigationMenu.Link>
       </NavigationMenu.Item>
       <NavigationMenu.Item>
-        <NavigationMenu.Link
-          className={linkClass}
-          closeOnClick
-          render={<Link href="/submit" />}
-        >
-          Submit post
-        </NavigationMenu.Link>
-      </NavigationMenu.Item>
-      <NavigationMenu.Item>
         <form action={auth.onSignOut}>
           <button className={`${linkClass} text-left`} type="submit">
             Sign out

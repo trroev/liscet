@@ -286,9 +286,9 @@ describe("RichText renderer", () => {
 
     it("resolves internal-doc links via the registry", () => {
       const internalDocResolvers: InternalDocResolvers = {
-        posts: (doc) => {
+        articles: (doc) => {
           if (typeof doc === "object" && doc !== null && "slug" in doc) {
-            return `/posts/${(doc as { slug: string }).slug}`
+            return `/articles/${(doc as { slug: string }).slug}`
           }
           return
         },
@@ -296,8 +296,8 @@ describe("RichText renderer", () => {
       const data = editorState([
         paragraph([
           internalLinkNode({
-            relationTo: "posts",
-            value: { id: "p1", slug: "hello" },
+            relationTo: "articles",
+            value: { id: "a1", slug: "hello" },
             children: [text("related")],
           }),
         ]),
@@ -307,7 +307,7 @@ describe("RichText renderer", () => {
       )
       const link = screen.getByRole("link", { name: "related" })
       expect(link).toHaveAttribute("data-next-link", "true")
-      expect(link).toHaveAttribute("href", "/posts/hello")
+      expect(link).toHaveAttribute("href", "/articles/hello")
     })
 
     it("warns and renders plain text when collection has no resolver", () => {

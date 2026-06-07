@@ -2,7 +2,6 @@ import path from "node:path"
 import { fileURLToPath } from "node:url"
 import { postgresAdapter } from "@payloadcms/db-postgres"
 import { cloudStoragePlugin } from "@payloadcms/plugin-cloud-storage"
-import { seoPlugin } from "@payloadcms/plugin-seo"
 import { lexicalEditor } from "@payloadcms/richtext-lexical"
 import { env as cloudinaryEnv } from "@repo/env/cloudinary"
 import { env as databaseEnv } from "@repo/env/database"
@@ -10,9 +9,7 @@ import { env as payloadEnv } from "@repo/env/payload"
 import { cloudinaryAdapter } from "@repo/payload/adapters/cloudinary"
 import { Admins } from "@repo/payload/collections/Admins"
 import { Media } from "@repo/payload/collections/Media"
-import { Posts } from "@repo/payload/collections/Posts"
 import { Users } from "@repo/payload/collections/Users"
-import type { Post } from "@repo/payload/payload-types"
 import { buildConfig } from "payload"
 
 const dirname = path.dirname(fileURLToPath(import.meta.url))
@@ -62,45 +59,29 @@ export function createPayloadConfig({ baseDir }: CreatePayloadConfigOptions) {
       },
       user: Admins.slug,
     },
-    collections: [Admins, Media, Posts, Users],
+    collections: [Admins, Media, Users],
     db: postgresAdapter({
       idType: "uuid",
       migrationDir: path.resolve(dirname, "migrations"),
       pool: { connectionString: databaseEnv.DATABASE_URL },
     }),
     editor: lexicalEditor(),
-    plugins: [
-      ...(cloudinaryConfig
-        ? [
-            cloudStoragePlugin({
-              collections: {
-                media: {
-                  adapter: cloudinaryAdapter({
-                    config: cloudinaryConfig,
-                    folder: "starter",
-                  }),
-                  disableLocalStorage: true,
-                  disablePayloadAccessControl: true,
-                },
+    plugins: cloudinaryConfig
+      ? [
+          cloudStoragePlugin({
+            collections: {
+              media: {
+                adapter: cloudinaryAdapter({
+                  config: cloudinaryConfig,
+                  folder: "starter",
+                }),
+                disableLocalStorage: true,
+                disablePayloadAccessControl: true,
               },
-            }),
-          ]
-        : []),
-      seoPlugin({
-        collections: ["posts"],
-        generateDescription: ({ doc }) =>
-          (doc as Post).description?.slice(0, 160) ?? "",
-        generateImage: ({ doc }) => {
-          const coverImage = (doc as Post).coverImage
-          return typeof coverImage === "object" && coverImage !== null
-            ? coverImage.id
-            : (coverImage ?? "")
-        },
-        generateTitle: ({ doc }) => (doc as Post).title,
-        tabbedUI: true,
-        uploadsCollection: "media",
-      }),
-    ],
+            },
+          }),
+        ]
+      : [],
     secret: payloadEnv.PAYLOAD_SECRET,
     typescript: {
       outputFile: path.resolve(dirname, "types", "payload-types.ts"),
