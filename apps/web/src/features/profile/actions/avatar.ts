@@ -70,7 +70,7 @@ const uploadAvatarImpl = async (
   const file: AvatarFile = parsed.data
 
   const previousAvatarId = extractAvatarId(userDoc.avatar)
-  const altLabel = userDoc.name || userDoc.email
+  const altLabel = userDoc.displayName || userDoc.email
   const media = await createMediaAsset({
     file,
     alt: `${altLabel} profile photo`,

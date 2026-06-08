@@ -1,21 +1,26 @@
+import { isAdmin } from "@repo/payload/access/isAdmin"
 import type { CollectionConfig, FieldAccess } from "payload"
 
 const isAdminField: FieldAccess = ({ req: { user } }) => Boolean(user)
 
 export const Users: CollectionConfig = {
+  access: {
+    create: isAdmin,
+    delete: isAdmin,
+    read: isAdmin,
+    update: isAdmin,
+  },
   admin: {
     useAsTitle: "email",
   },
+  auth: false,
   fields: [
     {
+      index: true,
       name: "email",
       required: true,
       type: "email",
       unique: true,
-    },
-    {
-      name: "name",
-      type: "text",
     },
     {
       admin: {
@@ -24,6 +29,19 @@ export const Users: CollectionConfig = {
       },
       index: true,
       name: "betterAuthId",
+      type: "text",
+      unique: true,
+    },
+    {
+      name: "displayName",
+      type: "text",
+    },
+    {
+      admin: {
+        description:
+          "IANA timezone string (e.g. America/New_York) for display.",
+      },
+      name: "timezone",
       type: "text",
     },
     {

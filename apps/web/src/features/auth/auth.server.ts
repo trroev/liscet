@@ -22,8 +22,8 @@ export const auth = createAuth({
                 collection: "users",
                 data: {
                   betterAuthId: user.id,
+                  displayName: user.name ?? "",
                   email: user.email,
-                  name: user.name ?? "",
                 },
               })
             )

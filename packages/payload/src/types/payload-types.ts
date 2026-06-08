@@ -171,11 +171,15 @@ export interface Media {
 export interface User {
   id: string;
   email: string;
-  name?: string | null;
   /**
    * BetterAuth user ID. Set automatically on sign-up.
    */
   betterAuthId?: string | null;
+  displayName?: string | null;
+  /**
+   * IANA timezone string (e.g. America/New_York) for display.
+   */
+  timezone?: string | null;
   /**
    * Avatar image. Written by the uploadAvatar server action (overrides access) or by admins.
    */
@@ -308,8 +312,9 @@ export interface MediaSelect<T extends boolean = true> {
  */
 export interface UsersSelect<T extends boolean = true> {
   email?: T;
-  name?: T;
   betterAuthId?: T;
+  displayName?: T;
+  timezone?: T;
   avatar?: T;
   updatedAt?: T;
   createdAt?: T;

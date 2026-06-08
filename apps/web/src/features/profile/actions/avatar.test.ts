@@ -48,7 +48,7 @@ const stubSession = (userId = "ba-user-1") => {
 
 type StubUser = {
   id: string
-  name?: string
+  displayName?: string
   avatar?: string | { id: string } | null
 }
 
@@ -131,7 +131,7 @@ describe("uploadAvatar", () => {
 
   it("creates a media doc and links it to the user", async () => {
     stubSession()
-    stubUserLookup([{ id: "payload-user-1", name: "Ada" }])
+    stubUserLookup([{ id: "payload-user-1", displayName: "Ada" }])
     create.mockResolvedValueOnce({
       id: "media-1",
       url: "https://cdn.example/avatar.jpg",
