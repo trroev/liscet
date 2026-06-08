@@ -68,6 +68,7 @@ export interface Config {
   blocks: {};
   collections: {
     admins: Admin;
+    licenses: License;
     media: Media;
     users: User;
     'payload-kv': PayloadKv;
@@ -78,6 +79,7 @@ export interface Config {
   collectionsJoins: {};
   collectionsSelect: {
     admins: AdminsSelect<false> | AdminsSelect<true>;
+    licenses: LicensesSelect<false> | LicensesSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
@@ -146,23 +148,25 @@ export interface Admin {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "media".
+ * via the `definition` "licenses".
  */
-export interface Media {
+export interface License {
   id: string;
-  _order?: string | null;
-  alt: string;
+  /**
+   * The practitioner who holds this license.
+   */
+  practitioner: string | User;
+  state: 'CA' | 'MA' | 'MI' | 'CT' | 'CO';
+  licenseType: string;
+  licenseNumber: string;
+  issuedAt: string;
+  expiresAt: string;
+  /**
+   * Months between renewals. Defaults to 24.
+   */
+  renewalCycleMonths?: number | null;
   updatedAt: string;
   createdAt: string;
-  url?: string | null;
-  thumbnailURL?: string | null;
-  filename?: string | null;
-  mimeType?: string | null;
-  filesize?: number | null;
-  width?: number | null;
-  height?: number | null;
-  focalX?: number | null;
-  focalY?: number | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -186,6 +190,26 @@ export interface User {
   avatar?: (string | null) | Media;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media".
+ */
+export interface Media {
+  id: string;
+  _order?: string | null;
+  alt: string;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -214,6 +238,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'admins';
         value: string | Admin;
+      } | null)
+    | ({
+        relationTo: 'licenses';
+        value: string | License;
       } | null)
     | ({
         relationTo: 'media';
@@ -286,6 +314,21 @@ export interface AdminsSelect<T extends boolean = true> {
         createdAt?: T;
         expiresAt?: T;
       };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "licenses_select".
+ */
+export interface LicensesSelect<T extends boolean = true> {
+  practitioner?: T;
+  state?: T;
+  licenseType?: T;
+  licenseNumber?: T;
+  issuedAt?: T;
+  expiresAt?: T;
+  renewalCycleMonths?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
