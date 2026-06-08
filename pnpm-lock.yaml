@@ -15,9 +15,6 @@ catalogs:
     '@payloadcms/richtext-lexical':
       specifier: 3.85.0
       version: 3.85.0
-    '@storybook/addon-themes':
-      specifier: ^10.4.2
-      version: 10.4.2
     '@types/pg':
       specifier: ^8.20.0
       version: 8.20.0
@@ -164,9 +161,6 @@ importers:
       '@storybook/addon-designs':
         specifier: ^11.1.3
         version: 11.1.3(@types/react@19.2.2)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)(storybook@10.3.6(@testing-library/dom@10.4.1)(prettier@3.8.3)(react-dom@19.2.0(react@19.2.0))(react@19.2.0))
-      '@storybook/addon-themes':
-        specifier: 'catalog:'
-        version: 10.4.2(storybook@10.3.6(@testing-library/dom@10.4.1)(prettier@3.8.3)(react-dom@19.2.0(react@19.2.0))(react@19.2.0))
       '@storybook/nextjs-vite':
         specifier: ^10.3.6
         version: 10.3.6(esbuild@0.27.7)(next@16.2.7(@opentelemetry/api@1.9.1)(@playwright/test@1.60.0)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)(sass@1.77.4))(react-dom@19.2.0(react@19.2.0))(react@19.2.0)(rollup@4.60.4)(storybook@10.3.6(@testing-library/dom@10.4.1)(prettier@3.8.3)(react-dom@19.2.0(react@19.2.0))(react@19.2.0))(typescript@6.0.3)(vite@8.0.10(@types/node@22.15.3)(esbuild@0.27.7)(jiti@2.6.1)(sass@1.77.4)(terser@5.48.0)(tsx@4.21.0)(yaml@2.9.0))(webpack@5.107.1(esbuild@0.27.7)(lightningcss@1.32.0))
@@ -588,9 +582,6 @@ importers:
       '@repo/tsconfig':
         specifier: workspace:*
         version: link:../tsconfig
-      '@storybook/addon-themes':
-        specifier: 'catalog:'
-        version: 10.4.2(storybook@10.3.6(@testing-library/dom@10.4.1)(prettier@3.8.3)(react-dom@19.2.0(react@19.2.0))(react@19.2.0))
       '@storybook/nextjs-vite':
         specifier: ^10.3.6
         version: 10.3.6(esbuild@0.27.7)(next@16.2.7(@opentelemetry/api@1.9.1)(@playwright/test@1.60.0)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)(sass@1.77.4))(react-dom@19.2.0(react@19.2.0))(react@19.2.0)(rollup@4.60.4)(storybook@10.3.6(@testing-library/dom@10.4.1)(prettier@3.8.3)(react-dom@19.2.0(react@19.2.0))(react@19.2.0))(typescript@6.0.3)(vite@8.0.10(@types/node@22.19.19)(esbuild@0.27.7)(jiti@2.6.1)(sass@1.77.4)(terser@5.48.0)(tsx@4.21.0)(yaml@2.9.0))(webpack@5.107.1(esbuild@0.27.7)(lightningcss@1.32.0))
@@ -3061,11 +3052,6 @@ packages:
         optional: true
       react-dom:
         optional: true
-
-  '@storybook/addon-themes@10.4.2':
-    resolution: {integrity: sha512-e5rP/RLujp06wmO75njxnfi3ndOBbgHIXceAsuN870BVh7D7iGx+8bwslIWy+FwRBYsCMCnWk+d25Zp4ai3p4w==}
-    peerDependencies:
-      storybook: ^10.4.2
 
   '@storybook/builder-vite@10.3.6':
     resolution: {integrity: sha512-gpvR/sE4BcrFtmQZ+Ker7zD23oQzoVeqD9nF6cK6yzY+Q0svJXyX2EPmFG4y+EwygD5/vNzDpP84gGMut8VRwg==}
@@ -8756,11 +8742,6 @@ snapshots:
       react-dom: 19.2.0(react@19.2.0)
     transitivePeerDependencies:
       - '@types/react'
-
-  '@storybook/addon-themes@10.4.2(storybook@10.3.6(@testing-library/dom@10.4.1)(prettier@3.8.3)(react-dom@19.2.0(react@19.2.0))(react@19.2.0))':
-    dependencies:
-      storybook: 10.3.6(@testing-library/dom@10.4.1)(prettier@3.8.3)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
-      ts-dedent: 2.2.0
 
   '@storybook/builder-vite@10.3.6(esbuild@0.27.7)(rollup@4.60.4)(storybook@10.3.6(@testing-library/dom@10.4.1)(prettier@3.8.3)(react-dom@19.2.0(react@19.2.0))(react@19.2.0))(vite@8.0.10(@types/node@22.15.3)(esbuild@0.27.7)(jiti@2.6.1)(sass@1.77.4)(terser@5.48.0)(tsx@4.21.0)(yaml@2.9.0))(webpack@5.107.1(esbuild@0.27.7)(lightningcss@1.32.0))':
     dependencies:

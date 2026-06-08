@@ -6,7 +6,6 @@ catalog:
   '@better-fetch/fetch': 1.1.21
   '@payloadcms/db-postgres': ^3.85.0
   '@payloadcms/richtext-lexical': 3.85.0
-  '@storybook/addon-themes': ^10.4.2
   '@types/pg': ^8.20.0
   "@types/react": 19.2.2
   "@types/react-dom": 19.2.2
