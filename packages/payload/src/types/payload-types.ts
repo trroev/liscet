@@ -72,6 +72,8 @@ export interface Config {
     courses: Course;
     licenses: License;
     media: Media;
+    'notification-log': NotificationLog;
+    'rule-set-versions': RuleSetVersion;
     users: User;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
@@ -85,6 +87,8 @@ export interface Config {
     courses: CoursesSelect<false> | CoursesSelect<true>;
     licenses: LicensesSelect<false> | LicensesSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
+    'notification-log': NotificationLogSelect<false> | NotificationLogSelect<true>;
+    'rule-set-versions': RuleSetVersionsSelect<false> | RuleSetVersionsSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -171,9 +175,9 @@ export interface CourseCredit {
   creditedCategories?: string[] | null;
   evaluatedAt: string;
   /**
-   * Semver of the RuleSetVersions document used for this evaluation.
+   * The rule set version used for this evaluation.
    */
-  ruleSetVersion: string;
+  ruleSetVersion: string | RuleSetVersion;
   updatedAt: string;
   createdAt: string;
 }
@@ -271,6 +275,51 @@ export interface License {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "rule-set-versions".
+ */
+export interface RuleSetVersion {
+  id: string;
+  state: 'CA' | 'MA' | 'MI' | 'CT' | 'CO';
+  licenseType: string;
+  /**
+   * Semver string identifying this rule set version.
+   */
+  version: string;
+  publishedAt: string;
+  /**
+   * Snapshot of the rule config at publish time.
+   */
+  ruleSetJson:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "notification-log".
+ */
+export interface NotificationLog {
+  id: string;
+  practitioner: string | User;
+  license: string | License;
+  notificationType: 'renewal-90d' | 'renewal-60d' | 'renewal-30d' | 'renewal-7d' | 'renewal-1d' | 'category-shortfall';
+  sentAt: string;
+  /**
+   * The calendar date the cron ran.
+   */
+  sentForDate: string;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -312,6 +361,14 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'media';
         value: string | Media;
+      } | null)
+    | ({
+        relationTo: 'notification-log';
+        value: string | NotificationLog;
+      } | null)
+    | ({
+        relationTo: 'rule-set-versions';
+        value: string | RuleSetVersion;
       } | null)
     | ({
         relationTo: 'users';
@@ -445,6 +502,32 @@ export interface MediaSelect<T extends boolean = true> {
   height?: T;
   focalX?: T;
   focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "notification-log_select".
+ */
+export interface NotificationLogSelect<T extends boolean = true> {
+  practitioner?: T;
+  license?: T;
+  notificationType?: T;
+  sentAt?: T;
+  sentForDate?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "rule-set-versions_select".
+ */
+export interface RuleSetVersionsSelect<T extends boolean = true> {
+  state?: T;
+  licenseType?: T;
+  version?: T;
+  publishedAt?: T;
+  ruleSetJson?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

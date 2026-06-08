@@ -1,13 +1,6 @@
 import { isAdmin } from "@repo/payload/access/isAdmin"
+import { LICENSE_STATES } from "@repo/payload/fields/licenseStates"
 import type { CollectionConfig } from "payload"
-
-const LICENSE_STATES = [
-  { label: "California", value: "CA" },
-  { label: "Massachusetts", value: "MA" },
-  { label: "Michigan", value: "MI" },
-  { label: "Connecticut", value: "CT" },
-  { label: "Colorado", value: "CO" },
-] as const satisfies ReadonlyArray<{ label: string; value: string }>
 
 export const Licenses: CollectionConfig = {
   // Admin-or-deny; practitioner ownership is enforced in server actions.

@@ -54,12 +54,12 @@ export const CourseCredits: CollectionConfig = {
     },
     {
       admin: {
-        description:
-          "Semver of the RuleSetVersions document used for this evaluation.",
+        description: "The rule set version used for this evaluation.",
       },
       name: "ruleSetVersion",
+      relationTo: "rule-set-versions",
       required: true,
-      type: "text",
+      type: "relationship",
     },
   ],
   indexes: [{ fields: ["course", "license"], unique: true }],
