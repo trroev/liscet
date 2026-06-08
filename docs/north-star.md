@@ -196,6 +196,31 @@ Both are pure, both live in `packages/rules-engine`.
 
 ---
 
+## Inspiration
+
+**Primary reference: Linear.** Liscet should feel like Linear — dense without crowding, fast, keyboard-first, restrained. The other apps listed under [Design strategy](#design-strategy) (Cron, Stripe Dashboard, Vercel Dashboard, Resend Dashboard, Height.app) are secondary references; Linear is the one to copy when in doubt.
+
+**Look-and-feel:**
+
+- **High information density.** Small base type (~13–14px), tight line-height, generous horizontal padding. Tables and lists show many rows without scrolling.
+- **Restraint over flourish.** No gradients, no illustrations, `shadow-sm` ceiling. Borders carry separation, not shadows.
+- **Hover-revealed actions.** Row-level controls (edit, delete, archive) appear only on hover. Default rows are silent.
+- **Pill aesthetic for status.** Compact, low-chroma badges. Status colors live in pills, never decoration.
+- **Cool muted accent.** Already locked in [Accent (v1)](#accent-v1) — hue 265°, max chroma 0.06.
+
+**UX:**
+
+- **Keyboard-first.** Every primary action has a shortcut. `?` opens a shortcut overlay.
+- **Cmd-K command palette.** Universal navigation + action surface. Reachable from anywhere.
+- **Inline editing.** Click to edit, `Esc` cancels, `Enter` saves. Modals only for destructive confirmations.
+- **Instant feedback.** Optimistic updates; spinners only for operations >200ms.
+- **Right sidebar for details.** Drill-down opens a slide-in panel, not a new page. Preserves list context.
+- **Skeleton states, not spinners.** Loading skeletons match final layout so the page doesn't reflow.
+
+When designing a new screen or component, ask: *does Linear do this, and how?* If Linear has no direct analogue, fall back to the secondary references.
+
+---
+
 ## Accent (v1)
 
 Cool muted indigo-violet, in the Linear / Things 3 / Stripe Dashboard family. Picked for restraint-first aesthetics — at max chroma `0.06` the accent reads as a tinted gray, with hue `265°` sitting clear of every status color (destructive 27, warning 75, success 150, info 230) and the sage secondary (140).
@@ -316,3 +341,4 @@ Adopt as we go: **Vitest** for unit (rules engine first — that's where bugs co
 | 20  | Name                | Liscet (TESS clear, `liscet.com` available)                          |
 | 21  | Support             | PostHog widget + `hello@` mailbox                                    |
 | 22  | Accent color        | Cool muted indigo-violet, hue 265°, max chroma 0.06                  |
+| 23  | Design inspiration  | Primary: Linear (look-and-feel + UX); secondary references kept      |
