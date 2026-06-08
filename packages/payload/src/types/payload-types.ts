@@ -68,6 +68,7 @@ export interface Config {
   blocks: {};
   collections: {
     admins: Admin;
+    courses: Course;
     licenses: License;
     media: Media;
     users: User;
@@ -79,6 +80,7 @@ export interface Config {
   collectionsJoins: {};
   collectionsSelect: {
     admins: AdminsSelect<false> | AdminsSelect<true>;
+    courses: CoursesSelect<false> | CoursesSelect<true>;
     licenses: LicensesSelect<false> | LicensesSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
@@ -148,23 +150,28 @@ export interface Admin {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "licenses".
+ * via the `definition` "courses".
  */
-export interface License {
+export interface Course {
   id: string;
   /**
-   * The practitioner who holds this license.
+   * The practitioner who completed this course.
    */
   practitioner: string | User;
-  state: 'CA' | 'MA' | 'MI' | 'CT' | 'CO';
-  licenseType: string;
-  licenseNumber: string;
-  issuedAt: string;
-  expiresAt: string;
+  title: string;
+  provider?: string | null;
+  completedAt: string;
+  hours: number;
   /**
-   * Months between renewals. Defaults to 24.
+   * Free-form subject tags. Free-text only — no clinical context.
    */
-  renewalCycleMonths?: number | null;
+  subjectCategories?: string[] | null;
+  format: 'live' | 'home-study' | 'in-person';
+  /**
+   * Certificate of completion document.
+   */
+  certificate?: (string | null) | Media;
+  source?: ('manual' | 'catalog') | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -213,6 +220,28 @@ export interface Media {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "licenses".
+ */
+export interface License {
+  id: string;
+  /**
+   * The practitioner who holds this license.
+   */
+  practitioner: string | User;
+  state: 'CA' | 'MA' | 'MI' | 'CT' | 'CO';
+  licenseType: string;
+  licenseNumber: string;
+  issuedAt: string;
+  expiresAt: string;
+  /**
+   * Months between renewals. Defaults to 24.
+   */
+  renewalCycleMonths?: number | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -238,6 +267,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'admins';
         value: string | Admin;
+      } | null)
+    | ({
+        relationTo: 'courses';
+        value: string | Course;
       } | null)
     | ({
         relationTo: 'licenses';
@@ -314,6 +347,23 @@ export interface AdminsSelect<T extends boolean = true> {
         createdAt?: T;
         expiresAt?: T;
       };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "courses_select".
+ */
+export interface CoursesSelect<T extends boolean = true> {
+  practitioner?: T;
+  title?: T;
+  provider?: T;
+  completedAt?: T;
+  hours?: T;
+  subjectCategories?: T;
+  format?: T;
+  certificate?: T;
+  source?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
