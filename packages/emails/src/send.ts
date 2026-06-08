@@ -5,17 +5,14 @@ import { z } from "zod"
 
 const resend = new Resend(env.RESEND_API_KEY)
 
-const recipientSchema = z.union([
-  z.string().email(),
-  z.array(z.string().email()).nonempty(),
-])
+const recipientSchema = z.union([z.email(), z.array(z.email()).nonempty()])
 
 const sendEmailSchema = z.object({
   from: z.string().min(1),
   react: z.custom<ReactElement>(isValidElement, {
     message: "react must be a valid React element",
   }),
-  replyTo: z.string().email().optional(),
+  replyTo: z.email().optional(),
   subject: z.string().min(1),
   to: recipientSchema,
 })
