@@ -186,13 +186,27 @@ Both are pure, both live in `packages/rules-engine`.
 - **Design-in-code.** No Figma. Storybook + the running app are the design tool.
 - **References:** Linear, Cron/Notion Calendar, Stripe Dashboard, Vercel Dashboard, Resend Dashboard, Height.app. Screenshot patterns into `design-references/` as a working mood board.
 - **Aesthetic discipline:**
-  - One accent color, picked once. Muted teal direction.
+  - One accent color, picked once. Cool muted indigo-violet (hue 265°, max chroma 0.06) — see [Accent (v1)](#accent-v1) below.
   - Status colors used only for status, never decoration.
   - Two type sizes per screen, max three.
   - `shadow-sm` ceiling. No gradients. No illustrations.
   - Generous whitespace. Restraint is the entire aesthetic.
 - **Therapist partners are usability testers**, not designers. Test each screen on preview deploys before merging.
 - **First three screens, in order:** Dashboard → Log a course → Onboarding.
+
+---
+
+## Accent (v1)
+
+Cool muted indigo-violet, in the Linear / Things 3 / Stripe Dashboard family. Picked for restraint-first aesthetics — at max chroma `0.06` the accent reads as a tinted gray, with hue `265°` sitting clear of every status color (destructive 27, warning 75, success 150, info 230) and the sage secondary (140).
+
+| Token                          | Light                   | Dark                    |
+| ------------------------------ | ----------------------- | ----------------------- |
+| `--semantic-accent`            | `oklch(0.55 0.06 265)`  | `oklch(0.70 0.049 265)` |
+| `--semantic-accent-hover`      | `oklch(0.46 0.053 265)` | `oklch(0.79 0.039 265)` |
+| `--semantic-accent-foreground` | `--color-neutral-50`    | `--color-neutral-900`   |
+
+The full `--color-accent-{50..900}` scale is the source of truth in [`packages/tailwind/src/tailwind.theme.css`](../packages/tailwind/src/tailwind.theme.css).
 
 ---
 
@@ -270,9 +284,8 @@ Adopt as we go: **Vitest** for unit (rules engine first — that's where bugs co
 | Domain purchase (`liscet.com`)                                            | Resend setup, marketing pages, OG template, email sender config |
 | CO scope clarification with CO partner                                    | Modeling the CO license/registration in the rules engine        |
 | First-license-type rule sets authored with each state's therapist partner | Rules engine config files, dashboard design pass                |
-| Accent color decision                                                     | Final brand identity in production (token structure already in place; #2 swaps in the locked OKLCH values) |
 
-**Resolved:** name locked to Liscet; USPTO TESS clear (Class 9 + Class 42); `liscet.com` available; repo bootstrapped at `trroev/liscet` from `next-payload-starter`.
+**Resolved:** name locked to Liscet; USPTO TESS clear (Class 9 + Class 42); `liscet.com` available; repo bootstrapped at `trroev/liscet` from `next-payload-starter`; accent color locked to cool muted indigo-violet (hue 265°, max chroma 0.06).
 
 ---
 
@@ -302,3 +315,4 @@ Adopt as we go: **Vitest** for unit (rules engine first — that's where bugs co
 | 19  | Marketing           | Single app, route-grouped sections                                   |
 | 20  | Name                | Liscet (TESS clear, `liscet.com` available)                          |
 | 21  | Support             | PostHog widget + `hello@` mailbox                                    |
+| 22  | Accent color        | Cool muted indigo-violet, hue 265°, max chroma 0.06                  |

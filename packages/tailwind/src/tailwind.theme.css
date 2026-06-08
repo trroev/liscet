@@ -25,17 +25,17 @@
   --color-neutral-800: oklch(0.25 0.007 60);
   --color-neutral-900: oklch(0.16 0.006 60);
 
-  /* COLORS — accent scale (placeholder; #2 swaps in locked v1 hue) */
-  --color-accent-50: oklch(0.97 0.015 40);
-  --color-accent-100: oklch(0.93 0.035 40);
-  --color-accent-200: oklch(0.87 0.06 40);
-  --color-accent-300: oklch(0.79 0.085 40);
-  --color-accent-400: oklch(0.7 0.105 40);
-  --color-accent-500: oklch(0.62 0.12 40);
-  --color-accent-600: oklch(0.55 0.13 40);
-  --color-accent-700: oklch(0.46 0.115 40);
-  --color-accent-800: oklch(0.37 0.09 40);
-  --color-accent-900: oklch(0.28 0.065 40);
+  /* COLORS — accent scale (v1: cool muted indigo-violet, hue 265, max chroma 0.06) */
+  --color-accent-50: oklch(0.97 0.007 265);
+  --color-accent-100: oklch(0.93 0.016 265);
+  --color-accent-200: oklch(0.87 0.028 265);
+  --color-accent-300: oklch(0.79 0.039 265);
+  --color-accent-400: oklch(0.7 0.049 265);
+  --color-accent-500: oklch(0.62 0.055 265);
+  --color-accent-600: oklch(0.55 0.06 265);
+  --color-accent-700: oklch(0.46 0.053 265);
+  --color-accent-800: oklch(0.37 0.042 265);
+  --color-accent-900: oklch(0.28 0.03 265);
 
   /* COLORS — sage secondary (placeholder) */
   --color-sage-50: oklch(0.97 0.008 140);
