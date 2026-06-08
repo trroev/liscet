@@ -6,6 +6,8 @@ import type { Metadata, Viewport } from "next"
 import { headers } from "next/headers"
 import { ThemeProvider } from "next-themes"
 import type React from "react"
+import { FeedbackButton } from "~/components/FeedbackButton"
+import { PostHogProvider } from "~/components/PostHogProvider"
 import { SentryUser } from "~/components/SentryUser"
 import { signOutAction } from "~/features/auth/actions/sign-out"
 import { auth } from "~/features/auth/auth.server"
@@ -83,9 +85,18 @@ export default async function FrontendLayout({
         >
           <SessionProvider initialUser={session?.user ?? null}>
             <SentryUser />
-            <AppShell auth={headerAuth} themeToggleSlot={<ThemeToggle />}>
-              {children}
-            </AppShell>
+            {session ? (
+              <PostHogProvider>
+                <AppShell auth={headerAuth} themeToggleSlot={<ThemeToggle />}>
+                  {children}
+                </AppShell>
+                <FeedbackButton />
+              </PostHogProvider>
+            ) : (
+              <AppShell auth={headerAuth} themeToggleSlot={<ThemeToggle />}>
+                {children}
+              </AppShell>
+            )}
           </SessionProvider>
         </ThemeProvider>
       </body>
