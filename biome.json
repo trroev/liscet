@@ -77,6 +77,7 @@
         "packages/logger/src/index.ts",
         "packages/logger/src/logger/index.ts",
         "packages/logger/src/test-transport/index.ts",
+        "packages/rules-engine/src/*/index.ts",
         "apps/web/src/features/*/components/*/index.ts",
         "apps/web/src/features/*/hooks/*/index.ts",
         "apps/web/src/components/*/index.ts"
