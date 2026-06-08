@@ -23,6 +23,26 @@ export type SubjectCategory =
   | "domestic-sexual-violence"
   | "veterans-mental-health"
 
+/**
+ * Runtime value set mirroring the `SubjectCategory` union — the single source
+ * of truth for mapping raw, unnormalized course tags onto the closed union.
+ */
+export const SUBJECT_CATEGORIES = [
+  "general",
+  "law-and-ethics",
+  "ethics",
+  "clinical",
+  "cultural-competency",
+  "suicide-risk",
+  "telehealth",
+  "human-trafficking",
+  "pain-symptom-management",
+  "anti-racism",
+  "anti-discrimination",
+  "domestic-sexual-violence",
+  "veterans-mental-health",
+] as const satisfies ReadonlyArray<SubjectCategory>
+
 export type CategoryMinimum = {
   readonly category: SubjectCategory
   readonly minHours: number
@@ -59,6 +79,8 @@ export type RuleSet = {
   readonly version: number
   readonly renewalCycleMonths: number
   readonly totalHours: number
+  /** Formats eligible to earn credit at all; gates before any credit calculation. */
+  readonly acceptedFormats: ReadonlyArray<CourseFormat>
   readonly categoryMinimums: ReadonlyArray<CategoryMinimum>
   readonly formatConstraints: ReadonlyArray<FormatConstraint>
   readonly specialRequirements: ReadonlyArray<SpecialRequirement>
