@@ -9,7 +9,7 @@ The app is instrumented with the three tools from the north-star (`docs/north-st
   - `apps/web/instrumentation-client.ts` — browser `init()` plus `onRouterTransitionStart` for client-boundary capture.
   - `apps/web/src/app/global-error.tsx` — `captureException` for the client error boundary.
 - Source maps upload only in CI: `next.config.ts` sets `silent: !process.env.CI`, and the upload requires `SENTRY_AUTH_TOKEN` / `SENTRY_ORG` / `SENTRY_PROJECT`, which are present in CI and absent in dev.
-- `~/components/SentryUser` calls `setUser({ id })` from the better-auth session. **Follow-up:** once the Practitioners collection exists, switch this to `setUser({ id: practitionerId })` and add `setContext('license', { state, licenseType })` in every server action and Payload hook (north-star line 259).
+- `~/components/SentryUser` calls `setUser({ id })` from the better-auth session. **Follow-up:** once the `users` collection mirror is live, switch this to `setUser({ id: practitionerId })` and add `setContext('license', { state, licenseType })` in every server action and Payload hook (north-star line 259).
 
 ### Environment
 

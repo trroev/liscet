@@ -102,11 +102,11 @@ There is **no `/app` URL segment.** `(app)` is a parenthesized route group for t
 
 ## Data model
 
-**Practitioners** — synced from BetterAuth on user creation/update via `databaseHooks`. Email is the join key. Stores timezone for display.
+**Users** — synced from BetterAuth on user creation/update via `databaseHooks`. Email is the join key. Stores timezone for display. (The end-user identity record; a user is always a practitioner here.)
 
-**Licenses** — belongs to Practitioner. `state`, `licenseType`, `licenseNumber`, `issuedAt`, `expiresAt`, `renewalCycleMonths` (default 24).
+**Licenses** — belongs to User. `state`, `licenseType`, `licenseNumber`, `issuedAt`, `expiresAt`, `renewalCycleMonths` (default 24).
 
-**Courses** — owned by Practitioner, not License. `title`, `provider`, `completedAt`, `hours`, `subjectCategories[]`, `format` (live | home-study | in-person), `certificate` (Media relation), `source: 'manual' | 'catalog'` (discriminator for post-v1 catalog feature).
+**Courses** — owned by User, not License. `title`, `provider`, `completedAt`, `hours`, `subjectCategories[]`, `format` (live | home-study | in-person), `certificate` (Media relation), `source: 'manual' | 'catalog'` (discriminator for post-v1 catalog feature).
 
 **CourseCredits** — the join. One row per (Course × License) pair where the course counts. `creditedHours`, `creditedCategories`, `evaluatedAt`, `ruleSetVersion`. Payload collection with `admin.hidden` from non-admins, `access.create/update: () => false` from the API. Written only by the rules engine via Local API with `overrideAccess: true`.
 
@@ -116,7 +116,7 @@ There is **no `/app` URL segment.** `(app)` is a parenthesized route group for t
 
 ### Design calls baked in
 
-1. Courses owned by Practitioner, not License. One log, fanned out into CourseCredits across all eligible licenses by the engine.
+1. Courses owned by User, not License. One log, fanned out into CourseCredits across all eligible licenses by the engine.
 2. CourseCredits are persisted, not derived. Dashboard reads stay fast.
 3. License-centric data model from day one, even if v1 UI shows one license. Migrating later is brutal; modeling now is free.
 
@@ -150,11 +150,11 @@ Both are pure, both live in `packages/rules-engine`.
 ## Auth — hybrid
 
 - **One Postgres DB**, BetterAuth tables alongside Payload collections.
-- **BetterAuth owns end-user identity.** `databaseHooks` upserts the matching Payload `Practitioners` row via Local API. Email is the join key.
-- **Payload Users collection** = admins only (you + therapist partners). `/admin/login`.
-- **Practitioners collection** has `auth: false`. Identity comes from BetterAuth session.
-- **Access control bridge:** server components and actions read the BetterAuth session, then call Payload with `overrideAccess: false` and `user: practitionerDoc`. Row-level access enforced by Payload's access functions on `req.user`.
-- **Sync hooks from day one.** Email change in BetterAuth propagates to Practitioners. User deletion cascades.
+- **BetterAuth owns end-user identity.** `databaseHooks` upserts the matching Payload `users` row via Local API. Email is the join key.
+- **Payload Admins collection** = admins only (you + therapist partners). `/admin/login`.
+- **Users collection** has `auth: false`. Identity comes from BetterAuth session.
+- **Access control bridge:** server components and actions read the BetterAuth session, then call Payload with `overrideAccess: false` and `user: userDoc`. Row-level access enforced by Payload's access functions on `req.user`.
+- **Sync hooks from day one.** Email change in BetterAuth propagates to Users. User deletion cascades.
 
 ---
 
@@ -336,7 +336,7 @@ Adopt as we go: **Vitest** for unit (rules engine first — that's where bugs co
 | 8a  | Database            | Postgres on Neon                                                     |
 | 8b  | Auth                | Hybrid: BetterAuth (users) + Payload (admins)                        |
 | 9   | Monorepo            | Turborepo, single app + shared packages                              |
-| 10  | Data model          | Practitioners / Licenses / Courses / CourseCredits / RuleSetVersions |
+| 10  | Data model          | Users / Licenses / Courses / CourseCredits / RuleSetVersions |
 | 11  | Notifications       | Resend + Vercel Cron, email-only                                     |
 | 12  | Evaluation triggers | Sync `afterChange` hooks + manual reeval CLI                         |
 | 13  | UI split            | `packages/ui` primitives, `apps/web/components` features             |
