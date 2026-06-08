@@ -22,7 +22,7 @@
     "SENTRY_PROJECT",
     "VERCEL_URL"
   ],
-  "globalPassThroughEnv": ["SKIP_ENV_VALIDATION"],
+  "globalPassThroughEnv": ["PAYLOAD_MIGRATING", "SKIP_ENV_VALIDATION"],
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
