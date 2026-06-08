@@ -84,10 +84,19 @@ packages/
 app/
   (marketing)/              public, indexed: /, /about, /pricing later, /contact
   (auth)/                   /login, /signup, /forgot-password
-  (app)/                    authenticated product: /app/dashboard, /app/courses, /app/licenses, /app/settings
+  (app)/                    authenticated product (route group — never in the URL)
+    onboarding/             /onboarding — fixed; the userSlug is created here, so it can't nest under it
+    [userSlug]/             userSlug is always the first authed path segment (Linear-literal):
+                              /{userSlug}                 dashboard (signed-in home)
+                              /{userSlug}/courses         course history
+                              /{userSlug}/courses/new     log a course
+                              /{userSlug}/licenses        license management
+                              /{userSlug}/settings/...    two-pane settings shell (Account, …)
   admin/                    Payload admin, separate auth, /admin/login
   legal/                    /legal/terms, /legal/privacy, /legal/subprocessors
 ```
+
+There is **no `/app` URL segment.** `(app)` is a parenthesized route group for the authed layout and does not appear in the URL. Mirroring Linear (`linear.app/{workspace}/...`), the practitioner's onboarding-chosen slug is the first segment of every authenticated path. The slug is reserved-word- and uniqueness-checked at creation; account/profile management lives in the settings shell at `/{userSlug}/settings/account` (there is no standalone `/profile` route).
 
 ---
 
@@ -272,7 +281,7 @@ Adopt as we go: **Vitest** for unit (rules engine first — that's where bugs co
 
 ## Marketing surface
 
-- **Single Next.js app.** Marketing on `/`, product on `/app/*`, admin on `/admin`.
+- **Single Next.js app.** Marketing on `/`, product under the practitioner's slug `/{userSlug}/*` (no `/app` segment), admin on `/admin`.
 - **SEO baseline:** `generateMetadata` per page, one `@vercel/og` template for OG images, `sitemap.ts` + `robots.ts`, `SoftwareApplication` JSON-LD on landing.
 - **Long-tail target keywords:** "LCSW CEU tracker California", "LICSW continuing education tracker Massachusetts", etc. Not the bare word "Liscet."
 
