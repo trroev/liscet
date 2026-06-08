@@ -1,4 +1,5 @@
 import { isAdmin } from "@repo/payload/access/isAdmin"
+import { cascadeDeleteUser } from "@repo/payload/hooks/cascadeDeleteUser"
 import type { CollectionConfig, FieldAccess } from "payload"
 
 const isAdminField: FieldAccess = ({ req: { user } }) => Boolean(user)
@@ -61,5 +62,8 @@ export const Users: CollectionConfig = {
       type: "upload",
     },
   ],
+  hooks: {
+    beforeDelete: [cascadeDeleteUser],
+  },
   slug: "users",
 }
