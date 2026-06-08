@@ -12,7 +12,7 @@ CEU tracker for mental health professionals. Helps licensees track continuing ed
 | ----------------------------- | ------------------------------------------------------------------------------------------- |
 | Pricing                       | Free                                                                                        |
 | States                        | CA, MA, MI, CT, CO                                                                          |
-| License types                 | CA-LCSW, MA-LICSW, MI-LMSW-C, CT-LICSW, CO-registered telehealth provider                   |
+| License types                 | CA-LCSW, MA-LICSW, MI-LMSW-C, CT-LICSW; CO = telehealth-into-CO registration attribute on a home-state license (not its own rule set) |
 | User type                     | B2C, individual practitioners                                                               |
 | Multi-state licenses per user | Modeled in data layer; surfaced in UI as one license at launch, multi-license shortly after |
 | Course logging                | Manual entry only (no OCR, no provider catalog)                                             |
@@ -21,7 +21,7 @@ CEU tracker for mental health professionals. Helps licensees track continuing ed
 | Auth                          | Hybrid: BetterAuth for end users, Payload auth for admins                                   |
 | Light + dark mode             | Required from day one                                                                       |
 
-**CO caveat:** confirm with CO partner whether we're tracking a CO-specific CE requirement or supporting out-of-state therapists practicing telehealth into CO under their home-state CEUs. Different feature.
+**CO caveat — RESOLVED (2026-06-08, see [#1](https://github.com/trroev/liscet/issues/1)):** Liscet supports out-of-state therapists practicing telehealth **into** CO under their home-state CEUs — not a CO-specific CE requirement. Colorado's pathway for these practitioners (the "CO-registered telehealth provider" above) is the out-of-state **telehealth registration** under SB24-141 / C.R.S. § 12-30-124, open to mental health providers from 2026-01-01. It is **not** a Colorado license: the registrant keeps an active, unencumbered **home-state** credential, cannot open a CO office, and cannot see patients in person in CO. Their CE obligation therefore rides on the home-state license — Colorado's own 40-PDH biennial CE binds CO *licensees*, not these *registrants*. So "CO-registered telehealth provider" is a **telehealth-into-CO registration attribute layered on a home-state license, not a standalone CO CE rule set**; CEU tracking stays governed by the home state's rule set. Confirmed by CO partner (referred us to [Person Centered Tech — Teletherapy Practice Rules by State](https://personcenteredtech.com/teletherapy-practice-rules-by-state/) as the scope basis). Follow-up modeling tracked in [#22](https://github.com/trroev/liscet/issues/22).
 
 ---
 
@@ -307,10 +307,9 @@ Adopt as we go: **Vitest** for unit (rules engine first — that's where bugs co
 | Item                                                                      | Blocks                                                          |
 | ------------------------------------------------------------------------- | --------------------------------------------------------------- |
 | Domain purchase (`liscet.com`)                                            | Resend setup, marketing pages, OG template, email sender config |
-| CO scope clarification with CO partner                                    | Modeling the CO license/registration in the rules engine        |
 | First-license-type rule sets authored with each state's therapist partner | Rules engine config files, dashboard design pass                |
 
-**Resolved:** name locked to Liscet; USPTO TESS clear (Class 9 + Class 42); `liscet.com` available; repo bootstrapped at `trroev/liscet` from `next-payload-starter`; accent color locked to cool muted indigo-violet (hue 265°, max chroma 0.06).
+**Resolved:** name locked to Liscet; USPTO TESS clear (Class 9 + Class 42); `liscet.com` available; repo bootstrapped at `trroev/liscet` from `next-payload-starter`; accent color locked to cool muted indigo-violet (hue 265°, max chroma 0.06); CO scope resolved to telehealth-into-CO registration under home-state CEUs (a license attribute, not a CO rule set — see [CO caveat](#v1-scope) and follow-up [#22](https://github.com/trroev/liscet/issues/22)).
 
 ---
 
@@ -342,3 +341,4 @@ Adopt as we go: **Vitest** for unit (rules engine first — that's where bugs co
 | 21  | Support             | PostHog widget + `hello@` mailbox                                    |
 | 22  | Accent color        | Cool muted indigo-violet, hue 265°, max chroma 0.06                  |
 | 23  | Design inspiration  | Primary: Linear (look-and-feel + UX); secondary references kept      |
+| 24  | CO scope            | Defers to home-state CEUs; telehealth-into-CO registration attribute, not a rule set |
