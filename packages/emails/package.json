@@ -1,0 +1,32 @@
+{
+  "name": "@repo/emails",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./send": "./src/send.ts",
+    "./layouts/*": "./src/layouts/*/index.tsx",
+    "./templates/*": "./src/templates/*/index.tsx"
+  },
+  "scripts": {
+    "email:preview": "email dev --dir ./src",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf .turbo .next .react-email dist storybook-static coverage *.tsbuildinfo test-results playwright-report"
+  },
+  "dependencies": {
+    "@react-email/components": "^1.0.12",
+    "@repo/env": "workspace:*",
+    "react": "catalog:",
+    "react-dom": "catalog:",
+    "resend": "^6.12.4",
+    "zod": "^4.3.6"
+  },
+  "devDependencies": {
+    "@repo/tsconfig": "workspace:*",
+    "@types/node": "^22.15.3",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "react-email": "^6.5.0",
+    "typescript": "catalog:"
+  }
+}

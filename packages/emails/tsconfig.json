@@ -1,0 +1,15 @@
+{
+  "extends": "@repo/tsconfig/library.json",
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "noEmit": true,
+    "types": ["node"],
+    "paths": {
+      "@repo/emails/send": ["./src/send.ts"],
+      "@repo/emails/layouts/*": ["./src/layouts/*/index.tsx"],
+      "@repo/emails/templates/*": ["./src/templates/*/index.tsx"]
+    }
+  },
+  "include": ["src"],
+  "exclude": ["node_modules", "dist"]
+}

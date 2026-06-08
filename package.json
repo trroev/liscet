@@ -12,6 +12,7 @@
     "dev": "dotenvx run --convention=nextjs -- turbo run dev",
     "e2e": "dotenvx run --convention=nextjs -- pnpm --filter @repo/e2e run e2e",
     "e2e:ui": "dotenvx run --convention=nextjs -- pnpm --filter @repo/e2e run e2e:ui",
+    "email:preview": "pnpm --filter @repo/emails email:preview",
     "format": "pnpm exec biome format",
     "format:fix": "pnpm exec biome format --write",
     "generate:types": "turbo run generate:types",

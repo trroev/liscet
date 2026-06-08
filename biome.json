@@ -54,7 +54,8 @@
         "**/*.config.cjs",
         "apps/e2e/global-setup.ts",
         "apps/e2e/global-teardown.ts",
-        "apps/e2e/payload-config.ts"
+        "apps/e2e/payload-config.ts",
+        "packages/emails/src/**/*.tsx"
       ],
       "linter": {
         "rules": {
@@ -78,6 +79,8 @@
         "packages/logger/src/logger/index.ts",
         "packages/logger/src/test-transport/index.ts",
         "packages/rules-engine/src/*/index.ts",
+        "packages/emails/src/layouts/*/index.tsx",
+        "packages/emails/src/templates/*/index.tsx",
         "apps/web/src/features/*/components/*/index.ts",
         "apps/web/src/features/*/hooks/*/index.ts",
         "apps/web/src/components/*/index.ts"
@@ -98,6 +101,7 @@
         "packages/types/**",
         "packages/logger/**",
         "packages/rules-engine/**",
+        "packages/emails/**",
         "packages/payload/src/components/**",
         "apps/web/src/components/**",
         "apps/web/src/features/*/components/**"
