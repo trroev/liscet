@@ -68,6 +68,7 @@ export interface Config {
   blocks: {};
   collections: {
     admins: Admin;
+    'course-credits': CourseCredit;
     courses: Course;
     licenses: License;
     media: Media;
@@ -80,6 +81,7 @@ export interface Config {
   collectionsJoins: {};
   collectionsSelect: {
     admins: AdminsSelect<false> | AdminsSelect<true>;
+    'course-credits': CourseCreditsSelect<false> | CourseCreditsSelect<true>;
     courses: CoursesSelect<false> | CoursesSelect<true>;
     licenses: LicensesSelect<false> | LicensesSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
@@ -147,6 +149,33 @@ export interface Admin {
     | null;
   password?: string | null;
   collection: 'admins';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "course-credits".
+ */
+export interface CourseCredit {
+  id: string;
+  /**
+   * The course that produced this credit.
+   */
+  course: string | Course;
+  /**
+   * The license the course was credited against.
+   */
+  license: string | License;
+  creditedHours: number;
+  /**
+   * Subject categories the rules engine credited.
+   */
+  creditedCategories?: string[] | null;
+  evaluatedAt: string;
+  /**
+   * Semver of the RuleSetVersions document used for this evaluation.
+   */
+  ruleSetVersion: string;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -269,6 +298,10 @@ export interface PayloadLockedDocument {
         value: string | Admin;
       } | null)
     | ({
+        relationTo: 'course-credits';
+        value: string | CourseCredit;
+      } | null)
+    | ({
         relationTo: 'courses';
         value: string | Course;
       } | null)
@@ -347,6 +380,20 @@ export interface AdminsSelect<T extends boolean = true> {
         createdAt?: T;
         expiresAt?: T;
       };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "course-credits_select".
+ */
+export interface CourseCreditsSelect<T extends boolean = true> {
+  course?: T;
+  license?: T;
+  creditedHours?: T;
+  creditedCategories?: T;
+  evaluatedAt?: T;
+  ruleSetVersion?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

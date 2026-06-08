@@ -8,6 +8,7 @@ import { env as databaseEnv } from "@repo/env/database"
 import { env as payloadEnv } from "@repo/env/payload"
 import { cloudinaryAdapter } from "@repo/payload/adapters/cloudinary"
 import { Admins } from "@repo/payload/collections/Admins"
+import { CourseCredits } from "@repo/payload/collections/CourseCredits"
 import { Courses } from "@repo/payload/collections/Courses"
 import { Licenses } from "@repo/payload/collections/Licenses"
 import { Media } from "@repo/payload/collections/Media"
@@ -61,7 +62,7 @@ export function createPayloadConfig({ baseDir }: CreatePayloadConfigOptions) {
       },
       user: Admins.slug,
     },
-    collections: [Admins, Courses, Licenses, Media, Users],
+    collections: [Admins, CourseCredits, Courses, Licenses, Media, Users],
     db: postgresAdapter({
       idType: "uuid",
       migrationDir: path.resolve(dirname, "migrations"),

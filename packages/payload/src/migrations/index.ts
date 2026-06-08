@@ -2,6 +2,7 @@ import * as migration_20260607_010817 from './20260607_010817';
 import * as migration_20260608_174640_users_to_practitioner_fields from './20260608_174640_users_to_practitioner_fields';
 import * as migration_20260608_181640 from './20260608_181640';
 import * as migration_20260608_182804_courses from './20260608_182804_courses';
+import * as migration_20260608_183751_course_credits from './20260608_183751_course_credits';
 
 export const migrations = [
   {
@@ -22,6 +23,11 @@ export const migrations = [
   {
     up: migration_20260608_182804_courses.up,
     down: migration_20260608_182804_courses.down,
-    name: '20260608_182804_courses'
+    name: '20260608_182804_courses',
+  },
+  {
+    up: migration_20260608_183751_course_credits.up,
+    down: migration_20260608_183751_course_credits.down,
+    name: '20260608_183751_course_credits'
   },
 ];
