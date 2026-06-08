@@ -81,8 +81,8 @@ export const SiteHeader = ({
           </NavigationMenu.Root>
 
           <div className="hidden md:flex md:items-center md:gap-2">
-            {themeToggleSlot}
             <Separator orientation="vertical" />
+            {themeToggleSlot}
             {authSlot}
           </div>
         </div>

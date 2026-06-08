@@ -22,13 +22,9 @@ const triggerClass = cn(
   "focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-2"
 )
 
-// Base UI's Menu.Root (1.4) has no openOnHover prop, so we open on pointer
-// enter via controlled state. Closing is handled the usual ways: clicking an
-// item, clicking outside, or pressing Escape.
 export const ThemeToggle = (): React.JSX.Element => {
   const { theme, setTheme } = useTheme()
   const [mounted, setMounted] = useState(false)
-  const [open, setOpen] = useState(false)
 
   useEffect(() => {
     setMounted(true)
@@ -43,13 +39,9 @@ export const ThemeToggle = (): React.JSX.Element => {
     .exhaustive()
 
   return (
-    <Menu.Root onOpenChange={setOpen} open={open}>
-      <Menu.Trigger
-        aria-label="Change theme"
-        className={triggerClass}
-        onPointerEnter={() => setOpen(true)}
-      >
-        <TriggerIcon aria-hidden className="size-5" />
+    <Menu.Root>
+      <Menu.Trigger aria-label="Change theme" className={triggerClass}>
+        <TriggerIcon aria-hidden className="size-4" />
       </Menu.Trigger>
       <Menu.Content align="end" sideOffset={8}>
         <Menu.RadioGroup
