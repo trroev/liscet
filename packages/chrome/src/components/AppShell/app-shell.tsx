@@ -9,9 +9,14 @@ import { SiteHeader } from "./site-header.client"
 export type AppShellProps = {
   auth: HeaderAuth
   children: React.ReactNode
+  themeToggleSlot?: React.ReactNode
 }
 
-export const AppShell = ({ auth, children }: AppShellProps) => {
+export const AppShell = ({
+  auth,
+  children,
+  themeToggleSlot,
+}: AppShellProps) => {
   const desktopAuth =
     auth.status === "signed-in" ? (
       <UserMenu auth={auth} />
@@ -29,6 +34,7 @@ export const AppShell = ({ auth, children }: AppShellProps) => {
       <SiteHeader
         authSlot={desktopAuth}
         mobileAuthSlot={<MobileAuth auth={auth} />}
+        themeToggleSlot={themeToggleSlot}
       />
       <main className="flex-1">{children}</main>
       <SiteFooter />

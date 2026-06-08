@@ -12,12 +12,14 @@ import { MobileNav } from "../MobileNav"
 export type SiteHeaderProps = {
   authSlot: React.ReactNode
   mobileAuthSlot: React.ReactNode
+  themeToggleSlot?: React.ReactNode
   className?: string
 }
 
 export const SiteHeader = ({
   authSlot,
   mobileAuthSlot,
+  themeToggleSlot,
   className,
 }: SiteHeaderProps) => {
   const [isScrolled, setIsScrolled] = useState(false)
@@ -78,7 +80,8 @@ export const SiteHeader = ({
             <MobileNav authSlot={mobileAuthSlot} isOpen={isMobileNavOpen} />
           </NavigationMenu.Root>
 
-          <div className="hidden md:flex md:gap-2">
+          <div className="hidden md:flex md:items-center md:gap-2">
+            {themeToggleSlot}
             <Separator orientation="vertical" />
             {authSlot}
           </div>

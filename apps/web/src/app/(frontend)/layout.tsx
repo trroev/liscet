@@ -4,10 +4,12 @@ import { env } from "@repo/env/app"
 import type { HeaderAuth } from "@repo/types/HeaderAuth"
 import type { Metadata, Viewport } from "next"
 import { headers } from "next/headers"
+import { ThemeProvider } from "next-themes"
 import type React from "react"
 import { SentryUser } from "~/components/SentryUser"
 import { signOutAction } from "~/features/auth/actions/sign-out"
 import { auth } from "~/features/auth/auth.server"
+import { ThemeToggle } from "~/features/settings/components/ThemeToggle"
 import { cormorant, manrope } from "~/fonts"
 import { getPayloadUserByBetterAuthId } from "~/lib/queries/payload-user-by-better-auth-id"
 
@@ -70,12 +72,22 @@ export default async function FrontendLayout({
       className={`${cormorant.variable} ${manrope.variable}`}
       data-scroll-behavior="smooth"
       lang="en"
+      suppressHydrationWarning
     >
       <body className="flex min-h-dvh flex-col font-sans">
-        <SessionProvider initialUser={session?.user ?? null}>
-          <SentryUser />
-          <AppShell auth={headerAuth}>{children}</AppShell>
-        </SessionProvider>
+        <ThemeProvider
+          attribute="data-theme"
+          defaultTheme="system"
+          disableTransitionOnChange
+          enableSystem
+        >
+          <SessionProvider initialUser={session?.user ?? null}>
+            <SentryUser />
+            <AppShell auth={headerAuth} themeToggleSlot={<ThemeToggle />}>
+              {children}
+            </AppShell>
+          </SessionProvider>
+        </ThemeProvider>
       </body>
     </html>
   )
