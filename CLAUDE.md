@@ -115,6 +115,13 @@ Default exports are required for `page.tsx`, `layout.tsx`, `error.tsx`, `loading
 ### CSRF / server actions
 Server actions (`signOutAction`, `uploadAvatar`, etc.) rely on Next.js 16's built-in same-origin / `Origin`-header CSRF check — the framework rejects action invocations whose `Origin` does not match the host. Do not add a custom CSRF token layer on top unless a same-origin assumption changes (e.g. exposing actions to a third-party origin, embedding in an iframe on a different domain).
 
+### Auth bridge (BetterAuth ↔ Payload)
+The BetterAuth `databaseHooks` that mirror identity into the Payload `users` collection live **inline in `apps/web/src/features/auth/auth.server.ts`**, not in `packages/auth`. They need `@payload-config`/`getPayload`, which only resolve in the app; `@repo/auth` has **no Payload dependency by design** — `createAuth(extraOptions)` accepts the hooks so the app injects them. (Issue templates that point hooks at `packages/auth/src/auth.ts` or a `syncPractitioner.ts` are inaccurate — follow the app-layer location.)
+
+- **Keys:** `email` is the join key for the *initial* create-sync; `betterAuthId` is the stable key for every subsequent `update`/`delete`.
+- **Resilience:** every hook is wrapped so a Payload-sync failure is reported to Sentry (`captureException`) but never blocks the BetterAuth operation. Local API calls rely on the default `overrideAccess: true` (no `req` user passed).
+- **Deletion cascade:** deleting a BetterAuth user hard-deletes the Payload user doc; a `beforeDelete` hook on the `users` collection (`packages/payload/src/hooks/cascadeDeleteUser`) hard-deletes the practitioner's Licenses and Courses, because the DB FKs are `ON DELETE set null` and would otherwise orphan those rows.
+
 ### Import boundaries
 Layered architecture is enforced by Biome's `noRestrictedImports` in `biome.json`:
 
