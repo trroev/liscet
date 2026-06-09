@@ -4,6 +4,7 @@ import * as migration_20260608_181640 from './20260608_181640';
 import * as migration_20260608_182804_courses from './20260608_182804_courses';
 import * as migration_20260608_183751_course_credits from './20260608_183751_course_credits';
 import * as migration_20260608_185332_rule_sets_notification_log from './20260608_185332_rule_sets_notification_log';
+import * as migration_20260609_130614_co_telehealth_registration from './20260609_130614_co_telehealth_registration';
 
 export const migrations = [
   {
@@ -34,6 +35,11 @@ export const migrations = [
   {
     up: migration_20260608_185332_rule_sets_notification_log.up,
     down: migration_20260608_185332_rule_sets_notification_log.down,
-    name: '20260608_185332_rule_sets_notification_log'
+    name: '20260608_185332_rule_sets_notification_log',
+  },
+  {
+    up: migration_20260609_130614_co_telehealth_registration.up,
+    down: migration_20260609_130614_co_telehealth_registration.down,
+    name: '20260609_130614_co_telehealth_registration'
   },
 ];

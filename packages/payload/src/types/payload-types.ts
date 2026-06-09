@@ -270,6 +270,20 @@ export interface License {
    * Months between renewals. Defaults to 24.
    */
   renewalCycleMonths?: number | null;
+  /**
+   * Out-of-state telehealth registration into Colorado (C.R.S. § 12-30-124). Creates no CO CE requirement — courses still evaluate under the home-state rule set.
+   */
+  coTelehealthRegistration?: {
+    /**
+     * Registered for telehealth into Colorado.
+     */
+    isRegistered?: boolean | null;
+    registrationNumber?: string | null;
+    /**
+     * CO telehealth registration expiry (stored for the practitioner's reference and renewal reminders).
+     */
+    expiresAt?: string | null;
+  };
   updatedAt: string;
   createdAt: string;
 }
@@ -481,6 +495,13 @@ export interface LicensesSelect<T extends boolean = true> {
   issuedAt?: T;
   expiresAt?: T;
   renewalCycleMonths?: T;
+  coTelehealthRegistration?:
+    | T
+    | {
+        isRegistered?: T;
+        registrationNumber?: T;
+        expiresAt?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
 }
