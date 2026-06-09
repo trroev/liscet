@@ -17,7 +17,7 @@
   },
   "dependencies": {
     "@repo/env": "workspace:*",
-    "@sentry/nextjs": "^10.53.1",
+    "@repo/observability": "workspace:*",
     "better-auth": "^1.2.8",
     "drizzle-orm": "catalog:",
     "pg": "catalog:",

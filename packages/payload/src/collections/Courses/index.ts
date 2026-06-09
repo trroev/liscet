@@ -1,4 +1,5 @@
 import { isAdmin } from "@repo/payload/access/isAdmin"
+import { evaluateCourseCreditsOnCourseChange } from "@repo/payload/hooks/evaluateCourseCredits"
 import type { CollectionConfig } from "payload"
 
 const COURSE_FORMATS = [
@@ -84,6 +85,9 @@ export const Courses: CollectionConfig = {
       type: "select",
     },
   ],
+  hooks: {
+    afterChange: [evaluateCourseCreditsOnCourseChange],
+  },
   indexes: [{ fields: ["practitioner", "completedAt"] }],
   labels: {
     plural: "Courses",

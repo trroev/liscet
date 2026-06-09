@@ -5,6 +5,7 @@ import * as migration_20260608_182804_courses from './20260608_182804_courses';
 import * as migration_20260608_183751_course_credits from './20260608_183751_course_credits';
 import * as migration_20260608_185332_rule_sets_notification_log from './20260608_185332_rule_sets_notification_log';
 import * as migration_20260609_130614_co_telehealth_registration from './20260609_130614_co_telehealth_registration';
+import * as migration_20260609_170237_course_credit_versioning_and_license_status from './20260609_170237_course_credit_versioning_and_license_status';
 
 export const migrations = [
   {
@@ -40,6 +41,11 @@ export const migrations = [
   {
     up: migration_20260609_130614_co_telehealth_registration.up,
     down: migration_20260609_130614_co_telehealth_registration.down,
-    name: '20260609_130614_co_telehealth_registration'
+    name: '20260609_130614_co_telehealth_registration',
+  },
+  {
+    up: migration_20260609_170237_course_credit_versioning_and_license_status.up,
+    down: migration_20260609_170237_course_credit_versioning_and_license_status.down,
+    name: '20260609_170237_course_credit_versioning_and_license_status'
   },
 ];

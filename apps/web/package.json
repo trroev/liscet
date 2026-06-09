@@ -31,7 +31,7 @@
     "@repo/types": "workspace:*",
     "@repo/ui": "workspace:*",
     "@repo/utils": "workspace:*",
-    "@sentry/nextjs": "^10.53.1",
+    "@sentry/nextjs": "catalog:",
     "@tanstack/react-form": "^1.32.0",
     "better-auth": "^1.2.8",
     "minisearch": "^7.2.0",

@@ -1,7 +1,15 @@
 import { isAdmin } from "@repo/payload/access/isAdmin"
 import { LICENSE_STATES } from "@repo/payload/fields/licenseStates"
+import { evaluateCourseCreditsOnLicenseChange } from "@repo/payload/hooks/evaluateCourseCredits"
 import type { CollectionConfig } from "payload"
 import { validateCoTelehealthRegistration } from "./validate-co-telehealth-registration"
+
+const LICENSE_STATUSES = [
+  { label: "Active", value: "active" },
+  { label: "Lapsed", value: "lapsed" },
+  { label: "Suspended", value: "suspended" },
+  { label: "Revoked", value: "revoked" },
+] as const satisfies ReadonlyArray<{ label: string; value: string }>
 
 export const Licenses: CollectionConfig = {
   // Admin-or-deny; practitioner ownership is enforced in server actions.
@@ -35,6 +43,17 @@ export const Licenses: CollectionConfig = {
       name: "licenseType",
       required: true,
       type: "text",
+    },
+    {
+      admin: {
+        description:
+          "Only `active` licenses accrue course credit. Lapsed/suspended/revoked licenses are excluded from evaluation.",
+      },
+      defaultValue: "active",
+      name: "status",
+      options: [...LICENSE_STATUSES],
+      required: true,
+      type: "select",
     },
     {
       name: "licenseNumber",
@@ -100,6 +119,9 @@ export const Licenses: CollectionConfig = {
       type: "group",
     },
   ],
+  hooks: {
+    afterChange: [evaluateCourseCreditsOnLicenseChange],
+  },
   indexes: [{ fields: ["practitioner", "state", "licenseType"] }],
   labels: {
     plural: "Licenses",

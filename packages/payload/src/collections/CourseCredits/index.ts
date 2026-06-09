@@ -54,12 +54,21 @@ export const CourseCredits: CollectionConfig = {
     },
     {
       admin: {
-        description: "The rule set version used for this evaluation.",
+        description:
+          "Rule set applied, keyed as state-licenseType (e.g. CA-LCSW).",
+      },
+      name: "ruleSetKey",
+      required: true,
+      type: "text",
+    },
+    {
+      admin: {
+        description:
+          "Version of the rule set config used for this evaluation. Code is the source of truth; this is a denormalized snapshot for reproducibility.",
       },
       name: "ruleSetVersion",
-      relationTo: "rule-set-versions",
       required: true,
-      type: "relationship",
+      type: "number",
     },
   ],
   indexes: [{ fields: ["course", "license"], unique: true }],

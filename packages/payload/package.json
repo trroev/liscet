@@ -30,6 +30,8 @@
     "@payloadcms/richtext-lexical": "catalog:",
     "@repo/env": "workspace:*",
     "@repo/logger": "workspace:*",
+    "@repo/observability": "workspace:*",
+    "@repo/rules-engine": "workspace:*",
     "@repo/ui": "workspace:*",
     "cloudinary": "^2.10.0",
     "lexical": "0.41.0",

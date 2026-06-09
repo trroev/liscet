@@ -13,7 +13,6 @@ import { Courses } from "@repo/payload/collections/Courses"
 import { Licenses } from "@repo/payload/collections/Licenses"
 import { Media } from "@repo/payload/collections/Media"
 import { NotificationLog } from "@repo/payload/collections/NotificationLog"
-import { RuleSetVersions } from "@repo/payload/collections/RuleSetVersions"
 import { Users } from "@repo/payload/collections/Users"
 import { buildConfig } from "payload"
 
@@ -71,7 +70,6 @@ export function createPayloadConfig({ baseDir }: CreatePayloadConfigOptions) {
       Licenses,
       Media,
       NotificationLog,
-      RuleSetVersions,
       Users,
     ],
     db: postgresAdapter({

@@ -73,7 +73,6 @@ export interface Config {
     licenses: License;
     media: Media;
     'notification-log': NotificationLog;
-    'rule-set-versions': RuleSetVersion;
     users: User;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
@@ -88,7 +87,6 @@ export interface Config {
     licenses: LicensesSelect<false> | LicensesSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     'notification-log': NotificationLogSelect<false> | NotificationLogSelect<true>;
-    'rule-set-versions': RuleSetVersionsSelect<false> | RuleSetVersionsSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -175,9 +173,13 @@ export interface CourseCredit {
   creditedCategories?: string[] | null;
   evaluatedAt: string;
   /**
-   * The rule set version used for this evaluation.
+   * Rule set applied, keyed as state-licenseType (e.g. CA-LCSW).
    */
-  ruleSetVersion: string | RuleSetVersion;
+  ruleSetKey: string;
+  /**
+   * Version of the rule set config used for this evaluation. Code is the source of truth; this is a denormalized snapshot for reproducibility.
+   */
+  ruleSetVersion: number;
   updatedAt: string;
   createdAt: string;
 }
@@ -263,6 +265,10 @@ export interface License {
   practitioner: string | User;
   state: 'CA' | 'MA' | 'MI' | 'CT' | 'CO';
   licenseType: string;
+  /**
+   * Only `active` licenses accrue course credit. Lapsed/suspended/revoked licenses are excluded from evaluation.
+   */
+  status: 'active' | 'lapsed' | 'suspended' | 'revoked';
   licenseNumber: string;
   issuedAt: string;
   expiresAt: string;
@@ -284,34 +290,6 @@ export interface License {
      */
     expiresAt?: string | null;
   };
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "rule-set-versions".
- */
-export interface RuleSetVersion {
-  id: string;
-  state: 'CA' | 'MA' | 'MI' | 'CT' | 'CO';
-  licenseType: string;
-  /**
-   * Semver string identifying this rule set version.
-   */
-  version: string;
-  publishedAt: string;
-  /**
-   * Snapshot of the rule config at publish time.
-   */
-  ruleSetJson:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -379,10 +357,6 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'notification-log';
         value: string | NotificationLog;
-      } | null)
-    | ({
-        relationTo: 'rule-set-versions';
-        value: string | RuleSetVersion;
       } | null)
     | ({
         relationTo: 'users';
@@ -462,6 +436,7 @@ export interface CourseCreditsSelect<T extends boolean = true> {
   creditedHours?: T;
   creditedCategories?: T;
   evaluatedAt?: T;
+  ruleSetKey?: T;
   ruleSetVersion?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -491,6 +466,7 @@ export interface LicensesSelect<T extends boolean = true> {
   practitioner?: T;
   state?: T;
   licenseType?: T;
+  status?: T;
   licenseNumber?: T;
   issuedAt?: T;
   expiresAt?: T;
@@ -534,19 +510,6 @@ export interface NotificationLogSelect<T extends boolean = true> {
   notificationType?: T;
   sentAt?: T;
   sentForDate?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "rule-set-versions_select".
- */
-export interface RuleSetVersionsSelect<T extends boolean = true> {
-  state?: T;
-  licenseType?: T;
-  version?: T;
-  publishedAt?: T;
-  ruleSetJson?: T;
   updatedAt?: T;
   createdAt?: T;
 }

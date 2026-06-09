@@ -1,4 +1,4 @@
-import { captureException } from "@sentry/nextjs"
+import { captureException } from "@repo/observability"
 import { createAuthClient } from "better-auth/react"
 import { friendlyAuthMessage, GENERIC_AUTH_ERROR_MESSAGE } from "./errors"
 
