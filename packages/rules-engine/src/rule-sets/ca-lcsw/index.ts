@@ -6,10 +6,9 @@ import type { RuleSet } from "@repo/rules-engine/types/RuleSet"
  * rule set and the reference pattern for subsequent states.
  *
  * Note: the doc's special requirements carry conditional trigger dates
- * (suicide-risk >= 2021-01-01, telehealth >= 2023-07-01) that the
- * `SpecialRequirement` type cannot express today, so they are encoded as
- * unconditional `one-time` entries — the most faithful representation the
- * current type allows.
+ * (suicide-risk >= 2021-01-01, telehealth >= 2023-07-01), expressed via each
+ * requirement's `effectiveFrom`. They apply only to licensees whose
+ * renewal/reactivation date is on or after the trigger.
  */
 export const caLcswRuleSet = {
   state: "CA",
@@ -21,8 +20,18 @@ export const caLcswRuleSet = {
   categoryMinimums: [{ category: "law-and-ethics", minHours: 6 }],
   formatConstraints: [],
   specialRequirements: [
-    { category: "suicide-risk", minHours: 6, recurrence: "one-time" },
-    { category: "telehealth", minHours: 3, recurrence: "one-time" },
+    {
+      category: "suicide-risk",
+      minHours: 6,
+      recurrence: "one-time",
+      effectiveFrom: "2021-01-01",
+    },
+    {
+      category: "telehealth",
+      minHours: 3,
+      recurrence: "one-time",
+      effectiveFrom: "2023-07-01",
+    },
   ],
   carryOverMaxHours: null,
 } as const satisfies RuleSet

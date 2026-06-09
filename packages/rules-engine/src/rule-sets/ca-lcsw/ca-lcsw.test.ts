@@ -41,11 +41,13 @@ describe("caLcswRuleSet", () => {
         "specialRequirements": [
           {
             "category": "suicide-risk",
+            "effectiveFrom": "2021-01-01",
             "minHours": 6,
             "recurrence": "one-time",
           },
           {
             "category": "telehealth",
+            "effectiveFrom": "2023-07-01",
             "minHours": 3,
             "recurrence": "one-time",
           },

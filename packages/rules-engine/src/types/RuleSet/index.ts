@@ -71,6 +71,12 @@ export type SpecialRequirement = {
   readonly category: SubjectCategory
   readonly minHours: number
   readonly recurrence: Recurrence
+  /**
+   * ISO 8601 date (YYYY-MM-DD) the requirement first applies. Gated on the
+   * license's renewal/reactivation date — a requirement is owed only when that
+   * date is on or after `effectiveFrom`. Omit for an always-effective requirement.
+   */
+  readonly effectiveFrom?: string
 }
 
 export type RuleSet = {
