@@ -14,7 +14,7 @@ export type AvatarProps = React.ComponentProps<typeof BaseAvatar.Root> &
     src?: string | null
     alt?: string
     initials: string
-    transformSrc?: (url: string, px: number) => string
+    transformSrc?: ({ url, px }: { url: string; px: number }) => string
   }
 
 export const Avatar = ({
@@ -33,7 +33,7 @@ export const Avatar = ({
     if (!src) {
       return null
     }
-    return transformSrc ? transformSrc(src, px) : src
+    return transformSrc ? transformSrc({ url: src, px }) : src
   }
   const src1x = applyTransform(px)
   const src2x = applyTransform(px * 2)
