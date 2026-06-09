@@ -1,4 +1,6 @@
 import { evaluateCourse } from "@repo/rules-engine/evaluators/evaluateCourse"
+import { summarizeLicense } from "@repo/rules-engine/evaluators/summarizeLicense"
+import type { CourseCreditResult } from "@repo/rules-engine/types/CourseCreditResult"
 import type { EvaluatedCourse } from "@repo/rules-engine/types/EvaluatedCourse"
 import { describe, expect, it } from "vitest"
 import { caLcswRuleSet } from "./index"
@@ -87,5 +89,72 @@ describe("caLcswRuleSet", () => {
       ruleSetVersion: 1,
       evaluatedAt: EVALUATED_AT,
     })
+  })
+
+  it("credits a suicide-risk course now that special requirements qualify", () => {
+    const result = evaluateCourse({
+      course: buildCourse({ subjectCategories: ["suicide-risk"] }),
+      license,
+      ruleSet: caLcswRuleSet,
+      evaluatedAt: EVALUATED_AT,
+    })
+
+    expect(result?.creditedCategories).toEqual(["suicide-risk"])
+  })
+
+  it("owes neither dated requirement when the gating date precedes both triggers", () => {
+    const summary = summarizeLicense({
+      license: {
+        id: "license-1",
+        issuedAt: new Date("2020-06-01T00:00:00.000Z"),
+        renewalCycleMonths: 24,
+      },
+      credits: [],
+      today: EVALUATED_AT,
+      ruleSet: caLcswRuleSet,
+    })
+
+    expect(summary.specialRequirementProgress).toEqual([])
+  })
+
+  it("owes both dated requirements when the gating date is on or after both triggers", () => {
+    const buildCredit = (
+      overrides: Partial<CourseCreditResult>
+    ): CourseCreditResult => ({
+      courseId: "course-x",
+      licenseId: "license-1",
+      creditedHours: 0,
+      creditedCategories: [],
+      ruleSetVersion: 1,
+      evaluatedAt: EVALUATED_AT,
+      ...overrides,
+    })
+
+    const summary = summarizeLicense({
+      license: {
+        id: "license-1",
+        issuedAt: new Date("2024-01-01T00:00:00.000Z"),
+        renewalCycleMonths: 24,
+      },
+      credits: [
+        buildCredit({
+          courseId: "course-suicide-risk",
+          creditedHours: 6,
+          creditedCategories: ["suicide-risk"],
+        }),
+        buildCredit({
+          courseId: "course-telehealth",
+          creditedHours: 3,
+          creditedCategories: ["telehealth"],
+        }),
+      ],
+      today: EVALUATED_AT,
+      ruleSet: caLcswRuleSet,
+    })
+
+    expect(summary.specialRequirementProgress).toEqual([
+      { category: "suicide-risk", credited: 6, required: 6 },
+      { category: "telehealth", credited: 3, required: 3 },
+    ])
   })
 })

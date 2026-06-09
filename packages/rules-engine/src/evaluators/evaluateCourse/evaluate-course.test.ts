@@ -76,6 +76,28 @@ describe("evaluateCourse", () => {
     expect(result).toBeNull()
   })
 
+  it("credits a course tagged with a special-requirement category", () => {
+    const specialRuleSet: RuleSet = {
+      ...ruleSet,
+      specialRequirements: [
+        {
+          category: "suicide-risk",
+          minHours: 6,
+          recurrence: "one-time",
+          effectiveFrom: "2021-01-01",
+        },
+      ],
+    }
+    const result = evaluateCourse({
+      course: buildCourse({ subjectCategories: ["suicide-risk"] }),
+      license,
+      ruleSet: specialRuleSet,
+      evaluatedAt: EVALUATED_AT,
+    })
+
+    expect(result?.creditedCategories).toEqual(["suicide-risk"])
+  })
+
   it("returns null when the course has zero hours", () => {
     const result = evaluateCourse({
       course: buildCourse({ hours: 0 }),

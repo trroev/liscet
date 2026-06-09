@@ -72,6 +72,14 @@ export const Licenses: CollectionConfig = {
     },
     {
       admin: {
+        description:
+          "Date the license was reactivated after lapsing, if ever. Gates state-specific special CE requirements that carry an effective date — a requirement applies only when this date (or issuedAt, if absent) is on or after its trigger.",
+      },
+      name: "reactivationDate",
+      type: "date",
+    },
+    {
+      admin: {
         description: "Months between renewals. Defaults to 24.",
       },
       defaultValue: 24,

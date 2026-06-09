@@ -28,7 +28,10 @@ const isKnownCategory = (tag: string): tag is SubjectCategory =>
  * effects; `evaluatedAt` is injected so the result is deterministic.
  *
  * Returns `null` when the course does not qualify: an ineligible format, zero
- * (or negative) hours, or no category that the rule set actually requires.
+ * (or negative) hours, or no category the rule set requires — as a category
+ * minimum or a special requirement. A special-requirement category earns credit
+ * here regardless of its `effectiveFrom`; effectiveness gates the *minimum*
+ * (in `summarizeLicense`), not whether the hours count at all.
  */
 export function evaluateCourse({
   course,
@@ -48,9 +51,10 @@ export function evaluateCourse({
     .map((tag) => tag.trim().toLowerCase())
     .filter(isKnownCategory)
 
-  const requiredCategories = new Set(
-    ruleSet.categoryMinimums.map((minimum) => minimum.category)
-  )
+  const requiredCategories = new Set<SubjectCategory>([
+    ...ruleSet.categoryMinimums.map((minimum) => minimum.category),
+    ...ruleSet.specialRequirements.map((requirement) => requirement.category),
+  ])
   const creditedCategories = [...new Set(mappedCategories)].filter((category) =>
     requiredCategories.has(category)
   )

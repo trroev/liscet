@@ -273,6 +273,10 @@ export interface License {
   issuedAt: string;
   expiresAt: string;
   /**
+   * Date the license was reactivated after lapsing, if ever. Gates state-specific special CE requirements that carry an effective date — a requirement applies only when this date (or issuedAt, if absent) is on or after its trigger.
+   */
+  reactivationDate?: string | null;
+  /**
    * Months between renewals. Defaults to 24.
    */
   renewalCycleMonths?: number | null;
@@ -470,6 +474,7 @@ export interface LicensesSelect<T extends boolean = true> {
   licenseNumber?: T;
   issuedAt?: T;
   expiresAt?: T;
+  reactivationDate?: T;
   renewalCycleMonths?: T;
   coTelehealthRegistration?:
     | T

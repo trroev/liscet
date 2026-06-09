@@ -160,6 +160,114 @@ describe("summarizeLicense", () => {
     ])
   })
 
+  const datedRuleSet: RuleSet = {
+    ...ruleSet,
+    specialRequirements: [
+      {
+        category: "suicide-risk",
+        minHours: 6,
+        recurrence: "one-time",
+        effectiveFrom: "2026-01-01",
+      },
+    ],
+  }
+
+  it("excludes a special requirement whose effectiveFrom is after the gating date", () => {
+    const summary = summarizeLicense({
+      license,
+      credits: [],
+      today: TODAY,
+      ruleSet: datedRuleSet,
+    })
+
+    expect(summary.specialRequirementProgress).toEqual([])
+  })
+
+  it("does not let a not-yet-effective special requirement block completion", () => {
+    const summary = summarizeLicense({
+      license,
+      credits: [
+        buildCredit({
+          courseId: "course-general",
+          creditedHours: 30,
+          creditedCategories: ["general"],
+        }),
+        buildCredit({
+          courseId: "course-ethics",
+          creditedHours: 6,
+          creditedCategories: ["law-and-ethics"],
+        }),
+      ],
+      today: TODAY,
+      ruleSet: datedRuleSet,
+    })
+
+    expect(summary.isComplete).toBe(true)
+  })
+
+  it("includes an effective special requirement and keeps the license incomplete until it is met", () => {
+    const reactivatedLicense = {
+      ...license,
+      reactivationDate: new Date("2026-06-01T00:00:00.000Z"),
+    }
+    const summary = summarizeLicense({
+      license: reactivatedLicense,
+      credits: [
+        buildCredit({
+          courseId: "course-general",
+          creditedHours: 30,
+          creditedCategories: ["general"],
+        }),
+        buildCredit({
+          courseId: "course-ethics",
+          creditedHours: 6,
+          creditedCategories: ["law-and-ethics"],
+        }),
+      ],
+      today: TODAY,
+      ruleSet: datedRuleSet,
+    })
+
+    expect(summary.specialRequirementProgress).toEqual([
+      { category: "suicide-risk", credited: 0, required: 6 },
+    ])
+    expect(summary.isComplete).toBe(false)
+  })
+
+  it("counts a met effective special requirement toward completion", () => {
+    const reactivatedLicense = {
+      ...license,
+      reactivationDate: new Date("2026-06-01T00:00:00.000Z"),
+    }
+    const summary = summarizeLicense({
+      license: reactivatedLicense,
+      credits: [
+        buildCredit({
+          courseId: "course-general",
+          creditedHours: 30,
+          creditedCategories: ["general"],
+        }),
+        buildCredit({
+          courseId: "course-ethics",
+          creditedHours: 6,
+          creditedCategories: ["law-and-ethics"],
+        }),
+        buildCredit({
+          courseId: "course-suicide-risk",
+          creditedHours: 6,
+          creditedCategories: ["suicide-risk"],
+        }),
+      ],
+      today: TODAY,
+      ruleSet: datedRuleSet,
+    })
+
+    expect(summary.specialRequirementProgress).toEqual([
+      { category: "suicide-risk", credited: 6, required: 6 },
+    ])
+    expect(summary.isComplete).toBe(true)
+  })
+
   it("derives renewsAt from issuedAt plus the license renewal cycle, ignoring today", () => {
     const summary = summarizeLicense({
       license,
