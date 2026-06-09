@@ -16,6 +16,7 @@ export const ctLicswRuleSet = {
   formatConstraints: [
     { kind: "max-hours", formats: ["home-study"], hours: 10 },
   ],
+  providerCaps: [],
   specialRequirements: [
     {
       category: "veterans-mental-health",

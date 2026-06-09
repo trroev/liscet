@@ -65,6 +65,31 @@ export type FormatConstraint =
       readonly fraction: number
     }
 
+/**
+ * Closed union by design: the accrediting organizations whose approval a state
+ * recognizes for provider-based hour caps. Adding a body is a deliberate edit
+ * here, never a free-form string.
+ */
+export type ApprovingBody = "APA" | "NBCC" | "NHA" | "ANCC" | "ACCME"
+
+/**
+ * Caps keyed to a course's *approving body* (accrediting organization) rather
+ * than its delivery `CourseFormat` — an orthogonal dimension to
+ * `FormatConstraint`. Only cap kinds are modeled; a provider-keyed minimum is
+ * not a recognized regulatory shape.
+ */
+export type ProviderCap =
+  | {
+      readonly kind: "max-hours"
+      readonly approvingBodies: ReadonlyArray<ApprovingBody>
+      readonly hours: number
+    }
+  | {
+      readonly kind: "max-fraction"
+      readonly approvingBodies: ReadonlyArray<ApprovingBody>
+      readonly fraction: number
+    }
+
 export type Recurrence = "one-time" | { readonly everyMonths: number }
 
 export type SpecialRequirement = {
@@ -89,6 +114,8 @@ export type RuleSet = {
   readonly acceptedFormats: ReadonlyArray<CourseFormat>
   readonly categoryMinimums: ReadonlyArray<CategoryMinimum>
   readonly formatConstraints: ReadonlyArray<FormatConstraint>
+  /** Caps keyed to a course's approving body; orthogonal to `formatConstraints`. */
+  readonly providerCaps: ReadonlyArray<ProviderCap>
   readonly specialRequirements: ReadonlyArray<SpecialRequirement>
   /** `null` = no carry-over allowed. */
   readonly carryOverMaxHours: number | null

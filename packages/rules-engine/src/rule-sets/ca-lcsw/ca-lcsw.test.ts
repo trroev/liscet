@@ -39,6 +39,7 @@ describe("caLcswRuleSet", () => {
         ],
         "formatConstraints": [],
         "licenseType": "LCSW",
+        "providerCaps": [],
         "renewalCycleMonths": 24,
         "specialRequirements": [
           {

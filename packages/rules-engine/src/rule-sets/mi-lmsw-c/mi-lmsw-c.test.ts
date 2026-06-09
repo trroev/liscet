@@ -54,6 +54,7 @@ describe("miLmswCRuleSet", () => {
           },
         ],
         "licenseType": "LMSW-C",
+        "providerCaps": [],
         "renewalCycleMonths": 36,
         "specialRequirements": [],
         "state": "MI",

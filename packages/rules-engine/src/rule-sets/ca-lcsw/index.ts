@@ -19,6 +19,7 @@ export const caLcswRuleSet = {
   acceptedFormats: ["live", "home-study", "in-person"],
   categoryMinimums: [{ category: "law-and-ethics", minHours: 6 }],
   formatConstraints: [],
+  providerCaps: [],
   specialRequirements: [
     {
       category: "suicide-risk",

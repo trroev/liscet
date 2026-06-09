@@ -45,6 +45,7 @@ describe("ctLicswRuleSet", () => {
           },
         ],
         "licenseType": "LICSW",
+        "providerCaps": [],
         "renewalCycleMonths": 12,
         "specialRequirements": [
           {

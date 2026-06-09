@@ -53,6 +53,19 @@ describe("maLicswRuleSet", () => {
         ],
         "formatConstraints": [],
         "licenseType": "LICSW",
+        "providerCaps": [
+          {
+            "approvingBodies": [
+              "APA",
+              "NBCC",
+              "NHA",
+              "ANCC",
+              "ACCME",
+            ],
+            "fraction": 0.25,
+            "kind": "max-fraction",
+          },
+        ],
         "renewalCycleMonths": 24,
         "specialRequirements": [],
         "state": "MA",
@@ -71,6 +84,14 @@ describe("maLicswRuleSet", () => {
     expect(maLicswRuleSet.categoryMinimums).toContainEqual({
       category: "clinical",
       minHours: 10,
+    })
+  })
+
+  it("caps approved-provider hours at 25% of the period", () => {
+    expect(maLicswRuleSet.providerCaps).toContainEqual({
+      kind: "max-fraction",
+      approvingBodies: ["APA", "NBCC", "NHA", "ANCC", "ACCME"],
+      fraction: 0.25,
     })
   })
 

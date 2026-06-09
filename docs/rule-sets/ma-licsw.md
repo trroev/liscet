@@ -24,15 +24,28 @@ Governing board: Massachusetts Board of Registration of Social Workers.
 
 ## Format constraints
 
-| Kind | Formats | Value | Notes |
-| --- | --- | --- | --- |
-| `max-fraction` | (provider-based) | 0.25 | Up to 25% of the total may come from programs approved by APA, NBCC, NHA, ANCC, or ACCME. |
+None.
 
-> **Open question for partner:** this cap is keyed to *approving body*, not delivery
-> `CourseFormat`. The `max-fraction` shape models the 25% ceiling; whether the
-> `formats` set is the right lever (vs. a future `approvedBody` dimension) needs
-> partner confirmation. If it doesn't fit, file an issue to extend `RuleSet`
-> rather than overloading `formats`.
+`formatConstraints: []`
+
+## Provider caps
+
+Caps keyed to the course's *approving body* (accrediting organization), modeled
+via `providerCaps` — orthogonal to delivery `CourseFormat`.
+
+| Kind | Approving bodies | Value | Notes |
+| --- | --- | --- | --- |
+| `max-fraction` | APA, NBCC, NHA, ANCC, ACCME | 0.25 | Up to 25% of the total may come from programs approved by these bodies. |
+
+```ts
+providerCaps: [
+  {
+    kind: "max-fraction",
+    approvingBodies: ["APA", "NBCC", "NHA", "ANCC", "ACCME"],
+    fraction: 0.25,
+  },
+]
+```
 
 ## Special requirements
 

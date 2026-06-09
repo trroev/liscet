@@ -20,6 +20,7 @@ const ruleSet: RuleSet = {
     { category: "law-and-ethics", minHours: 6 },
   ],
   formatConstraints: [],
+  providerCaps: [],
   specialRequirements: [],
   carryOverMaxHours: null,
 }

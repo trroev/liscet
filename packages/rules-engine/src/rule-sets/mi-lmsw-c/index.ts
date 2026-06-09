@@ -23,6 +23,7 @@ export const miLmswCRuleSet = {
   formatConstraints: [
     { kind: "min-hours", formats: ["live", "in-person"], hours: 22.5 },
   ],
+  providerCaps: [],
   specialRequirements: [],
   carryOverMaxHours: null,
 } as const satisfies RuleSet
