@@ -263,7 +263,7 @@ export interface License {
    * The practitioner who holds this license.
    */
   practitioner: string | User;
-  state: 'CA' | 'MA' | 'MI' | 'CT' | 'CO';
+  state: 'CA' | 'MA' | 'MI' | 'CT';
   licenseType: string;
   /**
    * Only `active` licenses accrue course credit. Lapsed/suspended/revoked licenses are excluded from evaluation.

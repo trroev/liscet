@@ -11,8 +11,8 @@ CEU tracker for mental health professionals. Helps licensees track continuing ed
 | Dimension                     | v1                                                                                          |
 | ----------------------------- | ------------------------------------------------------------------------------------------- |
 | Pricing                       | Free                                                                                        |
-| States                        | CA, MA, MI, CT, CO                                                                          |
-| License types                 | CA-LCSW, MA-LICSW, MI-LMSW-C, CT-LICSW; CO = telehealth-into-CO registration attribute on a home-state license (not its own rule set) |
+| States                        | CA, MA, MI, CT (CO is not a selectable license state — see below)                           |
+| License types                 | CA-LCSW, MA-LICSW, MI-LMSW-C, CT-LICSW; CO = telehealth-into-CO registration attribute on a home-state license (not a selectable license state or rule set) |
 | User type                     | B2C, individual practitioners                                                               |
 | Multi-state licenses per user | Modeled in data layer; surfaced in UI as one license at launch, multi-license shortly after |
 | Course logging                | Manual entry only (no OCR, no provider catalog)                                             |
@@ -22,6 +22,8 @@ CEU tracker for mental health professionals. Helps licensees track continuing ed
 | Light + dark mode             | Required from day one                                                                       |
 
 **CO caveat — RESOLVED (2026-06-08, see [#1](https://github.com/trroev/liscet/issues/1)):** Liscet supports out-of-state therapists practicing telehealth **into** CO under their home-state CEUs — not a CO-specific CE requirement. Colorado's pathway for these practitioners (the "CO-registered telehealth provider" above) is the out-of-state **telehealth registration** under SB24-141 / C.R.S. § 12-30-124, open to mental health providers from 2026-01-01. It is **not** a Colorado license: the registrant keeps an active, unencumbered **home-state** credential, cannot open a CO office, and cannot see patients in person in CO. Their CE obligation therefore rides on the home-state license — Colorado's own 40-PDH biennial CE binds CO *licensees*, not these *registrants*. So "CO-registered telehealth provider" is a **telehealth-into-CO registration attribute layered on a home-state license, not a standalone CO CE rule set**; CEU tracking stays governed by the home state's rule set. Confirmed by CO partner (referred us to [Person Centered Tech — Teletherapy Practice Rules by State](https://personcenteredtech.com/teletherapy-practice-rules-by-state/) as the scope basis). Follow-up modeling tracked in [#22](https://github.com/trroev/liscet/issues/22).
+
+**Decision (2026-06-09, see [#50](https://github.com/trroev/liscet/issues/50)):** Because no CO license is modeled, `"CO"` is **removed** from `LICENSE_STATES` and `RuleSetState` — a license can no longer be created with `state: "CO"`, closing the gap where it would route to a non-existent `CO-*` rule set. CO survives only as the target of the telehealth-into-CO registration attribute on non-CO licenses.
 
 ---
 

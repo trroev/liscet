@@ -1,4 +1,4 @@
-export type RuleSetState = "CA" | "MA" | "MI" | "CT" | "CO"
+export type RuleSetState = "CA" | "MA" | "MI" | "CT"
 
 export type RuleSetLicenseType = "LCSW" | "LICSW" | "LMSW-C"
 

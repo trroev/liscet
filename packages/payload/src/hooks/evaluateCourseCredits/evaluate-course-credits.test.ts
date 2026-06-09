@@ -120,7 +120,7 @@ describe("evaluateCourseCreditsOnCourseChange", () => {
 
   it("skips licenses with no shipped rule set", async () => {
     const payload = makePayload({
-      licenses: [license({ state: "CO", licenseType: "LCSW" })],
+      licenses: [license({ state: "CA", licenseType: "LICSW" })],
     })
     await callCourseHook(course(), payload)
     expect(payload.create).not.toHaveBeenCalled()
