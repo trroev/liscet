@@ -79,6 +79,8 @@
         "packages/logger/src/logger/index.ts",
         "packages/logger/src/test-transport/index.ts",
         "packages/rules-engine/src/*/index.ts",
+        "packages/db-seed/src/*/index.ts",
+        "packages/db-seed/src/types/*/index.ts",
         "packages/emails/src/layouts/*/index.tsx",
         "packages/emails/src/templates/*/index.tsx",
         "apps/web/src/features/*/components/*/index.ts",
@@ -101,6 +103,7 @@
         "packages/types/**",
         "packages/logger/**",
         "packages/rules-engine/**",
+        "packages/db-seed/**",
         "packages/emails/**",
         "packages/payload/src/components/**",
         "apps/web/src/components/**",
@@ -217,6 +220,31 @@
                       "~/app/**"
                     ],
                     "message": "Code inside apps/web/src/features/** must not import via the `~/features/*` alias (cross-feature imports are banned, and intra-feature imports must use relative paths) and must not import from `~/app/**`. Hoist shared code into `~/lib` or `~/components`."
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "includes": [
+        "apps/web/src/app/**",
+        "apps/web/src/features/**",
+        "apps/web/src/components/**",
+        "apps/web/src/lib/**"
+      ],
+      "linter": {
+        "rules": {
+          "style": {
+            "noRestrictedImports": {
+              "level": "error",
+              "options": {
+                "patterns": [
+                  {
+                    "group": ["@repo/db-seed", "@repo/db-seed/**"],
+                    "message": "@repo/db-seed is a CLI-only seeder. It must only be imported from apps/web/src/scripts/** — never from app runtime code (routes, pages, layouts, features, components, lib)."
                   }
                 ]
               }
