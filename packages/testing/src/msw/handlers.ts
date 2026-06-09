@@ -50,10 +50,13 @@ type PayloadListPage<TDoc extends PayloadDoc> = {
   limit: number
 }
 
-export const payloadListHandler = <TDoc extends PayloadDoc>(
-  collection: string,
+export const payloadListHandler = <TDoc extends PayloadDoc>({
+  collection,
+  docs,
+}: {
+  collection: string
   docs: ReadonlyArray<TDoc>
-) =>
+}) =>
   http.get(`/api/${collection}`, () => {
     const body: PayloadListPage<TDoc> = {
       docs: [...docs],
@@ -70,10 +73,13 @@ export const payloadListHandler = <TDoc extends PayloadDoc>(
     return HttpResponse.json(body as unknown as JsonBodyType)
   })
 
-export const payloadFindHandler = <TDoc extends PayloadDoc>(
-  collection: string,
+export const payloadFindHandler = <TDoc extends PayloadDoc>({
+  collection,
+  docs,
+}: {
+  collection: string
   docs: ReadonlyArray<TDoc>
-) =>
+}) =>
   http.get(`/api/${collection}/:id`, ({ params }) => {
     const doc = docs.find((d) => d.id === params.id)
     if (!doc) {
