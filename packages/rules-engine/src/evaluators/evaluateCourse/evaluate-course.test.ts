@@ -37,7 +37,12 @@ const buildCourse = (
 
 describe("evaluateCourse", () => {
   it("credits a qualifying course", () => {
-    const result = evaluateCourse(buildCourse(), license, ruleSet, EVALUATED_AT)
+    const result = evaluateCourse({
+      course: buildCourse(),
+      license,
+      ruleSet,
+      evaluatedAt: EVALUATED_AT,
+    })
 
     expect(result).toEqual({
       courseId: "course-1",
@@ -50,77 +55,77 @@ describe("evaluateCourse", () => {
   })
 
   it("returns null when the format is not accepted", () => {
-    const result = evaluateCourse(
-      buildCourse({ format: "home-study" }),
+    const result = evaluateCourse({
+      course: buildCourse({ format: "home-study" }),
       license,
       ruleSet,
-      EVALUATED_AT
-    )
+      evaluatedAt: EVALUATED_AT,
+    })
 
     expect(result).toBeNull()
   })
 
   it("returns null when no category is required by the rule set", () => {
-    const result = evaluateCourse(
-      buildCourse({ subjectCategories: ["clinical", "telehealth"] }),
+    const result = evaluateCourse({
+      course: buildCourse({ subjectCategories: ["clinical", "telehealth"] }),
       license,
       ruleSet,
-      EVALUATED_AT
-    )
+      evaluatedAt: EVALUATED_AT,
+    })
 
     expect(result).toBeNull()
   })
 
   it("returns null when the course has zero hours", () => {
-    const result = evaluateCourse(
-      buildCourse({ hours: 0 }),
+    const result = evaluateCourse({
+      course: buildCourse({ hours: 0 }),
       license,
       ruleSet,
-      EVALUATED_AT
-    )
+      evaluatedAt: EVALUATED_AT,
+    })
 
     expect(result).toBeNull()
   })
 
   it("caps a carried-over course's hours at carryOverMaxHours", () => {
     const cappedRuleSet: RuleSet = { ...ruleSet, carryOverMaxHours: 4 }
-    const result = evaluateCourse(
-      buildCourse({
+    const result = evaluateCourse({
+      course: buildCourse({
         completedAt: new Date("2024-11-01T00:00:00.000Z"),
         hours: 10,
       }),
       license,
-      cappedRuleSet,
-      EVALUATED_AT
-    )
+      ruleSet: cappedRuleSet,
+      evaluatedAt: EVALUATED_AT,
+    })
 
     expect(result?.creditedHours).toBe(4)
   })
 
   it("does not cap a current-cycle course of the same hours", () => {
     const cappedRuleSet: RuleSet = { ...ruleSet, carryOverMaxHours: 4 }
-    const result = evaluateCourse(
-      buildCourse({
+    const result = evaluateCourse({
+      course: buildCourse({
         completedAt: new Date("2025-06-01T00:00:00.000Z"),
         hours: 10,
       }),
       license,
-      cappedRuleSet,
-      EVALUATED_AT
-    )
+      ruleSet: cappedRuleSet,
+      evaluatedAt: EVALUATED_AT,
+    })
 
     expect(result?.creditedHours).toBe(10)
   })
 
   it("normalizes raw tags and drops unrecognized ones", () => {
-    const result = evaluateCourse(
-      buildCourse({
+    const result = evaluateCourse({
+      course: buildCourse({
         subjectCategories: [" General ", "Law-And-Ethics", "made-up"],
       }),
       license,
       ruleSet,
-      EVALUATED_AT
-    )
+      evaluatedAt: EVALUATED_AT,
+    })
 
     expect(result?.creditedCategories).toEqual(["general", "law-and-ethics"])
   })

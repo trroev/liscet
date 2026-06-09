@@ -8,6 +8,13 @@ type EvaluatedLicense = {
   readonly renewalCycleStart: Date
 }
 
+type EvaluateCourseArgs = {
+  readonly course: EvaluatedCourse
+  readonly license: EvaluatedLicense
+  readonly ruleSet: RuleSet
+  readonly evaluatedAt: Date
+}
+
 const KNOWN_CATEGORIES: ReadonlySet<SubjectCategory> = new Set(
   SUBJECT_CATEGORIES
 )
@@ -23,12 +30,12 @@ const isKnownCategory = (tag: string): tag is SubjectCategory =>
  * Returns `null` when the course does not qualify: an ineligible format, zero
  * (or negative) hours, or no category that the rule set actually requires.
  */
-export function evaluateCourse(
-  course: EvaluatedCourse,
-  license: EvaluatedLicense,
-  ruleSet: RuleSet,
-  evaluatedAt: Date
-): CourseCreditResult | null {
+export function evaluateCourse({
+  course,
+  license,
+  ruleSet,
+  evaluatedAt,
+}: EvaluateCourseArgs): CourseCreditResult | null {
   if (!ruleSet.acceptedFormats.includes(course.format)) {
     return null
   }
