@@ -4,6 +4,8 @@ import type {
   ProgressSummary,
 } from "@repo/rules-engine/types/ProgressSummary"
 import type { RuleSet, SubjectCategory } from "@repo/rules-engine/types/RuleSet"
+import { addMonths } from "@repo/rules-engine/utils/addMonths"
+import { currentRecurrenceWindowStart } from "@repo/rules-engine/utils/currentRecurrenceWindowStart"
 import { isRequirementEffective } from "@repo/rules-engine/utils/isRequirementEffective"
 
 type SummarizedLicense = {
@@ -20,39 +22,9 @@ type SummarizedLicense = {
 type SummarizeLicenseArgs = {
   readonly license: SummarizedLicense
   readonly credits: Array<CourseCreditResult>
-  /**
-   * Part of the locked summarizeLicense API (callers #26/#24), reserved for
-   * future cycle-lapse logic. Every current ProgressSummary field derives from
-   * issuedAt, not wall-clock time, so it is intentionally not yet read.
-   */
+  /** Wall-clock reference for selecting the current recurrence window. */
   readonly today: Date
   readonly ruleSet: RuleSet
-}
-
-/**
- * Add `months` calendar months to `date` using UTC fields, clamping to the
- * last valid day of the target month (Jan 31 + 1 month → Feb 28/29). UTC keeps
- * the result independent of the host timezone, matching the deterministic,
- * pure-function contract of the rules engine.
- */
-function addMonths(date: Date, months: number): Date {
-  const targetDay = date.getUTCDate()
-  const result = new Date(
-    Date.UTC(
-      date.getUTCFullYear(),
-      date.getUTCMonth() + months,
-      1,
-      date.getUTCHours(),
-      date.getUTCMinutes(),
-      date.getUTCSeconds(),
-      date.getUTCMilliseconds()
-    )
-  )
-  const daysInTargetMonth = new Date(
-    Date.UTC(result.getUTCFullYear(), result.getUTCMonth() + 1, 0)
-  ).getUTCDate()
-  result.setUTCDate(Math.min(targetDay, daysInTargetMonth))
-  return result
 }
 
 /**
@@ -70,10 +42,20 @@ function addMonths(date: Date, months: number): Date {
  * the licensee entered or re-entered active practice). Only requirements
  * effective as of that date appear in `specialRequirementProgress` and bear on
  * `isComplete`; a requirement whose `effectiveFrom` is later is ignored.
+ *
+ * A recurring special requirement's credit is windowed to its current
+ * recurrence period (anchored at the same renewal/reactivation date, selected
+ * by `today`): credits earned in a prior window do not count toward the current
+ * obligation. The recurrence window is independent of the renewal cycle — they
+ * are separate mechanisms (CT-LICSW's 72-month veterans requirement spans six
+ * 12-month renewals). One-time requirements, `categoryProgress`, and
+ * `totalCreditedHours` are not windowed; per-cycle windowing of categories and
+ * the total is a separate concern, deliberately out of scope here.
  */
 export function summarizeLicense({
   license,
   credits,
+  today,
   ruleSet,
 }: SummarizeLicenseArgs): ProgressSummary {
   const totalCreditedHours = credits.reduce(
@@ -81,9 +63,16 @@ export function summarizeLicense({
     0
   )
 
-  const creditedHoursIn = (category: SubjectCategory): number =>
+  const creditedHoursIn = (
+    category: SubjectCategory,
+    since: Date | null = null
+  ): number =>
     credits
-      .filter((credit) => credit.creditedCategories.includes(category))
+      .filter(
+        (credit) =>
+          credit.creditedCategories.includes(category) &&
+          (since === null || credit.completedAt >= since)
+      )
       .reduce((sum, credit) => sum + credit.creditedHours, 0)
 
   const categoryProgress: ReadonlyArray<CategoryProgress> =
@@ -101,7 +90,14 @@ export function summarizeLicense({
       )
       .map((requirement) => ({
         category: requirement.category,
-        credited: creditedHoursIn(requirement.category),
+        credited: creditedHoursIn(
+          requirement.category,
+          currentRecurrenceWindowStart({
+            recurrence: requirement.recurrence,
+            anchor: gatedAt,
+            asOf: today,
+          })
+        ),
         required: requirement.minHours,
       }))
 
@@ -119,6 +115,9 @@ export function summarizeLicense({
     categoryProgress,
     specialRequirementProgress,
     isComplete,
-    renewsAt: addMonths(license.issuedAt, license.renewalCycleMonths),
+    renewsAt: addMonths({
+      date: license.issuedAt,
+      months: license.renewalCycleMonths,
+    }),
   }
 }

@@ -7,4 +7,6 @@ export type CourseCreditResult = {
   readonly creditedCategories: ReadonlyArray<SubjectCategory>
   readonly ruleSetVersion: number
   readonly evaluatedAt: Date
+  /** Course completion date — buckets the credit into a recurrence window. */
+  readonly completedAt: Date
 }

@@ -89,6 +89,7 @@ describe("caLcswRuleSet", () => {
       creditedCategories: ["law-and-ethics"],
       ruleSetVersion: 1,
       evaluatedAt: EVALUATED_AT,
+      completedAt: new Date("2025-06-01T00:00:00.000Z"),
     })
   })
 
@@ -128,6 +129,7 @@ describe("caLcswRuleSet", () => {
       creditedCategories: [],
       ruleSetVersion: 1,
       evaluatedAt: EVALUATED_AT,
+      completedAt: new Date("2025-06-01T00:00:00.000Z"),
       ...overrides,
     })
 

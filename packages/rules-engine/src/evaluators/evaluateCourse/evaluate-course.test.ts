@@ -52,6 +52,7 @@ describe("evaluateCourse", () => {
       creditedCategories: ["general"],
       ruleSetVersion: 3,
       evaluatedAt: EVALUATED_AT,
+      completedAt: new Date("2025-06-01T00:00:00.000Z"),
     })
   })
 

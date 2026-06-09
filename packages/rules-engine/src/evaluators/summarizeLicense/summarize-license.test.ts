@@ -39,6 +39,7 @@ const buildCredit = (
   creditedCategories: ["general"],
   ruleSetVersion: 3,
   evaluatedAt: EVALUATED_AT,
+  completedAt: new Date("2025-03-01T00:00:00.000Z"),
   ...overrides,
 })
 
@@ -267,6 +268,106 @@ describe("summarizeLicense", () => {
       { category: "suicide-risk", credited: 6, required: 6 },
     ])
     expect(summary.isComplete).toBe(true)
+  })
+
+  const recurringRuleSet: RuleSet = {
+    ...ruleSet,
+    specialRequirements: [
+      {
+        category: "veterans-mental-health",
+        minHours: 2,
+        recurrence: { everyMonths: 72 },
+      },
+    ],
+  }
+
+  // License issued 2025-01-01; first 72-month window is [2025-01-01, 2031-01-01),
+  // the second [2031-01-01, 2037-01-01).
+  const fullBaseCredits = [
+    buildCredit({
+      courseId: "course-general",
+      creditedHours: 30,
+      creditedCategories: ["general"],
+    }),
+    buildCredit({
+      courseId: "course-ethics",
+      creditedHours: 6,
+      creditedCategories: ["law-and-ethics"],
+    }),
+  ]
+
+  it("counts a recurring requirement credit earned in the current window", () => {
+    const summary = summarizeLicense({
+      license,
+      credits: [
+        ...fullBaseCredits,
+        buildCredit({
+          courseId: "course-veterans",
+          creditedHours: 2,
+          creditedCategories: ["veterans-mental-health"],
+          completedAt: new Date("2032-06-01T00:00:00.000Z"),
+        }),
+      ],
+      today: new Date("2033-01-01T00:00:00.000Z"),
+      ruleSet: recurringRuleSet,
+    })
+
+    expect(summary.specialRequirementProgress).toEqual([
+      { category: "veterans-mental-health", credited: 2, required: 2 },
+    ])
+    expect(summary.isComplete).toBe(true)
+  })
+
+  it("ignores a recurring requirement credit earned in a prior window", () => {
+    const summary = summarizeLicense({
+      license,
+      credits: [
+        ...fullBaseCredits,
+        buildCredit({
+          courseId: "course-veterans",
+          creditedHours: 2,
+          creditedCategories: ["veterans-mental-health"],
+          completedAt: new Date("2026-06-01T00:00:00.000Z"),
+        }),
+      ],
+      today: new Date("2033-01-01T00:00:00.000Z"),
+      ruleSet: recurringRuleSet,
+    })
+
+    expect(summary.specialRequirementProgress).toEqual([
+      { category: "veterans-mental-health", credited: 0, required: 2 },
+    ])
+    expect(summary.isComplete).toBe(false)
+  })
+
+  it("does not window a one-time requirement — an old credit still counts", () => {
+    const oneTimeRuleSet: RuleSet = {
+      ...ruleSet,
+      specialRequirements: [
+        {
+          category: "suicide-risk",
+          minHours: 6,
+          recurrence: "one-time",
+        },
+      ],
+    }
+    const summary = summarizeLicense({
+      license,
+      credits: [
+        buildCredit({
+          courseId: "course-suicide-risk",
+          creditedHours: 6,
+          creditedCategories: ["suicide-risk"],
+          completedAt: new Date("2025-02-01T00:00:00.000Z"),
+        }),
+      ],
+      today: new Date("2033-01-01T00:00:00.000Z"),
+      ruleSet: oneTimeRuleSet,
+    })
+
+    expect(summary.specialRequirementProgress).toEqual([
+      { category: "suicide-risk", credited: 6, required: 6 },
+    ])
   })
 
   it("derives renewsAt from issuedAt plus the license renewal cycle, ignoring today", () => {

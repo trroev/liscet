@@ -77,5 +77,6 @@ export function evaluateCourse({
     creditedCategories,
     ruleSetVersion: ruleSet.version,
     evaluatedAt,
+    completedAt: course.completedAt,
   }
 }
