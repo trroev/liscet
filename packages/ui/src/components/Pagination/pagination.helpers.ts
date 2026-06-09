@@ -2,7 +2,13 @@ import { match, P } from "ts-pattern"
 
 export type PageItem = number | "ellipsis"
 
-export const getPageItems = (current: number, total: number): Array<PageItem> =>
+export const getPageItems = ({
+  current,
+  total,
+}: {
+  current: number
+  total: number
+}): Array<PageItem> =>
   match(total)
     .with(P.number.lte(7), (t) => Array.from({ length: t }, (_, i) => i + 1))
     .otherwise(() => {

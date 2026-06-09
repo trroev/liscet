@@ -15,7 +15,7 @@ export const Pagination = ({
   totalPages,
   onPageChange,
 }: PaginationProps) => {
-  const pages = getPageItems(currentPage, totalPages)
+  const pages = getPageItems({ current: currentPage, total: totalPages })
 
   return (
     <nav aria-label="pagination" className="flex w-full justify-center">

@@ -80,9 +80,13 @@ describe("SignInForm", () => {
 
   it("shows the friendly message when the server rejects the credentials", async () => {
     server.use(
-      authErrorHandler("sign-in/email", 401, {
-        code: "INVALID_EMAIL_OR_PASSWORD",
-        message: "Invalid email or password",
+      authErrorHandler({
+        path: "sign-in/email",
+        status: 401,
+        body: {
+          code: "INVALID_EMAIL_OR_PASSWORD",
+          message: "Invalid email or password",
+        },
       })
     )
     const user = userEvent.setup()

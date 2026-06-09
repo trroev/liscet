@@ -24,11 +24,16 @@ export const authSignUpHandler = (payload: SessionPayload) =>
 export const authSignOutHandler = () =>
   http.post(`${AUTH_BASE}/sign-out`, () => HttpResponse.json({ success: true }))
 
-export const authErrorHandler = (
-  path: string,
+export const authErrorHandler = ({
+  path,
   status = 401,
-  body: JsonBodyType = { error: "Unauthorized" }
-) => http.all(`${AUTH_BASE}/${path}`, () => HttpResponse.json(body, { status }))
+  body = { error: "Unauthorized" },
+}: {
+  path: string
+  status?: number
+  body?: JsonBodyType
+}) =>
+  http.all(`${AUTH_BASE}/${path}`, () => HttpResponse.json(body, { status }))
 
 type PayloadDoc = { id: string }
 
@@ -77,8 +82,13 @@ export const payloadFindHandler = <TDoc extends PayloadDoc>(
     return HttpResponse.json(doc as unknown as JsonBodyType)
   })
 
-export const payloadErrorHandler = (
-  collection: string,
+export const payloadErrorHandler = ({
+  collection,
   status = 500,
-  body: JsonBodyType = { errors: ["Server error"] }
-) => http.all(`/api/${collection}/*`, () => HttpResponse.json(body, { status }))
+  body = { errors: ["Server error"] },
+}: {
+  collection: string
+  status?: number
+  body?: JsonBodyType
+}) =>
+  http.all(`/api/${collection}/*`, () => HttpResponse.json(body, { status }))

@@ -86,9 +86,13 @@ describe("SignUpForm", () => {
 
   it("shows the friendly message when the email is already registered", async () => {
     server.use(
-      authErrorHandler("sign-up/email", 422, {
-        code: "USER_ALREADY_EXISTS",
-        message: "User already exists",
+      authErrorHandler({
+        path: "sign-up/email",
+        status: 422,
+        body: {
+          code: "USER_ALREADY_EXISTS",
+          message: "User already exists",
+        },
       })
     )
     const user = userEvent.setup()
