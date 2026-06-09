@@ -92,6 +92,40 @@ describe("reconcileCredits", () => {
     expect(payload.create).not.toHaveBeenCalled()
   })
 
+  it("returns a summary of created, updated, and deleted rows", async () => {
+    const payload = makePayload({
+      scopeDocs: [
+        { id: "keep", course: "course-1", license: "license-1" },
+        { id: "drop", course: "course-1", license: "license-old" },
+      ],
+      matchDocs: [{ id: "keep", course: "course-1", license: "license-1" }],
+    })
+    const summary = await reconcileCredits({
+      credits: [credit()],
+      payload: payload as never,
+      req,
+      scope: { course: { equals: "course-1" } },
+    })
+    expect(summary).toEqual({ created: 0, deleted: 1, updated: 1 })
+  })
+
+  it("dry run reports the plan without writing", async () => {
+    const payload = makePayload({
+      scopeDocs: [{ id: "drop", course: "course-1", license: "license-old" }],
+    })
+    const summary = await reconcileCredits({
+      credits: [credit()],
+      dryRun: true,
+      payload: payload as never,
+      req,
+      scope: { course: { equals: "course-1" } },
+    })
+    expect(summary).toEqual({ created: 1, deleted: 1, updated: 0 })
+    expect(payload.create).not.toHaveBeenCalled()
+    expect(payload.update).not.toHaveBeenCalled()
+    expect(payload.delete).not.toHaveBeenCalled()
+  })
+
   it("keeps a still-valid row while deleting a stale sibling", async () => {
     const payload = makePayload({
       scopeDocs: [

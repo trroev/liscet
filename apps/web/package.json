@@ -13,6 +13,7 @@
     "generate:importmap": "pnpm with-env payload generate:importmap",
     "migrate": "pnpm with-env payload migrate",
     "migrate:create": "pnpm with-env payload migrate:create",
+    "rules:reevaluate": "pnpm with-env payload run src/scripts/reevaluate.ts --",
     "test": "vitest run",
     "postinstall": "if [ -z \"$CI\" ] && [ -f .env.keys ]; then pnpm generate:types && pnpm generate:importmap; fi",
     "clean": "rm -rf .turbo .next dist storybook-static coverage *.tsbuildinfo test-results playwright-report"
@@ -26,7 +27,9 @@
     "@repo/auth": "workspace:*",
     "@repo/chrome": "workspace:*",
     "@repo/env": "workspace:*",
+    "@repo/logger": "workspace:*",
     "@repo/payload": "workspace:*",
+    "@repo/rules-engine": "workspace:*",
     "@repo/tailwind": "workspace:*",
     "@repo/types": "workspace:*",
     "@repo/ui": "workspace:*",

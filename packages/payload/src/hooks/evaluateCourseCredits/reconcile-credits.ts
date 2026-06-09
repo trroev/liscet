@@ -12,9 +12,20 @@ export type CreditToPersist = {
 
 type ReconcileCreditsArgs = {
   readonly payload: Payload
-  readonly req: PayloadRequest
+  readonly req?: PayloadRequest
   readonly scope: Where
   readonly credits: ReadonlyArray<CreditToPersist>
+  /**
+   * When true, compute the create/update/delete plan and report it without
+   * touching the database. Used by the `rules:reevaluate` CLI's `--dry-run`.
+   */
+  readonly dryRun?: boolean
+}
+
+export type ReconcileSummary = {
+  readonly created: number
+  readonly updated: number
+  readonly deleted: number
 }
 
 const pairKey = (courseId: string, licenseId: string): string =>
@@ -28,7 +39,8 @@ export async function reconcileCredits({
   req,
   scope,
   credits,
-}: ReconcileCreditsArgs): Promise<void> {
+  dryRun = false,
+}: ReconcileCreditsArgs): Promise<ReconcileSummary> {
   const existing = await payload.find({
     collection: "course-credits",
     depth: 0,
@@ -45,17 +57,21 @@ export async function reconcileCredits({
   const staleRows = existing.docs.filter(
     (row) => !desired.has(pairKey(refId(row.course), refId(row.license)))
   )
-  await Promise.all(
-    staleRows.map((row) =>
-      payload.delete({
-        collection: "course-credits",
-        id: row.id,
-        overrideAccess: true,
-        req,
-      })
+  if (!dryRun) {
+    await Promise.all(
+      staleRows.map((row) =>
+        payload.delete({
+          collection: "course-credits",
+          id: row.id,
+          overrideAccess: true,
+          req,
+        })
+      )
     )
-  )
+  }
 
+  let created = 0
+  let updated = 0
   await Promise.all(
     credits.map(async (credit) => {
       const data = {
@@ -83,21 +99,29 @@ export async function reconcileCredits({
       })
       const found = match.docs[0]
       if (found) {
-        await payload.update({
+        updated += 1
+        if (!dryRun) {
+          await payload.update({
+            collection: "course-credits",
+            data,
+            id: found.id,
+            overrideAccess: true,
+            req,
+          })
+        }
+        return
+      }
+      created += 1
+      if (!dryRun) {
+        await payload.create({
           collection: "course-credits",
           data,
-          id: found.id,
           overrideAccess: true,
           req,
         })
-        return
       }
-      await payload.create({
-        collection: "course-credits",
-        data,
-        overrideAccess: true,
-        req,
-      })
     })
   )
+
+  return { created, deleted: staleRows.length, updated }
 }

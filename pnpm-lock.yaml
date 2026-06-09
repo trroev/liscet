@@ -221,9 +221,15 @@ importers:
       '@repo/env':
         specifier: workspace:*
         version: link:../../packages/env
+      '@repo/logger':
+        specifier: workspace:*
+        version: link:../../packages/logger
       '@repo/payload':
         specifier: workspace:*
         version: link:../../packages/payload
+      '@repo/rules-engine':
+        specifier: workspace:*
+        version: link:../../packages/rules-engine
       '@repo/tailwind':
         specifier: workspace:*
         version: link:../../packages/tailwind

@@ -1,54 +1,14 @@
 import { createLogger } from "@repo/logger"
 import { captureException } from "@repo/observability"
 import type { Course, License } from "@repo/payload/payload-types"
-import { evaluateCourse } from "@repo/rules-engine/evaluators/evaluateCourse"
-import { RULE_SETS, type RuleSetKey } from "@repo/rules-engine/rule-sets"
 import type { CollectionAfterChangeHook } from "payload"
-import { deriveRenewalCycleStart } from "./derive-renewal-cycle-start"
+import { creditFor, ruleSetKeyFor } from "./credit-for"
 import { type CreditToPersist, reconcileCredits } from "./reconcile-credits"
-import { toEvaluatedCourse } from "./to-evaluated-course"
 
 const log = createLogger({ name: "payload.evaluate-course-credits" })
 
 const refId = (ref: string | { id: string }): string =>
   typeof ref === "string" ? ref : ref.id
-
-const ruleSetKeyFor = (license: License): RuleSetKey | null => {
-  const key = `${license.state}-${license.licenseType}`
-  return key in RULE_SETS ? (key as RuleSetKey) : null
-}
-
-const creditFor = (
-  license: License,
-  course: Course,
-  evaluatedAt: Date
-): CreditToPersist | null => {
-  const key = ruleSetKeyFor(license)
-  if (key === null) {
-    return null
-  }
-  const result = evaluateCourse({
-    course: toEvaluatedCourse(course),
-    evaluatedAt,
-    license: {
-      id: license.id,
-      renewalCycleStart: deriveRenewalCycleStart(license),
-    },
-    ruleSet: RULE_SETS[key],
-  })
-  if (result === null) {
-    return null
-  }
-  return {
-    courseId: result.courseId,
-    creditedCategories: result.creditedCategories,
-    creditedHours: result.creditedHours,
-    evaluatedAt: result.evaluatedAt,
-    licenseId: result.licenseId,
-    ruleSetKey: key,
-    ruleSetVersion: result.ruleSetVersion,
-  }
-}
 
 export const evaluateCourseCreditsOnCourseChange: CollectionAfterChangeHook<
   Course
@@ -70,7 +30,7 @@ export const evaluateCourseCreditsOnCourseChange: CollectionAfterChangeHook<
     })
     const evaluatedAt = new Date()
     const credits = licenses.docs
-      .map((license) => creditFor(license, doc, evaluatedAt))
+      .map((license) => creditFor({ course: doc, evaluatedAt, license }))
       .filter((credit): credit is CreditToPersist => credit !== null)
     await reconcileCredits({
       credits,
@@ -107,7 +67,7 @@ export const evaluateCourseCreditsOnLicenseChange: CollectionAfterChangeHook<
     })
     const evaluatedAt = new Date()
     const credits = courses.docs
-      .map((course) => creditFor(doc, course, evaluatedAt))
+      .map((course) => creditFor({ course, evaluatedAt, license: doc }))
       .filter((credit): credit is CreditToPersist => credit !== null)
     await reconcileCredits({ credits, payload, req, scope })
   } catch (err) {
