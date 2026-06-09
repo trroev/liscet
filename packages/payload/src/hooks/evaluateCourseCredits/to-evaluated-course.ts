@@ -8,5 +8,6 @@ export function toEvaluatedCourse(course: Course): EvaluatedCourse {
     hours: course.hours,
     format: course.format,
     subjectCategories: course.subjectCategories ?? [],
+    approvingBody: course.provider ?? null,
   }
 }

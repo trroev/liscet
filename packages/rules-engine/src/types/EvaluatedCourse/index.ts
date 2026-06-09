@@ -7,4 +7,6 @@ export type EvaluatedCourse = {
   readonly format: CourseFormat
   // Raw, unnormalized tags from Courses; the evaluator maps these to SubjectCategory.
   readonly subjectCategories: ReadonlyArray<string>
+  // Raw, unnormalized provider from Courses; the evaluator maps it to ApprovingBody.
+  readonly approvingBody?: string | null
 }

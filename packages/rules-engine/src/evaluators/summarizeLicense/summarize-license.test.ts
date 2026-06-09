@@ -40,6 +40,8 @@ const buildCredit = (
   ruleSetVersion: 3,
   evaluatedAt: EVALUATED_AT,
   completedAt: new Date("2025-03-01T00:00:00.000Z"),
+  format: "live",
+  approvingBody: null,
   ...overrides,
 })
 
@@ -368,6 +370,152 @@ describe("summarizeLicense", () => {
     expect(summary.specialRequirementProgress).toEqual([
       { category: "suicide-risk", credited: 6, required: 6 },
     ])
+  })
+
+  it("enforces a min-hours format constraint (MI-style ≥22.5 live/in-person)", () => {
+    const formatMinRuleSet: RuleSet = {
+      ...ruleSet,
+      categoryMinimums: [],
+      totalHours: 22.5,
+      formatConstraints: [
+        { kind: "min-hours", formats: ["live", "in-person"], hours: 22.5 },
+      ],
+    }
+
+    const met = summarizeLicense({
+      license,
+      credits: [
+        buildCredit({
+          creditedHours: 22.5,
+          creditedCategories: [],
+          format: "live",
+        }),
+      ],
+      today: TODAY,
+      ruleSet: formatMinRuleSet,
+    })
+    expect(met.formatConstraintProgress).toEqual([
+      {
+        kind: "min-hours",
+        creditedHours: 22.5,
+        limitHours: 22.5,
+        satisfied: true,
+      },
+    ])
+    expect(met.isComplete).toBe(true)
+
+    const unmet = summarizeLicense({
+      license,
+      credits: [
+        buildCredit({
+          creditedHours: 22.5,
+          creditedCategories: [],
+          format: "home-study",
+        }),
+      ],
+      today: TODAY,
+      ruleSet: formatMinRuleSet,
+    })
+    expect(unmet.formatConstraintProgress[0]?.satisfied).toBe(false)
+    expect(unmet.isComplete).toBe(false)
+  })
+
+  it("flags but does not block on a max-hours format cap (CT-style home-study ≤10)", () => {
+    const formatMaxRuleSet: RuleSet = {
+      ...ruleSet,
+      categoryMinimums: [],
+      totalHours: 5,
+      formatConstraints: [
+        { kind: "max-hours", formats: ["home-study"], hours: 10 },
+      ],
+    }
+
+    const within = summarizeLicense({
+      license,
+      credits: [
+        buildCredit({
+          creditedHours: 8,
+          creditedCategories: [],
+          format: "home-study",
+        }),
+      ],
+      today: TODAY,
+      ruleSet: formatMaxRuleSet,
+    })
+    expect(within.formatConstraintProgress[0]?.satisfied).toBe(true)
+
+    const exceeded = summarizeLicense({
+      license,
+      credits: [
+        buildCredit({
+          creditedHours: 12,
+          creditedCategories: [],
+          format: "home-study",
+        }),
+      ],
+      today: TODAY,
+      ruleSet: formatMaxRuleSet,
+    })
+    expect(exceeded.formatConstraintProgress[0]?.satisfied).toBe(false)
+    // A max cap limits credit, not eligibility — total is met, so still complete.
+    expect(exceeded.isComplete).toBe(true)
+  })
+
+  it("flags but does not block on a max-fraction provider cap (MA-style ≤25%)", () => {
+    const providerCapRuleSet: RuleSet = {
+      ...ruleSet,
+      categoryMinimums: [],
+      totalHours: 30,
+      providerCaps: [
+        { kind: "max-fraction", approvingBodies: ["APA"], fraction: 0.25 },
+      ],
+    }
+
+    const within = summarizeLicense({
+      license,
+      credits: [
+        buildCredit({
+          creditedHours: 6,
+          creditedCategories: [],
+          approvingBody: "APA",
+        }),
+        buildCredit({
+          creditedHours: 24,
+          creditedCategories: [],
+          approvingBody: null,
+        }),
+      ],
+      today: TODAY,
+      ruleSet: providerCapRuleSet,
+    })
+    expect(within.providerCapProgress).toEqual([
+      {
+        kind: "max-fraction",
+        creditedHours: 6,
+        limitHours: 7.5,
+        satisfied: true,
+      },
+    ])
+
+    const exceeded = summarizeLicense({
+      license,
+      credits: [
+        buildCredit({
+          creditedHours: 9,
+          creditedCategories: [],
+          approvingBody: "APA",
+        }),
+        buildCredit({
+          creditedHours: 21,
+          creditedCategories: [],
+          approvingBody: null,
+        }),
+      ],
+      today: TODAY,
+      ruleSet: providerCapRuleSet,
+    })
+    expect(exceeded.providerCapProgress[0]?.satisfied).toBe(false)
+    expect(exceeded.isComplete).toBe(true)
   })
 
   it("derives renewsAt from issuedAt plus the license renewal cycle, ignoring today", () => {

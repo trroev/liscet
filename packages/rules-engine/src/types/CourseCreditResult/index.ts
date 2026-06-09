@@ -1,4 +1,8 @@
-import type { SubjectCategory } from "@repo/rules-engine/types/RuleSet"
+import type {
+  ApprovingBody,
+  CourseFormat,
+  SubjectCategory,
+} from "@repo/rules-engine/types/RuleSet"
 
 export type CourseCreditResult = {
   readonly courseId: string
@@ -9,4 +13,8 @@ export type CourseCreditResult = {
   readonly evaluatedAt: Date
   /** Course completion date — buckets the credit into a recurrence window. */
   readonly completedAt: Date
+  /** Delivery format, for aggregate format-constraint checks. */
+  readonly format: CourseFormat
+  /** Approving body, for aggregate provider-cap checks; null when unrecognized. */
+  readonly approvingBody: ApprovingBody | null
 }

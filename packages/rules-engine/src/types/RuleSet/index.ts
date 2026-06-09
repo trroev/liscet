@@ -73,6 +73,18 @@ export type FormatConstraint =
 export type ApprovingBody = "APA" | "NBCC" | "NHA" | "ANCC" | "ACCME"
 
 /**
+ * Runtime value set mirroring `ApprovingBody` — the single source of truth for
+ * mapping a raw, unnormalized course provider onto the closed union.
+ */
+export const APPROVING_BODIES = [
+  "APA",
+  "NBCC",
+  "NHA",
+  "ANCC",
+  "ACCME",
+] as const satisfies ReadonlyArray<ApprovingBody>
+
+/**
  * Caps keyed to a course's *approving body* (accrediting organization) rather
  * than its delivery `CourseFormat` — an orthogonal dimension to
  * `FormatConstraint`. Only cap kinds are modeled; a provider-keyed minimum is

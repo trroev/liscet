@@ -1,7 +1,14 @@
 import type { CourseCreditResult } from "@repo/rules-engine/types/CourseCreditResult"
 import type { EvaluatedCourse } from "@repo/rules-engine/types/EvaluatedCourse"
-import type { RuleSet, SubjectCategory } from "@repo/rules-engine/types/RuleSet"
-import { SUBJECT_CATEGORIES } from "@repo/rules-engine/types/RuleSet"
+import type {
+  ApprovingBody,
+  RuleSet,
+  SubjectCategory,
+} from "@repo/rules-engine/types/RuleSet"
+import {
+  APPROVING_BODIES,
+  SUBJECT_CATEGORIES,
+} from "@repo/rules-engine/types/RuleSet"
 
 type EvaluatedLicense = {
   readonly id: string
@@ -21,6 +28,19 @@ const KNOWN_CATEGORIES: ReadonlySet<SubjectCategory> = new Set(
 
 const isKnownCategory = (tag: string): tag is SubjectCategory =>
   KNOWN_CATEGORIES.has(tag as SubjectCategory)
+
+const KNOWN_APPROVING_BODIES: ReadonlySet<ApprovingBody> = new Set(
+  APPROVING_BODIES
+)
+
+const toApprovingBody = (
+  provider: string | null | undefined
+): ApprovingBody | null => {
+  const normalized = provider?.trim().toUpperCase()
+  return normalized && KNOWN_APPROVING_BODIES.has(normalized as ApprovingBody)
+    ? (normalized as ApprovingBody)
+    : null
+}
 
 /**
  * Decide whether a single completed course earns credit toward a license under
@@ -78,5 +98,7 @@ export function evaluateCourse({
     ruleSetVersion: ruleSet.version,
     evaluatedAt,
     completedAt: course.completedAt,
+    format: course.format,
+    approvingBody: toApprovingBody(course.approvingBody),
   }
 }

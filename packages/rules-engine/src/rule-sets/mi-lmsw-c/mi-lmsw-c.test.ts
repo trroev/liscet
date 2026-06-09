@@ -100,6 +100,8 @@ describe("miLmswCRuleSet", () => {
       ruleSetVersion: 1,
       evaluatedAt: EVALUATED_AT,
       completedAt: new Date("2025-06-01T00:00:00.000Z"),
+      format: "live",
+      approvingBody: null,
     })
   })
 })
