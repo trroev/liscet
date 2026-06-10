@@ -223,6 +223,10 @@ export interface User {
   betterAuthId?: string | null;
   displayName?: string | null;
   /**
+   * URL slug — the first path segment of every authed screen (e.g. /{slug}). Set during onboarding and immutable thereafter; must be lowercase kebab-case and not reserved.
+   */
+  slug?: string | null;
+  /**
    * IANA timezone string (e.g. America/New_York) for display.
    */
   timezone?: string | null;
@@ -526,6 +530,7 @@ export interface UsersSelect<T extends boolean = true> {
   email?: T;
   betterAuthId?: T;
   displayName?: T;
+  slug?: T;
   timezone?: T;
   avatar?: T;
   updatedAt?: T;

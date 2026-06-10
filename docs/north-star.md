@@ -100,6 +100,8 @@ app/
 
 There is **no `/app` URL segment.** `(app)` is a parenthesized route group for the authed layout and does not appear in the URL. Mirroring Linear (`linear.app/{workspace}/...`), the practitioner's onboarding-chosen slug is the first segment of every authenticated path. The slug is reserved-word- and uniqueness-checked at creation; account/profile management lives in the settings shell at `/{userSlug}/settings/account` (there is no standalone `/profile` route).
 
+**Implementation note (interim, as of 2026-06-09):** v1 places authed routes under the existing `(frontend)/` route group rather than `(app)/` — onboarding ships at `(frontend)/onboarding/` and `[userSlug]/...` will mount under `(frontend)/` until a follow-up migration moves them into `(app)/`. The route convention (`/onboarding`, `/{userSlug}/...`) is unaffected; only the underlying Next.js route-group folder differs. The migration is tracked separately and should land before the marketing-on-`/` work in M7 (which expects `(frontend)/` to be the public route group).
+
 ---
 
 ## Data model

@@ -50,10 +50,12 @@
     "react-schemaorg": "^2.0.1",
     "schema-dts": "^2.0.0",
     "server-only": "^0.0.1",
+    "slugify": "catalog:",
     "ts-pattern": "^5.9.0",
     "zod": "^4.3.6"
   },
   "devDependencies": {
+    "@repo/storybook-config": "workspace:*",
     "@repo/testing": "workspace:*",
     "@repo/tsconfig": "workspace:*",
     "@tailwindcss/postcss": "^4.2.4",

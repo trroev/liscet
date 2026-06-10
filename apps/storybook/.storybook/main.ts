@@ -12,6 +12,7 @@ const config: StorybookConfig = {
     "../src/**/*.mdx",
     "../src/**/*.stories.@(ts|tsx)",
     join(repoRoot, "packages/ui/src/**/*.stories.@(ts|tsx)"),
+    join(repoRoot, "apps/web/src/features/**/*.stories.@(ts|tsx)"),
   ],
   addons: ["@storybook/addon-a11y", "@storybook/addon-designs"],
   typescript: {

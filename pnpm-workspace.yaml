@@ -18,6 +18,7 @@ catalog:
   posthog-js: ^1.382.0
   react: ^19.2.0
   react-dom: ^19.2.0
+  slugify: ^1.6.9
   typescript: ^6.0.3
 
 # Make `pnpm add` write a catalog reference for deps the catalog already owns,

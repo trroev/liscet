@@ -51,6 +51,9 @@ catalogs:
     react-dom:
       specifier: ^19.2.0
       version: 19.2.0
+    slugify:
+      specifier: ^1.6.9
+      version: 1.6.9
     typescript:
       specifier: ^6.0.3
       version: 6.0.3
@@ -287,6 +290,9 @@ importers:
       server-only:
         specifier: ^0.0.1
         version: 0.0.1
+      slugify:
+        specifier: 'catalog:'
+        version: 1.6.9
       ts-pattern:
         specifier: ^5.9.0
         version: 5.9.0
@@ -294,6 +300,9 @@ importers:
         specifier: ^4.3.6
         version: 4.3.6
     devDependencies:
+      '@repo/storybook-config':
+        specifier: workspace:*
+        version: link:../../packages/storybook-config
       '@repo/testing':
         specifier: workspace:*
         version: link:../../packages/testing
@@ -6402,6 +6411,10 @@ packages:
   slice-ansi@8.0.0:
     resolution: {integrity: sha512-stxByr12oeeOyY2BlviTNQlYV5xOj47GirPr4yA1hE9JCtxfQN0+tVbkxwCtYDQWhEKWFHsEK48ORg5jrouCAg==}
     engines: {node: '>=20'}
+
+  slugify@1.6.9:
+    resolution: {integrity: sha512-vZ7rfeehZui7wQs438JXBckYLkIIdfHOXsaVEUMyS5fHo1483l1bMdo0EDSWYclY0yZKFOipDy4KHuKs6ssvdg==}
+    engines: {node: '>=8.0.0'}
 
   socket.io-adapter@2.5.7:
     resolution: {integrity: sha512-e0LyK91f3cUxTmv95/KzoLg47+zF+s/sbxRGDNsyG4dmIP8ZSX8ax6byOxfJXeNNtS/8AZlfD+uP7gBeR7DLlg==}
@@ -12938,6 +12951,8 @@ snapshots:
     dependencies:
       ansi-styles: 6.2.3
       is-fullwidth-code-point: 5.1.0
+
+  slugify@1.6.9: {}
 
   socket.io-adapter@2.5.7:
     dependencies:
