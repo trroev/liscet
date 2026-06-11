@@ -14,20 +14,18 @@ import {
   LICENSE_OPTIONS,
   type LicenseOptionValue,
 } from "../../lib/license-options"
-import { formatSlug, SLUG_MAX_LENGTH, validateSlugFormat } from "../../lib/slug"
+import { formatSlug, validateSlugFormat } from "../../lib/slug"
 import type {
   CheckSlugAvailabilityResult,
   CompleteOnboardingInput,
   CompleteOnboardingResult,
 } from "../../lib/types"
 
+const TOTAL_STEPS = 3
+type Step = 1 | 2 | 3
+
 const onboardingSchema = z
   .object({
-    accountName: z
-      .string()
-      .trim()
-      .min(1, "Enter an account name.")
-      .max(SLUG_MAX_LENGTH * 2, "Account name is too long."),
     expiresAt: z.iso.date("Enter a valid expiration date."),
     issuedAt: z.iso.date("Enter a valid issue date."),
     licenseNumber: z.string().trim().min(1, "Enter your license number."),
@@ -35,19 +33,16 @@ const onboardingSchema = z
       LICENSE_OPTION_VALUES as ReadonlyArray<LicenseOptionValue>,
       "Select a state and license type."
     ),
+    slug: z
+      .string()
+      .refine(
+        (value) => validateSlugFormat(value) === null,
+        "Enter a valid URL."
+      ),
   })
   .refine((data) => Date.parse(data.expiresAt) > Date.parse(data.issuedAt), {
     message: "Expiration date must be after the issue date.",
     path: ["expiresAt"],
-  })
-  .superRefine((data, ctx) => {
-    if (validateSlugFormat(formatSlug(data.accountName)) !== null) {
-      ctx.addIssue({
-        code: "custom",
-        message: "Use at least 2 letters or numbers.",
-        path: ["accountName"],
-      })
-    }
   })
 
 type SlugStatus =
@@ -59,7 +54,11 @@ type SlugStatus =
 
 const SLUG_DEBOUNCE_MS = 400
 
+const isLicenseOptionValue = (value: string): value is LicenseOptionValue =>
+  LICENSE_OPTION_VALUES.some((option) => option === value)
+
 export type OnboardingFormViewProps = {
+  initialSlug?: string
   onCheckSlug: (slug: string) => Promise<CheckSlugAvailabilityResult>
   onNavigate: (path: string) => void
   onSubmit: (
@@ -68,65 +67,79 @@ export type OnboardingFormViewProps = {
 }
 
 export const OnboardingFormView = ({
+  initialSlug = "",
   onCheckSlug,
   onNavigate,
   onSubmit,
 }: OnboardingFormViewProps): React.JSX.Element => {
+  const [step, setStep] = useState<Step>(1)
   const [serverError, setServerError] = useState<string | undefined>()
-  const [serverSuggestion, setServerSuggestion] = useState<string | undefined>()
   const [slugStatus, setSlugStatus] = useState<SlugStatus>({ kind: "idle" })
 
   const form = useForm({
     defaultValues: {
-      accountName: "",
       expiresAt: "",
       issuedAt: "",
       licenseNumber: "",
       licenseOption: "" as LicenseOptionValue | "",
+      slug: formatSlug(initialSlug),
     },
     validators: { onChange: onboardingSchema },
     onSubmit: async ({ value }) => {
       setServerError(undefined)
-      setServerSuggestion(undefined)
-      const slug = formatSlug(value.accountName)
       const result = await onSubmit({
         expiresAt: value.expiresAt,
         issuedAt: value.issuedAt,
         licenseNumber: value.licenseNumber,
         licenseOption: value.licenseOption as LicenseOptionValue,
-        slug,
+        slug: value.slug,
       })
       match(result)
         .with({ status: "success" }, ({ data }) => {
           onNavigate(`/${data.userSlug}`)
         })
-        .with({ status: "error" }, ({ message, suggestion }) => {
+        .with({ status: "error" }, ({ code, message, suggestion }) => {
+          if (
+            code === "SLUG_TAKEN" ||
+            code === "SLUG_RESERVED" ||
+            code === "SLUG_INVALID"
+          ) {
+            setSlugStatus({
+              kind: "unavailable",
+              reason: code === "SLUG_RESERVED" ? "reserved" : "taken",
+              suggestion,
+            })
+            setStep(1)
+            return
+          }
           setServerError(message)
-          setServerSuggestion(suggestion)
         })
         .exhaustive()
     },
   })
 
-  const accountName = useStore(form.store, (state) => state.values.accountName)
-  const previewSlug = formatSlug(accountName)
+  const slug = useStore(form.store, (state) => state.values.slug)
+  const licenseOption = useStore(
+    form.store,
+    (state) => state.values.licenseOption
+  )
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   useEffect(() => {
     if (debounceRef.current) {
       clearTimeout(debounceRef.current)
     }
-    if (previewSlug.length === 0) {
+    if (slug.length === 0) {
       setSlugStatus({ kind: "idle" })
       return
     }
-    if (validateSlugFormat(previewSlug) !== null) {
+    if (validateSlugFormat(slug) !== null) {
       setSlugStatus({ kind: "format-error" })
       return
     }
     setSlugStatus({ kind: "checking" })
     debounceRef.current = setTimeout(() => {
-      onCheckSlug(previewSlug).then((result) => {
+      onCheckSlug(slug).then((result) => {
         if (result.status !== "success") {
           setSlugStatus({ kind: "idle" })
           return
@@ -151,122 +164,101 @@ export const OnboardingFormView = ({
         clearTimeout(debounceRef.current)
       }
     }
-  }, [previewSlug, onCheckSlug])
+  }, [slug, onCheckSlug])
 
   const acceptSuggestion = (suggestion: string): void => {
-    form.setFieldValue("accountName", suggestion)
-    setServerSuggestion(undefined)
+    form.setFieldValue("slug", formatSlug(suggestion))
+  }
+
+  const canAdvance = match(step)
+    .with(1, () => slugStatus.kind === "available")
+    .with(2, () => isLicenseOptionValue(licenseOption))
+    .with(3, () => true)
+    .exhaustive()
+
+  const goNext = (): void => {
+    if (!canAdvance) {
+      return
+    }
+    setServerError(undefined)
+    setStep((current) =>
+      match<Step, Step>(current)
+        .with(1, () => 2)
+        .with(2, () => 3)
+        .with(3, () => 3)
+        .exhaustive()
+    )
+  }
+
+  const goBack = (): void => {
+    setServerError(undefined)
+    setStep((current) =>
+      match<Step, Step>(current)
+        .with(1, () => 1)
+        .with(2, () => 1)
+        .with(3, () => 2)
+        .exhaustive()
+    )
   }
 
   return (
     <section className="mx-auto flex w-full max-w-md flex-col gap-8 px-6 py-12">
-      <header className="space-y-2">
-        <h1 className="font-display text-heading-md text-text-primary">
-          Set up your account
-        </h1>
-        <p className="font-sans text-body-sm text-text-muted">
-          Pick an account name and add your first license. Your account name
-          becomes your URL — you'll land at{" "}
-          <span className="text-text-secondary">
-            liscet.com/{"{your-name}"}
-          </span>
-          .
-        </p>
+      <header className="space-y-3">
+        <StepProgress current={step} total={TOTAL_STEPS} />
+        {match(step)
+          .with(1, () => (
+            <div className="space-y-2">
+              <h1 className="font-display text-heading-md text-text-primary">
+                Choose your URL
+              </h1>
+              <p className="font-sans text-body-sm text-text-muted">
+                This becomes your account's home — every screen lives under it,
+                like{" "}
+                <span className="text-text-secondary">
+                  liscet.com/{slug || "your-name"}
+                </span>
+                .
+              </p>
+            </div>
+          ))
+          .with(2, () => (
+            <div className="space-y-2">
+              <h1 className="font-display text-heading-md text-text-primary">
+                Select your license
+              </h1>
+              <p className="font-sans text-body-sm text-text-muted">
+                Pick the state and license type you'll be tracking CEUs for.
+              </p>
+            </div>
+          ))
+          .with(3, () => (
+            <div className="space-y-2">
+              <h1 className="font-display text-heading-md text-text-primary">
+                License details
+              </h1>
+              <p className="font-sans text-body-sm text-text-muted">
+                Enter your license number and its issue and expiration dates.
+              </p>
+            </div>
+          ))
+          .exhaustive()}
       </header>
+
       <form
         className="flex flex-col gap-5"
         noValidate
         onSubmit={(event) => {
           event.preventDefault()
           event.stopPropagation()
+          if (step < TOTAL_STEPS) {
+            goNext()
+            return
+          }
           form.handleSubmit()
         }}
       >
-        <form.Field name="accountName">
-          {(field) => (
-            <Field
-              error={
-                field.state.meta.isTouched
-                  ? field.state.meta.errors[0]?.message
-                  : undefined
-              }
-              label="Account Name"
-            >
-              <Input
-                autoComplete="off"
-                id="accountName"
-                name={field.name}
-                onBlur={field.handleBlur}
-                onChange={(event) => field.handleChange(event.target.value)}
-                placeholder="Your Name"
-                required
-                type="text"
-                value={field.state.value}
-              />
-              <p
-                aria-live="polite"
-                className="font-sans text-body-sm text-text-muted"
-              >
-                liscet.com/{previewSlug || "your-name"}
-              </p>
-              <SlugStatusLine
-                onAcceptSuggestion={acceptSuggestion}
-                status={slugStatus}
-              />
-            </Field>
-          )}
-        </form.Field>
-
-        <form.Field name="licenseOption">
-          {(field) => (
-            <Field
-              error={
-                field.state.meta.isTouched
-                  ? field.state.meta.errors[0]?.message
-                  : undefined
-              }
-              label="State + license type"
-            >
-              <Select
-                aria-label="State and license type"
-                id="licenseOption"
-                onValueChange={(value) =>
-                  field.handleChange(value as LicenseOptionValue)
-                }
-                options={LICENSE_OPTIONS}
-                placeholder="Select…"
-                value={field.state.value}
-              />
-            </Field>
-          )}
-        </form.Field>
-
-        <form.Field name="licenseNumber">
-          {(field) => (
-            <Field
-              error={
-                field.state.meta.isTouched
-                  ? field.state.meta.errors[0]?.message
-                  : undefined
-              }
-              label="License number"
-            >
-              <Input
-                autoComplete="off"
-                id="licenseNumber"
-                name={field.name}
-                onBlur={field.handleBlur}
-                onChange={(event) => field.handleChange(event.target.value)}
-                required
-                type="text"
-                value={field.state.value}
-              />
-            </Field>
-          )}
-        </form.Field>
-
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <form.Field name="issuedAt">
+        {step === 1 && (
+          <form.Field name="slug">
             {(field) => (
               <Field
                 error={
@@ -274,21 +266,32 @@ export const OnboardingFormView = ({
                     ? field.state.meta.errors[0]?.message
                     : undefined
                 }
-                label="Issue date"
+                label="Account URL"
               >
                 <Input
-                  id="issuedAt"
+                  autoComplete="off"
+                  id="slug"
                   name={field.name}
                   onBlur={field.handleBlur}
-                  onChange={(event) => field.handleChange(event.target.value)}
+                  onChange={(event) =>
+                    field.handleChange(formatSlug(event.target.value))
+                  }
+                  placeholder="your-name"
                   required
-                  type="date"
+                  type="text"
                   value={field.state.value}
+                />
+                <SlugStatusLine
+                  onAcceptSuggestion={acceptSuggestion}
+                  status={slugStatus}
                 />
               </Field>
             )}
           </form.Field>
-          <form.Field name="expiresAt">
+        )}
+
+        {step === 2 && (
+          <form.Field name="licenseOption">
             {(field) => (
               <Field
                 error={
@@ -296,21 +299,101 @@ export const OnboardingFormView = ({
                     ? field.state.meta.errors[0]?.message
                     : undefined
                 }
-                label="Expiration date"
+                label="State + license type"
               >
-                <Input
-                  id="expiresAt"
-                  name={field.name}
-                  onBlur={field.handleBlur}
-                  onChange={(event) => field.handleChange(event.target.value)}
-                  required
-                  type="date"
+                <Select
+                  aria-label="State and license type"
+                  id="licenseOption"
+                  onValueChange={(value) =>
+                    field.handleChange(value as LicenseOptionValue)
+                  }
+                  options={LICENSE_OPTIONS}
+                  placeholder="Select…"
                   value={field.state.value}
                 />
               </Field>
             )}
           </form.Field>
-        </div>
+        )}
+
+        {step === 3 && (
+          <>
+            <form.Field name="licenseNumber">
+              {(field) => (
+                <Field
+                  error={
+                    field.state.meta.isTouched
+                      ? field.state.meta.errors[0]?.message
+                      : undefined
+                  }
+                  label="License number"
+                >
+                  <Input
+                    autoComplete="off"
+                    id="licenseNumber"
+                    name={field.name}
+                    onBlur={field.handleBlur}
+                    onChange={(event) => field.handleChange(event.target.value)}
+                    required
+                    type="text"
+                    value={field.state.value}
+                  />
+                </Field>
+              )}
+            </form.Field>
+
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <form.Field name="issuedAt">
+                {(field) => (
+                  <Field
+                    error={
+                      field.state.meta.isTouched
+                        ? field.state.meta.errors[0]?.message
+                        : undefined
+                    }
+                    label="Issue date"
+                  >
+                    <Input
+                      id="issuedAt"
+                      name={field.name}
+                      onBlur={field.handleBlur}
+                      onChange={(event) =>
+                        field.handleChange(event.target.value)
+                      }
+                      required
+                      type="date"
+                      value={field.state.value}
+                    />
+                  </Field>
+                )}
+              </form.Field>
+              <form.Field name="expiresAt">
+                {(field) => (
+                  <Field
+                    error={
+                      field.state.meta.isTouched
+                        ? field.state.meta.errors[0]?.message
+                        : undefined
+                    }
+                    label="Expiration date"
+                  >
+                    <Input
+                      id="expiresAt"
+                      name={field.name}
+                      onBlur={field.handleBlur}
+                      onChange={(event) =>
+                        field.handleChange(event.target.value)
+                      }
+                      required
+                      type="date"
+                      value={field.state.value}
+                    />
+                  </Field>
+                )}
+              </form.Field>
+            </div>
+          </>
+        )}
 
         {serverError && (
           <p
@@ -319,34 +402,38 @@ export const OnboardingFormView = ({
             role="alert"
           >
             {serverError}
-            {serverSuggestion && (
-              <>
-                {" Try "}
-                <button
-                  className="cursor-pointer"
-                  onClick={() => acceptSuggestion(serverSuggestion)}
-                  type="button"
-                >
-                  <Badge variant="muted">{serverSuggestion}</Badge>
-                </button>
-                .
-              </>
-            )}
           </p>
         )}
 
-        <form.Subscribe
-          selector={(state) => ({
-            canSubmit: state.canSubmit,
-            isSubmitting: state.isSubmitting,
-          })}
-        >
-          {({ canSubmit, isSubmitting }) => (
-            <Button disabled={!canSubmit || isSubmitting} type="submit">
-              {isSubmitting ? "Setting up…" : "Continue"}
+        <div className="flex items-center gap-3">
+          {step > 1 && (
+            <Button onClick={goBack} type="button" variant="outline">
+              Back
             </Button>
           )}
-        </form.Subscribe>
+          {step < TOTAL_STEPS ? (
+            <Button className="flex-1" disabled={!canAdvance} type="submit">
+              Continue
+            </Button>
+          ) : (
+            <form.Subscribe
+              selector={(state) => ({
+                canSubmit: state.canSubmit,
+                isSubmitting: state.isSubmitting,
+              })}
+            >
+              {({ canSubmit, isSubmitting }) => (
+                <Button
+                  className="flex-1"
+                  disabled={!canSubmit || isSubmitting}
+                  type="submit"
+                >
+                  {isSubmitting ? "Setting up…" : "Finish"}
+                </Button>
+              )}
+            </form.Subscribe>
+          )}
+        </div>
 
         <p className="font-sans text-body-sm text-text-muted">
           Liscet helps you track CEUs. You are responsible for verifying
@@ -356,6 +443,36 @@ export const OnboardingFormView = ({
     </section>
   )
 }
+
+type StepProgressProps = {
+  current: number
+  total: number
+}
+
+const StepProgress = ({
+  current,
+  total,
+}: StepProgressProps): React.JSX.Element => (
+  <div className="space-y-2">
+    <p className="font-sans text-body-sm text-text-muted">
+      Step {current} of {total}
+    </p>
+    <div aria-hidden="true" className="flex gap-1.5">
+      {Array.from({ length: total }, (_, index) => index + 1).map(
+        (stepIndex) => (
+          <span
+            className={
+              stepIndex <= current
+                ? "h-1 flex-1 rounded-full bg-accent"
+                : "h-1 flex-1 rounded-full bg-border"
+            }
+            key={stepIndex}
+          />
+        )
+      )}
+    </div>
+  </div>
+)
 
 type SlugStatusLineProps = {
   onAcceptSuggestion: (suggestion: string) => void

@@ -32,15 +32,6 @@ const reservedSlug =
       status: "success",
     })
 
-const submitTakenSuggestion =
-  (suggestion: string) => (): Promise<CompleteOnboardingResult> =>
-    Promise.resolve({
-      code: "SLUG_TAKEN",
-      message: "That slug is taken.",
-      status: "error",
-      suggestion,
-    })
-
 const meta = preview.meta({
   args: {
     onCheckSlug: availableSlug,
@@ -54,21 +45,17 @@ const meta = preview.meta({
 
 export const Empty = meta.story({})
 
-export const SlugAvailable = meta.story({
-  args: { onCheckSlug: availableSlug },
+export const Prefilled = meta.story({
+  args: { initialSlug: "trevor-mathiak", onCheckSlug: availableSlug },
 })
 
 export const SlugTaken = meta.story({
-  args: { onCheckSlug: takenSlug("trevor-mathiak-2") },
+  args: {
+    initialSlug: "trevor-mathiak",
+    onCheckSlug: takenSlug("trevor-mathiak-2"),
+  },
 })
 
 export const SlugReserved = meta.story({
-  args: { onCheckSlug: reservedSlug("admin-2") },
-})
-
-export const SubmitConflictWithSuggestion = meta.story({
-  args: {
-    onCheckSlug: availableSlug,
-    onSubmit: submitTakenSuggestion("trevor-mathiak-3"),
-  },
+  args: { initialSlug: "admin", onCheckSlug: reservedSlug("admin-2") },
 })

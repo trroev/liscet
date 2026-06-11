@@ -11,6 +11,7 @@ import type {
 import { OnboardingFormView } from "./onboarding-form.view"
 
 export type OnboardingFormProps = {
+  initialSlug?: string
   onCheckSlug?: (slug: string) => Promise<CheckSlugAvailabilityResult>
   onSubmit?: (
     input: CompleteOnboardingInput
@@ -18,12 +19,14 @@ export type OnboardingFormProps = {
 }
 
 export const OnboardingForm = ({
+  initialSlug,
   onCheckSlug = checkSlugAvailability,
   onSubmit = completeOnboarding,
 }: OnboardingFormProps): React.JSX.Element => {
   const router = useRouter()
   return (
     <OnboardingFormView
+      initialSlug={initialSlug}
       onCheckSlug={onCheckSlug}
       onNavigate={(path) => {
         router.push(path)

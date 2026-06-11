@@ -16,5 +16,5 @@ export default async function OnboardingPage() {
   if (viewer.user.slug) {
     redirect(`/${viewer.user.slug}`)
   }
-  return <OnboardingForm />
+  return <OnboardingForm initialSlug={viewer.user.displayName ?? ""} />
 }
