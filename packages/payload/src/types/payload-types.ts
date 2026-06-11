@@ -171,6 +171,18 @@ export interface CourseCredit {
    * Subject categories the rules engine credited.
    */
   creditedCategories?: string[] | null;
+  /**
+   * Course completion date, denormalized from the course — buckets the credit into a recurrence window when summarized.
+   */
+  completedAt: string;
+  /**
+   * Delivery format, denormalized from the course for aggregate format-constraint checks.
+   */
+  format: string;
+  /**
+   * Approving body for aggregate provider-cap checks; null when the provider is unrecognized.
+   */
+  approvingBody?: string | null;
   evaluatedAt: string;
   /**
    * Rule set applied, keyed as state-licenseType (e.g. CA-LCSW).
@@ -443,6 +455,9 @@ export interface CourseCreditsSelect<T extends boolean = true> {
   license?: T;
   creditedHours?: T;
   creditedCategories?: T;
+  completedAt?: T;
+  format?: T;
+  approvingBody?: T;
   evaluatedAt?: T;
   ruleSetKey?: T;
   ruleSetVersion?: T;

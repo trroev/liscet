@@ -48,6 +48,32 @@ export const CourseCredits: CollectionConfig = {
       type: "text",
     },
     {
+      admin: {
+        description:
+          "Course completion date, denormalized from the course — buckets the credit into a recurrence window when summarized.",
+      },
+      name: "completedAt",
+      required: true,
+      type: "date",
+    },
+    {
+      admin: {
+        description:
+          "Delivery format, denormalized from the course for aggregate format-constraint checks.",
+      },
+      name: "format",
+      required: true,
+      type: "text",
+    },
+    {
+      admin: {
+        description:
+          "Approving body for aggregate provider-cap checks; null when the provider is unrecognized.",
+      },
+      name: "approvingBody",
+      type: "text",
+    },
+    {
       name: "evaluatedAt",
       required: true,
       type: "date",

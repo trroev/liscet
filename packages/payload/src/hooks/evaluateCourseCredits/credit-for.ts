@@ -44,10 +44,13 @@ export const creditFor = ({
     return null
   }
   return {
+    approvingBody: result.approvingBody,
+    completedAt: result.completedAt,
     courseId: result.courseId,
     creditedCategories: result.creditedCategories,
     creditedHours: result.creditedHours,
     evaluatedAt: result.evaluatedAt,
+    format: result.format,
     licenseId: result.licenseId,
     ruleSetKey: key,
     ruleSetVersion: result.ruleSetVersion,

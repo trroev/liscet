@@ -6,6 +6,9 @@ export type CreditToPersist = {
   readonly creditedHours: number
   readonly creditedCategories: ReadonlyArray<string>
   readonly evaluatedAt: Date
+  readonly completedAt: Date
+  readonly format: string
+  readonly approvingBody: string | null
   readonly ruleSetKey: string
   readonly ruleSetVersion: number
 }
@@ -75,10 +78,13 @@ export async function reconcileCredits({
   await Promise.all(
     credits.map(async (credit) => {
       const data = {
+        approvingBody: credit.approvingBody,
+        completedAt: credit.completedAt.toISOString(),
         course: credit.courseId,
         creditedCategories: [...credit.creditedCategories],
         creditedHours: credit.creditedHours,
         evaluatedAt: credit.evaluatedAt.toISOString(),
+        format: credit.format,
         license: credit.licenseId,
         ruleSetKey: credit.ruleSetKey,
         ruleSetVersion: credit.ruleSetVersion,
