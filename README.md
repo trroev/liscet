@@ -1,6 +1,6 @@
 # next-payload-starter
 
-A Turborepo monorepo starter for content-driven web apps. Bundles Next.js 16, PayloadCMS 3, better-auth, MongoDB, Tailwind v4, Vitest, Storybook, and Biome — all wired up with the conventions, import boundaries, and CI scaffolding that make a fresh project usable in minutes instead of weeks.
+A Turborepo monorepo starter for content-driven web apps. Bundles Next.js 16, PayloadCMS 3, better-auth, Postgres, Tailwind v4, Vitest, Storybook, and Biome — all wired up with the conventions, import boundaries, and CI scaffolding that make a fresh project usable in minutes instead of weeks.
 
 The `posts` collection and `/posts` routes are a deliberately skeletal example demonstrating the feature-folder layout — adapt or replace per project.
 
@@ -12,7 +12,7 @@ The `posts` collection and `/posts` routes are a deliberately skeletal example d
 |---|---|
 | Framework | Next.js 16 (App Router) |
 | CMS | PayloadCMS 3 (embedded) + `@payloadcms/plugin-seo` + live preview |
-| Database | MongoDB (local Docker or hosted Atlas) |
+| Database | Postgres (local Docker or hosted, e.g. Neon) |
 | Auth | better-auth |
 | Images | Cloudinary (optional, custom Payload storage adapter) |
 | Styling | TailwindCSS v4 |
@@ -72,8 +72,14 @@ Payload and Better Auth share one Postgres connection, configured via `DATABASE_
 
 The model is **auto-push in dev, versioned migrations in production**:
 
-- **Local dev** — Payload auto-pushes its schema on boot; sync the Better Auth tables once with `pnpm --filter @repo/auth db:push`. No migration files needed to iterate.
-- **Production** — `pnpm migrate` applies pending Payload *and* Better Auth migrations. `apps/web/vercel.json` runs it ahead of the build, so a deploy migrates before serving traffic.
+- **Local dev** — Payload auto-pushes its schema on boot; sync the Better Auth tables once with:
+
+  ```sh
+  pnpm dotenvx run -f apps/web/.env.development -- pnpm --filter @repo/auth exec drizzle-kit push
+  ```
+
+  The `dotenvx run -f apps/web/.env.development` wrapper is required: `drizzle-kit` invoked standalone doesn't read the app env file the way the Next.js dev server does, so without it `DATABASE_URL` is empty, the command silently no-ops, and sign-in then fails with Postgres `relation "user" does not exist`. (The bare `db:push`/`db:migrate` scripts only work if `DATABASE_URL` is already exported in your shell.)
+- **Production** — `pnpm migrate` applies pending Payload *and* Better Auth migrations. `apps/web/vercel.json` runs it ahead of the build, so a deploy migrates before serving traffic. There `DATABASE_URL` comes from the platform env, so the root dotenvx wrapper finding no local file is fine.
 
 Initial migrations are committed in `packages/payload/src/migrations` and `packages/auth/drizzle`. After changing a collection or the auth schema, regenerate and commit:
 
