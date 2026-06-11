@@ -5,7 +5,7 @@ import { Button } from "@repo/ui/components/Button"
 import { Field } from "@repo/ui/components/Field"
 import { Input } from "@repo/ui/components/Input"
 import { useForm } from "@tanstack/react-form"
-import { useRouter, useSearchParams } from "next/navigation"
+import { useRouter } from "next/navigation"
 import { useState } from "react"
 import { match } from "ts-pattern"
 import { z } from "zod"
@@ -25,14 +25,8 @@ const signUpSchema = z
     path: ["confirmPassword"],
   })
 
-const isSafeCallbackUrl = (value: string | null): value is string =>
-  value?.startsWith("/") === true && !value.startsWith("//")
-
 export const SignUpForm = () => {
   const router = useRouter()
-  const searchParams = useSearchParams()
-  const rawCallback = searchParams.get("callbackUrl")
-  const callbackUrl = isSafeCallbackUrl(rawCallback) ? rawCallback : "/"
   const [serverError, setServerError] = useState<string | undefined>()
 
   const form = useForm({
@@ -50,7 +44,7 @@ export const SignUpForm = () => {
           setServerError(friendlyMessage)
         })
         .with({ status: "ok" }, () => {
-          router.push(callbackUrl)
+          router.push("/onboarding")
           router.refresh()
         })
         .exhaustive()

@@ -22,7 +22,9 @@ export const SignInForm = () => {
   const router = useRouter()
   const searchParams = useSearchParams()
   const rawCallback = searchParams.get("callbackUrl")
-  const callbackUrl = isSafeCallbackUrl(rawCallback) ? rawCallback : "/"
+  const callbackUrl = isSafeCallbackUrl(rawCallback)
+    ? rawCallback
+    : "/onboarding"
   const [serverError, setServerError] = useState<string | undefined>()
 
   const form = useForm({

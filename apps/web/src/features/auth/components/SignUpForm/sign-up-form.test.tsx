@@ -69,7 +69,7 @@ afterEach(() => {
 })
 
 describe("SignUpForm", () => {
-  it("creates an account and redirects to the default callback", async () => {
+  it("creates an account and redirects to onboarding", async () => {
     server.use(authSignUpHandler(buildSessionPayload()))
     const user = userEvent.setup()
 
@@ -79,7 +79,7 @@ describe("SignUpForm", () => {
     await user.click(screen.getByRole("button", { name: "Create account" }))
 
     await waitFor(() => {
-      expect(nav.push).toHaveBeenCalledWith("/")
+      expect(nav.push).toHaveBeenCalledWith("/onboarding")
     })
     expect(nav.refresh).toHaveBeenCalled()
   })

@@ -55,6 +55,7 @@ const buildSessionPayload = (): SessionPayload => {
 beforeEach(() => {
   nav.push.mockReset()
   nav.refresh.mockReset()
+  nav.searchParams = new URLSearchParams()
 })
 
 afterEach(() => {
@@ -62,7 +63,7 @@ afterEach(() => {
 })
 
 describe("SignInForm", () => {
-  it("submits valid credentials and redirects to the default callback", async () => {
+  it("submits valid credentials and redirects to onboarding by default", async () => {
     server.use(authSignInHandler(buildSessionPayload()))
     const user = userEvent.setup()
 
@@ -73,9 +74,25 @@ describe("SignInForm", () => {
     await user.click(screen.getByRole("button", { name: "Sign in" }))
 
     await waitFor(() => {
-      expect(nav.push).toHaveBeenCalledWith("/")
+      expect(nav.push).toHaveBeenCalledWith("/onboarding")
     })
     expect(nav.refresh).toHaveBeenCalled()
+  })
+
+  it("redirects to a safe callbackUrl when one is present", async () => {
+    nav.searchParams = new URLSearchParams({ callbackUrl: "/dashboard" })
+    server.use(authSignInHandler(buildSessionPayload()))
+    const user = userEvent.setup()
+
+    renderWithProviders(<SignInForm />)
+
+    await user.type(screen.getByLabelText("Email"), "chef@example.com")
+    await user.type(screen.getByLabelText("Password"), "hunter22")
+    await user.click(screen.getByRole("button", { name: "Sign in" }))
+
+    await waitFor(() => {
+      expect(nav.push).toHaveBeenCalledWith("/dashboard")
+    })
   })
 
   it("shows the friendly message when the server rejects the credentials", async () => {
