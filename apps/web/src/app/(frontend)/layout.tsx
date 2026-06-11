@@ -8,6 +8,7 @@ import { ThemeProvider } from "next-themes"
 import type React from "react"
 import { FeedbackButton } from "~/components/FeedbackButton"
 import { PostHogProvider } from "~/components/PostHogProvider"
+import { QueryProvider } from "~/components/QueryProvider"
 import { SentryUser } from "~/components/SentryUser"
 import { signOutAction } from "~/features/auth/actions/sign-out"
 import { auth } from "~/features/auth/auth.server"
@@ -84,19 +85,21 @@ export default async function FrontendLayout({
           enableSystem
         >
           <SessionProvider initialUser={session?.user ?? null}>
-            <SentryUser />
-            {session ? (
-              <PostHogProvider>
+            <QueryProvider>
+              <SentryUser />
+              {session ? (
+                <PostHogProvider>
+                  <AppShell auth={headerAuth} themeToggleSlot={<ThemeToggle />}>
+                    {children}
+                  </AppShell>
+                  <FeedbackButton />
+                </PostHogProvider>
+              ) : (
                 <AppShell auth={headerAuth} themeToggleSlot={<ThemeToggle />}>
                   {children}
                 </AppShell>
-                <FeedbackButton />
-              </PostHogProvider>
-            ) : (
-              <AppShell auth={headerAuth} themeToggleSlot={<ThemeToggle />}>
-                {children}
-              </AppShell>
-            )}
+              )}
+            </QueryProvider>
           </SessionProvider>
         </ThemeProvider>
       </body>

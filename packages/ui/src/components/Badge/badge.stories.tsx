@@ -5,7 +5,17 @@ import { Badge as Component } from "./badge"
 const meta = preview.meta({
   args: { children: "Badge" },
   argTypes: {
-    variant: { control: "inline-radio", options: ["default", "muted"] },
+    variant: {
+      control: "inline-radio",
+      options: [
+        "default",
+        "muted",
+        "success",
+        "warning",
+        "info",
+        "destructive",
+      ],
+    },
   },
   component: Component,
   parameters: { layout: "centered" },
@@ -19,6 +29,10 @@ export const Showcase = meta.story({
     <div className="flex flex-wrap items-center gap-3">
       <Component>Default</Component>
       <Component variant="muted">Muted</Component>
+      <Component variant="success">Success</Component>
+      <Component variant="warning">Warning</Component>
+      <Component variant="info">Info</Component>
+      <Component variant="destructive">Destructive</Component>
     </div>
   ),
 })
