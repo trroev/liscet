@@ -100,6 +100,16 @@ export const Users: CollectionConfig = {
       relationTo: "media",
       type: "upload",
     },
+    {
+      admin: {
+        description:
+          "Soft-delete marker set when the practitioner requests account deletion. Hard delete happens 30 days later via cron (#36); cleared if the practitioner cancels.",
+        readOnly: true,
+      },
+      index: true,
+      name: "deletedAt",
+      type: "date",
+    },
   ],
   hooks: {
     beforeDelete: [cascadeDeleteUser],

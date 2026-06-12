@@ -246,6 +246,10 @@ export interface User {
    * Avatar image. Written by the uploadAvatar server action (overrides access) or by admins.
    */
   avatar?: (string | null) | Media;
+  /**
+   * Soft-delete marker set when the practitioner requests account deletion. Hard delete happens 30 days later via cron (#36); cleared if the practitioner cancels.
+   */
+  deletedAt?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -548,6 +552,7 @@ export interface UsersSelect<T extends boolean = true> {
   slug?: T;
   timezone?: T;
   avatar?: T;
+  deletedAt?: T;
   updatedAt?: T;
   createdAt?: T;
 }
