@@ -270,10 +270,9 @@ export const Tokens = () => (
 
       <Section title="Font Families">
         <div className="space-y-3">
-          <p className="font-display text-heading-md">
-            Cormorant Garamond — display
-          </p>
-          <p className="font-sans text-body">Manrope — sans</p>
+          <p className="font-display text-heading-md">Geist — display</p>
+          <p className="font-sans text-body">Geist — sans</p>
+          <p className="font-mono text-body">Geist Mono — mono</p>
         </div>
       </Section>
     </div>

@@ -1,15 +1,13 @@
-import { Cormorant_Garamond, Manrope } from "next/font/google"
+import { Geist, Geist_Mono } from "next/font/google"
 
-export const cormorant = Cormorant_Garamond({
-  subsets: ["latin"],
-  weight: ["400", "500", "600"],
-  variable: "--font-cormorant",
+export const geist = Geist({
   display: "swap",
+  subsets: ["latin"],
+  variable: "--font-geist",
 })
 
-export const manrope = Manrope({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-  variable: "--font-manrope",
+export const geistMono = Geist_Mono({
   display: "swap",
+  subsets: ["latin"],
+  variable: "--font-geist-mono",
 })

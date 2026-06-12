@@ -13,7 +13,7 @@ import { SentryUser } from "~/components/SentryUser"
 import { signOutAction } from "~/features/auth/actions/sign-out"
 import { auth } from "~/features/auth/auth.server"
 import { ThemeToggle } from "~/features/settings/components/ThemeToggle"
-import { cormorant, manrope } from "~/fonts"
+import { geist, geistMono } from "~/fonts"
 import { getPayloadUserByBetterAuthId } from "~/lib/queries/payload-user-by-better-auth-id"
 
 import "../globals.css"
@@ -72,7 +72,7 @@ export default async function FrontendLayout({
 
   return (
     <html
-      className={`${cormorant.variable} ${manrope.variable}`}
+      className={`${geist.variable} ${geistMono.variable}`}
       data-scroll-behavior="smooth"
       lang="en"
       suppressHydrationWarning
