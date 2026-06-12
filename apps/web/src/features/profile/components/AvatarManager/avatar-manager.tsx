@@ -143,9 +143,7 @@ const AvatarManagerInner = ({ avatarUrl, email }: AvatarManagerProps) => {
 
       <div className="flex flex-col gap-2">
         <Dialog.Root onOpenChange={handleOpenChange} open={isOpen}>
-          <Dialog.Trigger
-            render={<Button variant="secondary">Change photo</Button>}
-          />
+          <Dialog.Trigger render={<Button>Change photo</Button>} />
           <Dialog.Portal>
             <Dialog.Backdrop />
             <Dialog.Popup>

@@ -15,11 +15,7 @@ export default function HomePage() {
           Liscet
         </h1>
         <div className="flex flex-wrap gap-4">
-          <Button
-            nativeButton={false}
-            render={<Link href="/admin" />}
-            variant="secondary"
-          >
+          <Button nativeButton={false} render={<Link href="/admin" />}>
             Open admin
           </Button>
         </div>

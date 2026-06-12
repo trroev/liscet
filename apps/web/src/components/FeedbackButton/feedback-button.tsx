@@ -27,11 +27,7 @@ export const FeedbackButton = (): ReactNode => {
     <Dialog.Root onOpenChange={setIsOpen} open={isOpen}>
       <Dialog.Trigger
         render={
-          <Button
-            className="fixed right-4 bottom-4 z-40"
-            type="button"
-            variant="secondary"
-          >
+          <Button className="fixed right-4 bottom-4 z-40" type="button">
             Feedback
           </Button>
         }
