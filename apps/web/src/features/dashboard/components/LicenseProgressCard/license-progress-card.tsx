@@ -67,7 +67,9 @@ export const LicenseProgressCard = ({
 
   return (
     <Panel>
-      <header className="flex items-start justify-between gap-4">
+      {/* wrap-reverse stacks the wrapped badge above the title; it also flips
+          the cross axis, so items-end renders as top-aligned */}
+      <header className="flex flex-wrap-reverse items-end justify-between gap-x-4 gap-y-2">
         <div className="space-y-1">
           <h2 className="font-display text-heading-md text-text-primary">
             {title}
@@ -84,7 +86,7 @@ export const LicenseProgressCard = ({
         </Badge>
       </header>
 
-      <div className="flex items-center justify-between gap-4">
+      <div className="flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center gap-3">
           <ProgressCircle
             isComplete={summary.isComplete}
