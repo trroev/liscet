@@ -18,6 +18,7 @@
     "generate:types": "turbo run generate:types",
     "lint": "pnpm exec ultracite check",
     "seed": "pnpm --filter web run seed",
+    "storybook": "turbo run storybook",
     "lint:fix": "pnpm exec ultracite fix",
     "migrate": "dotenvx run --convention=nextjs -- node scripts/migrate-deploy.mjs",
     "preinstall": "only-allow pnpm",
