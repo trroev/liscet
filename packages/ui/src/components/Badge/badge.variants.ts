@@ -1,7 +1,7 @@
 import { tv, type VariantProps } from "@repo/ui/utils/tv"
 
 export const badge = tv({
-  base: "inline-flex items-center rounded-sm px-2 py-0.5 font-sans text-caption uppercase tracking-widest",
+  base: "inline-flex max-w-full items-center overflow-hidden whitespace-nowrap rounded-sm px-2 py-0.5 font-sans text-caption uppercase tracking-widest",
   variants: {
     variant: {
       default: "bg-accent text-accent-foreground",
