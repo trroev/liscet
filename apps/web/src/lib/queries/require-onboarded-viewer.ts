@@ -11,13 +11,17 @@ import { getCurrentViewer } from "./current-viewer"
  * once a fully onboarded practitioner is present, so callers can rely on
  * `user.slug` being set.
  */
-export const requireOnboardedViewer = async (): Promise<{ user: User }> => {
+export const requireOnboardedViewer = async (): Promise<{
+  user: User
+  slug: string
+}> => {
   const viewer = await getCurrentViewer()
   if (viewer?.kind !== "user") {
     redirect("/sign-in")
   }
-  if (!viewer.user.slug) {
+  const { slug } = viewer.user
+  if (!slug) {
     redirect("/onboarding")
   }
-  return { user: viewer.user }
+  return { slug, user: viewer.user }
 }
