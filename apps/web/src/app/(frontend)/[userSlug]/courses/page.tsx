@@ -1,39 +1,32 @@
 import type { Metadata } from "next"
-import { DashboardView } from "~/features/dashboard/components/DashboardView"
-import { getDashboardData } from "~/features/dashboard/lib/get-dashboard-data"
 import { requireSlugOwner } from "~/lib/queries/require-slug-owner"
 
 export const metadata: Metadata = {
-  title: "Dashboard",
+  title: "Courses",
   robots: { follow: false, index: false },
 }
 
-export default async function DashboardPage({
+export default async function CoursesPage({
   params,
 }: {
   params: Promise<{ userSlug: string }>
 }) {
   const { userSlug } = await params
-  const { user, slug } = await requireSlugOwner({ userSlug })
-
-  const now = new Date()
-  const data = await getDashboardData(user.id, now)
+  await requireSlugOwner({ userSlug })
 
   return (
     <section className="mx-auto w-full max-w-3xl space-y-6 px-6 py-10">
       <header className="space-y-1">
         <h1 className="font-display text-heading-lg text-text-primary">
-          Dashboard
+          Courses
         </h1>
         <p className="font-sans text-body-sm text-text-muted">
-          Your continuing-education progress toward each license renewal.
+          Your continuing-education course history.
         </p>
       </header>
-      <DashboardView
-        initialData={data}
-        nowIso={now.toISOString()}
-        userSlug={slug}
-      />
+      <p className="rounded-lg border border-border border-dashed bg-surface p-6 text-body-sm text-text-secondary">
+        Course history is coming soon.
+      </p>
     </section>
   )
 }
