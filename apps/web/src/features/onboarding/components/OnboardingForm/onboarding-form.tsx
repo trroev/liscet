@@ -30,7 +30,6 @@ export const OnboardingForm = ({
       onCheckSlug={onCheckSlug}
       onNavigate={(path) => {
         router.push(path)
-        router.refresh()
       }}
       onSubmit={onSubmit}
     />
