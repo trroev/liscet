@@ -1,7 +1,7 @@
 import { randomBytes } from "node:crypto"
 import { expect, test } from "@playwright/test"
 import { OnboardingPage } from "../page-objects/onboarding-page"
-import { ProfilePage } from "../page-objects/profile-page"
+import { SettingsPage } from "../page-objects/settings-page"
 import { SignUpPage } from "../page-objects/sign-up-page"
 import { SiteHeader } from "../page-objects/site-header"
 
@@ -15,7 +15,7 @@ const uniqueSlug = (): string => `e2e-user-${randomBytes(3).toString("hex")}`
 
 const isoDate = (date: Date): string => date.toISOString().slice(0, 10)
 
-test("auth lifecycle: sign-up, onboarding, profile, sign-out", async ({
+test("auth lifecycle: sign-up, onboarding, account settings, sign-out", async ({
   page,
 }) => {
   const email = uniqueEmail()
@@ -48,12 +48,15 @@ test("auth lifecycle: sign-up, onboarding, profile, sign-out", async ({
     page.getByRole("heading", { name: LICENSE_OPTION_LABEL })
   ).toBeVisible()
 
-  const profile = new ProfilePage(page)
-  await profile.goto()
-  await profile.expectEmail(email)
-  await profile.expectMemberSince()
+  await page.goto("/profile")
+  await page.waitForURL(`/${slug}/settings/account`)
 
-  await profile.signOut()
+  const settings = new SettingsPage(page)
+  await settings.gotoAccount(slug)
+  await settings.expectEmail(email)
+  await settings.expectMemberSince()
+
+  await settings.signOut()
   await page.waitForURL("/")
 
   const header = new SiteHeader(page)

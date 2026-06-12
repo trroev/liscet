@@ -3,17 +3,17 @@ import { expect } from "@playwright/test"
 
 const SIGN_OUT_BUTTON = /sign out/i
 
-export class ProfilePage {
+export class SettingsPage {
   private readonly page: Page
 
   constructor(page: Page) {
     this.page = page
   }
 
-  async goto(): Promise<void> {
-    await this.page.goto("/profile")
+  async gotoAccount(slug: string): Promise<void> {
+    await this.page.goto(`/${slug}/settings/account`)
     await expect(
-      this.page.getByRole("heading", { name: "Profile", level: 1 })
+      this.page.getByRole("heading", { name: "Settings", level: 1 })
     ).toBeVisible()
   }
 
