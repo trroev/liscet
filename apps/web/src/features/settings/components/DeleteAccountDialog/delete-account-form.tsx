@@ -1,0 +1,104 @@
+"use client"
+
+import { Button } from "@repo/ui/components/Button"
+import { Dialog } from "@repo/ui/components/Dialog"
+import { Field } from "@repo/ui/components/Field"
+import { Input } from "@repo/ui/components/Input"
+import { useForm } from "@tanstack/react-form"
+import { useState } from "react"
+import { match } from "ts-pattern"
+import { z } from "zod"
+import { deleteAccount } from "../../actions/delete-account"
+
+const deleteAccountSchema = z.object({
+  password: z.string().min(1, "Password is required."),
+})
+
+export type DeleteAccountFormProps = {
+  onDeleted: () => void
+}
+
+export const DeleteAccountForm = ({ onDeleted }: DeleteAccountFormProps) => {
+  const [serverError, setServerError] = useState<string | undefined>()
+
+  const form = useForm({
+    defaultValues: { password: "" },
+    validators: { onChange: deleteAccountSchema },
+    onSubmit: async ({ value }) => {
+      setServerError(undefined)
+      const result = await deleteAccount({ password: value.password })
+      match(result)
+        .with({ status: "error" }, ({ message }) => {
+          setServerError(message)
+        })
+        .with({ status: "success" }, () => {
+          onDeleted()
+        })
+        .exhaustive()
+    },
+  })
+
+  return (
+    <form
+      className="flex flex-col gap-4"
+      noValidate
+      onSubmit={(e) => {
+        e.preventDefault()
+        e.stopPropagation()
+        form.handleSubmit()
+      }}
+    >
+      <form.Field name="password">
+        {(field) => (
+          <Field
+            error={
+              field.state.meta.isTouched
+                ? field.state.meta.errors[0]?.message
+                : undefined
+            }
+            label="Password"
+          >
+            <Input
+              autoComplete="current-password"
+              id="delete-account-password"
+              name={field.name}
+              onBlur={field.handleBlur}
+              onChange={(e) => field.handleChange(e.target.value)}
+              required
+              type="password"
+              value={field.state.value}
+            />
+          </Field>
+        )}
+      </form.Field>
+      {serverError && (
+        <p
+          aria-live="polite"
+          className="font-sans text-body-sm text-destructive"
+          role="alert"
+        >
+          {serverError}
+        </p>
+      )}
+      <div className="flex justify-end gap-2">
+        <Dialog.Close render={<Button variant="ghost">Cancel</Button>} />
+        <form.Subscribe
+          selector={(state) => ({
+            canSubmit: state.canSubmit,
+            isSubmitting: state.isSubmitting,
+          })}
+        >
+          {({ canSubmit, isSubmitting }) => (
+            <Button
+              disabled={!canSubmit || isSubmitting}
+              type="submit"
+              variant="destructive"
+            >
+              {isSubmitting ? "Deleting…" : "Delete account"}
+            </Button>
+          )}
+        </form.Subscribe>
+      </div>
+    </form>
+  )
+}
