@@ -67,8 +67,6 @@ export const LicenseProgressCard = ({
 
   return (
     <Panel>
-      {/* wrap-reverse stacks the wrapped badge above the title; it also flips
-          the cross axis, so items-end renders as top-aligned */}
       <header className="flex flex-wrap-reverse items-end justify-between gap-x-4 gap-y-2">
         <div className="space-y-1">
           <h2 className="font-display text-heading-md text-text-primary">
