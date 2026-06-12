@@ -5,12 +5,10 @@ import { baseEnvOptions } from "./shared"
 const env = createEnv({
   ...baseEnvOptions,
   experimental__runtimeEnv: {
-    EMAIL_FROM: process.env.EMAIL_FROM,
-    RESEND_API_KEY: process.env.RESEND_API_KEY,
+    BLOB_READ_WRITE_TOKEN: process.env.BLOB_READ_WRITE_TOKEN,
   },
   server: {
-    EMAIL_FROM: z.string().min(1),
-    RESEND_API_KEY: z.string(),
+    BLOB_READ_WRITE_TOKEN: z.string(),
   },
 })
 
