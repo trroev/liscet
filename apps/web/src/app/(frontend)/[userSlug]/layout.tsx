@@ -66,7 +66,7 @@ export default async function UserSlugLayout({
       auth={auth}
       homeHref={`/${slug}`}
       navItems={navItems}
-      profileHref="/profile"
+      profileHref={`/${slug}/settings/account`}
       themeToggleSlot={<ThemeToggle />}
     >
       {children}

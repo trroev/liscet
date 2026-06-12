@@ -16,7 +16,7 @@ const { uploadAvatar, removeAvatar, nav } = vi.hoisted(() => ({
     forward: vi.fn(),
     refresh: vi.fn(),
     prefetch: vi.fn(),
-    pathname: "/profile",
+    pathname: "/test-user/settings/account",
     searchParams: new URLSearchParams(),
   },
 }))
