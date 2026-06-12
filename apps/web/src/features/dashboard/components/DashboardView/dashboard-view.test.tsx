@@ -69,7 +69,7 @@ describe("DashboardView", () => {
 
   it("shows an add-license prompt when there are no active licenses", () => {
     renderView({ licenses: [] })
-    const cta = screen.getByRole("link", { name: "Add a license" })
+    const cta = screen.getByRole("button", { name: "Add a license" })
     expect(cta).toHaveAttribute("href", "/trevor/licenses")
   })
 })
