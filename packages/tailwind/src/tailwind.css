@@ -17,7 +17,7 @@
   semantic token. Without this, unused steps are tree-shaken and
   var(--color-accent-50) etc. resolves to nothing.
 */
-@source inline("{bg,text,border}-{neutral,accent,sage}-{50,100,200,300,400,500,600,700,800,900}");
+@source inline("{bg,text,border}-{neutral,accent,cyan}-{50,100,200,300,400,500,600,700,800,900}");
 
 @layer base {
   html {

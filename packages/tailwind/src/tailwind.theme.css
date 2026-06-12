@@ -25,29 +25,29 @@
   --color-neutral-800: oklch(0.25 0.007 60);
   --color-neutral-900: oklch(0.16 0.006 60);
 
-  /* COLORS — accent scale (v1: cool muted indigo-violet, hue 265, max chroma 0.06) */
-  --color-accent-50: oklch(0.97 0.007 265);
-  --color-accent-100: oklch(0.93 0.016 265);
-  --color-accent-200: oklch(0.87 0.028 265);
-  --color-accent-300: oklch(0.79 0.039 265);
-  --color-accent-400: oklch(0.7 0.049 265);
-  --color-accent-500: oklch(0.62 0.055 265);
-  --color-accent-600: oklch(0.55 0.06 265);
-  --color-accent-700: oklch(0.46 0.053 265);
-  --color-accent-800: oklch(0.37 0.042 265);
-  --color-accent-900: oklch(0.28 0.03 265);
+  /* COLORS — accent scale (v2: vivid bluish indigo, hue 264) */
+  --color-accent-50: oklch(0.97 0.015 264);
+  --color-accent-100: oklch(0.93 0.035 264);
+  --color-accent-200: oklch(0.87 0.065 264);
+  --color-accent-300: oklch(0.78 0.13 264);
+  --color-accent-400: oklch(0.69 0.18 264);
+  --color-accent-500: oklch(0.6 0.2 264);
+  --color-accent-600: oklch(0.52 0.22 264);
+  --color-accent-700: oklch(0.45 0.2 264);
+  --color-accent-800: oklch(0.38 0.16 264);
+  --color-accent-900: oklch(0.3 0.11 264);
 
-  /* COLORS — sage secondary (placeholder) */
-  --color-sage-50: oklch(0.97 0.008 140);
-  --color-sage-100: oklch(0.94 0.012 140);
-  --color-sage-200: oklch(0.88 0.02 140);
-  --color-sage-300: oklch(0.8 0.028 140);
-  --color-sage-400: oklch(0.72 0.035 140);
-  --color-sage-500: oklch(0.62 0.04 140);
-  --color-sage-600: oklch(0.52 0.04 140);
-  --color-sage-700: oklch(0.42 0.035 140);
-  --color-sage-800: oklch(0.32 0.028 140);
-  --color-sage-900: oklch(0.22 0.02 140);
+  /* COLORS — cyan secondary (v2: bright sky-cyan, hue 212) */
+  --color-cyan-50: oklch(0.98 0.012 212);
+  --color-cyan-100: oklch(0.95 0.035 212);
+  --color-cyan-200: oklch(0.9 0.07 212);
+  --color-cyan-300: oklch(0.86 0.13 212);
+  --color-cyan-400: oklch(0.78 0.15 212);
+  --color-cyan-500: oklch(0.68 0.135 212);
+  --color-cyan-600: oklch(0.56 0.115 212);
+  --color-cyan-700: oklch(0.48 0.098 212);
+  --color-cyan-800: oklch(0.4 0.08 212);
+  --color-cyan-900: oklch(0.31 0.06 212);
 
   /* TYPOGRAPHY — families (CSS vars wired via next/font) */
   --font-display:
@@ -116,21 +116,21 @@
   --semantic-accent: var(--color-accent-600);
   --semantic-accent-hover: var(--color-accent-700);
   --semantic-accent-foreground: var(--color-neutral-50);
-  --semantic-secondary: var(--color-sage-600);
-  --semantic-secondary-hover: var(--color-sage-700);
+  --semantic-secondary: var(--color-cyan-600);
+  --semantic-secondary-hover: var(--color-cyan-700);
   --semantic-secondary-foreground: var(--color-neutral-50);
-  --semantic-destructive: oklch(0.55 0.18 27);
-  --semantic-destructive-hover: oklch(0.48 0.19 27);
+  --semantic-destructive: oklch(0.57 0.23 27);
+  --semantic-destructive-hover: oklch(0.5 0.22 27);
   --semantic-destructive-foreground: var(--color-neutral-50);
-  --semantic-success: oklch(0.55 0.14 150);
-  --semantic-success-hover: oklch(0.48 0.15 150);
+  --semantic-success: oklch(0.57 0.18 150);
+  --semantic-success-hover: oklch(0.5 0.17 150);
   --semantic-success-foreground: var(--color-neutral-50);
-  --semantic-warning: oklch(0.7 0.14 75);
-  --semantic-warning-hover: oklch(0.63 0.15 75);
+  --semantic-warning: oklch(0.76 0.17 75);
+  --semantic-warning-hover: oklch(0.69 0.17 75);
   --semantic-warning-foreground: var(--color-neutral-900);
-  --semantic-info: oklch(0.6 0.14 230);
-  --semantic-info-hover: oklch(0.53 0.15 230);
-  --semantic-info-foreground: var(--color-neutral-50);
+  --semantic-info: var(--semantic-secondary);
+  --semantic-info-hover: var(--semantic-secondary-hover);
+  --semantic-info-foreground: var(--semantic-secondary-foreground);
 }
 
 [data-theme="dark"] {
@@ -142,24 +142,21 @@
   --semantic-text-muted: var(--color-neutral-400);
   --semantic-border: var(--color-neutral-700);
   --semantic-border-strong: var(--color-neutral-500);
-  --semantic-accent: var(--color-accent-400);
-  --semantic-accent-hover: var(--color-accent-300);
-  --semantic-accent-foreground: var(--color-neutral-900);
-  --semantic-secondary: var(--color-sage-400);
-  --semantic-secondary-hover: var(--color-sage-300);
+  --semantic-accent: var(--color-accent-500);
+  --semantic-accent-hover: var(--color-accent-600);
+  --semantic-accent-foreground: var(--color-neutral-50);
+  --semantic-secondary: var(--color-cyan-400);
+  --semantic-secondary-hover: var(--color-cyan-300);
   --semantic-secondary-foreground: var(--color-neutral-900);
-  --semantic-destructive: oklch(0.65 0.18 27);
-  --semantic-destructive-hover: oklch(0.72 0.17 27);
+  --semantic-destructive: oklch(0.68 0.2 27);
+  --semantic-destructive-hover: oklch(0.74 0.18 27);
   --semantic-destructive-foreground: var(--color-neutral-900);
-  --semantic-success: oklch(0.7 0.14 150);
-  --semantic-success-hover: oklch(0.76 0.13 150);
+  --semantic-success: oklch(0.74 0.18 150);
+  --semantic-success-hover: oklch(0.8 0.16 150);
   --semantic-success-foreground: var(--color-neutral-900);
-  --semantic-warning: oklch(0.78 0.14 75);
-  --semantic-warning-hover: oklch(0.83 0.13 75);
+  --semantic-warning: oklch(0.82 0.16 75);
+  --semantic-warning-hover: oklch(0.86 0.15 75);
   --semantic-warning-foreground: var(--color-neutral-900);
-  --semantic-info: oklch(0.7 0.14 230);
-  --semantic-info-hover: oklch(0.76 0.13 230);
-  --semantic-info-foreground: var(--color-neutral-900);
 }
 
 @theme inline {

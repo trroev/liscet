@@ -14,7 +14,7 @@ const NEUTRAL_STEPS = [
 ] as const
 
 const ACCENT_STEPS = NEUTRAL_STEPS
-const SAGE_STEPS = NEUTRAL_STEPS
+const CYAN_STEPS = NEUTRAL_STEPS
 
 const SEMANTIC_COLORS = [
   { name: "background", className: "bg-background" },
@@ -205,12 +205,12 @@ export const Tokens = () => (
         <Swatches prefix="neutral" steps={NEUTRAL_STEPS} />
       </Section>
 
-      <Section title="Color · Accent (Terracotta)">
+      <Section title="Color · Accent (Bluish Indigo)">
         <Swatches prefix="accent" steps={ACCENT_STEPS} />
       </Section>
 
-      <Section title="Color · Secondary (Sage)">
-        <Swatches prefix="sage" steps={SAGE_STEPS} />
+      <Section title="Color · Secondary (Cyan)">
+        <Swatches prefix="cyan" steps={CYAN_STEPS} />
       </Section>
 
       <Section title="Color · Semantic">
