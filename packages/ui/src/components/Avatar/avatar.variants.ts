@@ -10,7 +10,7 @@ export type AvatarSize = keyof typeof AVATAR_PX
 
 export const avatar = tv({
   base: [
-    "relative inline-flex shrink-0 select-none items-center justify-center overflow-hidden bg-secondary align-middle text-secondary-foreground",
+    "relative inline-flex shrink-0 select-none items-center justify-center overflow-hidden bg-accent align-middle text-accent-foreground",
   ],
   variants: {
     size: {
