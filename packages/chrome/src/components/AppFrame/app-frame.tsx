@@ -15,6 +15,7 @@ export type AppFrameProps = {
   children: React.ReactNode
   homeHref: string
   navItems: ReadonlyArray<AppFrameNavItem>
+  profileHref: string
   themeToggleSlot?: React.ReactNode
 }
 
@@ -30,6 +31,7 @@ export const AppFrame = ({
   children,
   homeHref,
   navItems,
+  profileHref,
   themeToggleSlot,
 }: AppFrameProps) => (
   <DetailPanelProvider>
@@ -48,7 +50,7 @@ export const AppFrame = ({
           navItems={navItems}
         />
         <div className="shrink-0 border-border border-t p-2">
-          <AppFrameUserMenu auth={auth} />
+          <AppFrameUserMenu auth={auth} profileHref={profileHref} />
         </div>
       </aside>
 
@@ -59,6 +61,7 @@ export const AppFrame = ({
               auth={auth}
               homeHref={homeHref}
               navItems={navItems}
+              profileHref={profileHref}
             />
           </div>
           <div className="flex items-center gap-1">
