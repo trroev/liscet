@@ -70,7 +70,7 @@ describe("LicenseProgressCard", () => {
         view={view(summary())}
       />
     )
-    const cta = screen.getByRole("link", { name: "Log your first course" })
+    const cta = screen.getByRole("button", { name: "Log your first course" })
     expect(cta).toHaveAttribute("href", "/trevor/courses/new")
   })
 
