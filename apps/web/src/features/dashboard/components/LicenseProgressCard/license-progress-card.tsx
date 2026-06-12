@@ -156,6 +156,7 @@ export const LicenseProgressCard = ({
               progress toward this license&apos;s requirements.
             </p>
             <Button
+              nativeButton={false}
               render={<Link href={`/${userSlug}/courses/new`} />}
               size="sm"
             >

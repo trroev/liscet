@@ -33,7 +33,11 @@ export const DashboardView = ({
         <p className="font-sans text-body-sm text-text-secondary">
           You don&apos;t have any active licenses yet.
         </p>
-        <Button render={<Link href={`/${userSlug}/licenses`} />} size="sm">
+        <Button
+          nativeButton={false}
+          render={<Link href={`/${userSlug}/licenses`} />}
+          size="sm"
+        >
           Add a license
         </Button>
       </div>
