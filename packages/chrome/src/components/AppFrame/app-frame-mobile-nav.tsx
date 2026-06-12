@@ -13,6 +13,7 @@ export type AppFrameMobileNavProps = {
   auth: SignedInAuth
   homeHref: string
   navItems: ReadonlyArray<AppFrameNavItem>
+  profileHref: string
 }
 
 const iconButtonClass = cn(
@@ -25,6 +26,7 @@ export const AppFrameMobileNav = ({
   auth,
   homeHref,
   navItems,
+  profileHref,
 }: AppFrameMobileNavProps) => {
   const [isOpen, setIsOpen] = useState(false)
 
@@ -70,7 +72,7 @@ export const AppFrameMobileNav = ({
             onNavigate={() => setIsOpen(false)}
           />
           <div className="shrink-0 border-border border-t p-2">
-            <AppFrameUserMenu auth={auth} />
+            <AppFrameUserMenu auth={auth} profileHref={profileHref} />
           </div>
         </Dialog.Popup>
       </Dialog.Portal>

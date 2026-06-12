@@ -8,9 +8,13 @@ import Link from "next/link"
 
 export type AppFrameUserMenuProps = {
   auth: SignedInAuth
+  profileHref: string
 }
 
-export const AppFrameUserMenu = ({ auth }: AppFrameUserMenuProps) => (
+export const AppFrameUserMenu = ({
+  auth,
+  profileHref,
+}: AppFrameUserMenuProps) => (
   <Menu.Root>
     <Menu.Trigger
       aria-label={`Account menu for ${auth.displayName}`}
@@ -30,7 +34,7 @@ export const AppFrameUserMenu = ({ auth }: AppFrameUserMenuProps) => (
       </span>
     </Menu.Trigger>
     <Menu.Content align="start" sideOffset={8}>
-      <Menu.LinkItem closeOnClick render={<Link href="/profile" />}>
+      <Menu.LinkItem closeOnClick render={<Link href={profileHref} />}>
         Profile
       </Menu.LinkItem>
       <Menu.Separator />
