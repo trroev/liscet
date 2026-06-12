@@ -9,6 +9,7 @@ import * as migration_20260609_170237_course_credit_versioning_and_license_statu
 import * as migration_20260609_192815_remove_co_license_state from './20260609_192815_remove_co_license_state';
 import * as migration_20260609_222845_slug_field_on_users from './20260609_222845_slug_field_on_users';
 import * as migration_20260611_195545_course_credit_dimensions from './20260611_195545_course_credit_dimensions';
+import * as migration_20260612_191556_deleted_at_on_users from './20260612_191556_deleted_at_on_users';
 
 export const migrations = [
   {
@@ -64,6 +65,11 @@ export const migrations = [
   {
     up: migration_20260611_195545_course_credit_dimensions.up,
     down: migration_20260611_195545_course_credit_dimensions.down,
-    name: '20260611_195545_course_credit_dimensions'
+    name: '20260611_195545_course_credit_dimensions',
+  },
+  {
+    up: migration_20260612_191556_deleted_at_on_users.up,
+    down: migration_20260612_191556_deleted_at_on_users.down,
+    name: '20260612_191556_deleted_at_on_users'
   },
 ];
