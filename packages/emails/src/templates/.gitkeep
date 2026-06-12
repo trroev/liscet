@@ -1,3 +1,0 @@
-# Email templates live here — one PascalCase directory per email type, each with
-# an `index.tsx` barrel, added in M6 (#35). Exposed via the package's
-# `"./templates/*"` wildcard export.
