@@ -104,7 +104,8 @@ type SemanticSwatchesProps = {
 
 const SemanticSwatches = ({ dark = false, label }: SemanticSwatchesProps) => (
   <div
-    className={`${dark ? "dark" : ""} rounded-lg border border-border bg-background p-6`}
+    className="rounded-lg border border-border bg-background p-6"
+    data-theme={dark ? "dark" : undefined}
   >
     <p className="mb-4 font-mono text-caption text-text-muted uppercase tracking-widest">
       {label}
@@ -122,6 +123,65 @@ const SemanticSwatches = ({ dark = false, label }: SemanticSwatchesProps) => (
       ))}
     </div>
   </div>
+)
+
+/**
+ * Regression probe for Storybook ↔ app Tailwind parity. Every measurement is
+ * produced by the real utility class (not an inline style), so a utility
+ * missing from Storybook's generated CSS collapses its accent ring visibly.
+ * The chrome uses semantic tokens so the Theme toolbar exercises dark mode.
+ */
+export const SpacingProbe = (): ReactNode => (
+  <main className="min-h-screen bg-background p-8 text-text-primary">
+    <div className="mx-auto max-w-5xl space-y-16">
+      <header className="space-y-2">
+        <p className="text-label text-text-muted uppercase tracking-widest">
+          Mise Design System
+        </p>
+        <h1 className="font-display text-heading-xl">Spacing Probe</h1>
+        <p className="text-body text-text-secondary">
+          The accent ring around each square is the utility&apos;s padding. A
+          missing utility renders no ring.
+        </p>
+      </header>
+
+      <Section title="Numeric scale">
+        <div className="space-y-2">
+          {SPACING_TOKENS.map((s) => (
+            <div className="flex items-center gap-4" key={s.utility}>
+              <span className="w-20 shrink-0 font-mono text-caption text-text-muted">
+                {s.utility}
+              </span>
+              <span className="w-16 shrink-0 font-mono text-caption text-text-muted">
+                {s.px}px
+              </span>
+              <div className={`${s.utility} w-fit bg-accent`}>
+                <div className="size-4 bg-surface" />
+              </div>
+            </div>
+          ))}
+        </div>
+      </Section>
+
+      <Section title="Named token · page-margin">
+        <div className="bg-accent px-page-margin py-2">
+          <div className="bg-surface p-3 font-mono text-caption">
+            px-page-margin · clamp(1rem, -2rem + 8vw, 5rem)
+          </div>
+        </div>
+      </Section>
+
+      <Section title="Utility · constrainer">
+        <div className="bg-accent py-2">
+          <div className="constrainer">
+            <div className="bg-surface p-3 font-mono text-caption">
+              constrainer · mx-auto px-page-margin max-w-360 w-full
+            </div>
+          </div>
+        </div>
+      </Section>
+    </div>
+  </main>
 )
 
 export const Tokens = () => (

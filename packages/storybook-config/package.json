@@ -18,6 +18,7 @@
   },
   "dependencies": {
     "@repo/tailwind": "workspace:*",
+    "@storybook/addon-themes": "catalog:",
     "react": "catalog:"
   }
 }

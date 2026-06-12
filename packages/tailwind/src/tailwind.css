@@ -1,12 +1,15 @@
-@import "tailwindcss";
+/*
+  source() pins automatic content detection to the repo root (relative to this
+  file) so every consumer scans the identical file set. Without it, each build
+  scans from its own base — @tailwindcss/postcss from process.cwd() (apps/web),
+  @tailwindcss/vite from the Vite root (apps/storybook) — so utilities used
+  only in files outside that base (e.g. apps/web feature stories rendered in
+  Storybook) are silently missing. Auto-detection heuristics still apply:
+  .gitignore'd paths and node_modules are excluded.
+*/
+@import "tailwindcss" source("../../..");
 @import "./tailwind.theme.css";
 @import "./tailwind.utilities.css";
-
-/*
-  Scan shared packages so their Tailwind classes are included in the build.
-  Paths are relative to this file (packages/tailwind/src/).
-*/
-@source "../../**/src/**/**";
 
 /*
   Safelist every step of each color scale so all --color-{scale}-{step}
