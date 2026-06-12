@@ -68,7 +68,7 @@ export const SiteHeader = ({
           className="font-display text-heading-md text-text-primary"
           href="/"
         >
-          Mise
+          Liscet
         </Link>
 
         <div className="flex items-center gap-2">
