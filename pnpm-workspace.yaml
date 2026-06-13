@@ -21,6 +21,7 @@ catalog:
   react: ^19.2.0
   react-dom: ^19.2.0
   slugify: ^1.6.9
+  storybook: ^10.3.6
   typescript: ^6.0.3
 
 # Make `pnpm add` write a catalog reference for deps the catalog already owns,

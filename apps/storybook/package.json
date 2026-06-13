@@ -18,7 +18,7 @@
     "@repo/ui": "workspace:*",
     "react": "catalog:",
     "react-dom": "catalog:",
-    "storybook": "^10.3.6"
+    "storybook": "catalog:"
   },
   "devDependencies": {
     "@repo/tsconfig": "workspace:*",
