@@ -12,7 +12,7 @@
   },
   "devDependencies": {
     "@repo/tsconfig": "workspace:*",
-    "@storybook/nextjs-vite": "^10.3.6",
+    "@storybook/nextjs-vite": "catalog:",
     "@types/react": "catalog:",
     "typescript": "catalog:"
   },

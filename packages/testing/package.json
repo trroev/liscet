@@ -18,26 +18,26 @@
   },
   "dependencies": {
     "@repo/auth": "workspace:*",
-    "@testing-library/jest-dom": "^6.9.1",
-    "@testing-library/react": "^16.3.2",
+    "@testing-library/jest-dom": "catalog:",
+    "@testing-library/react": "catalog:",
     "msw": "^2.7.0"
   },
   "peerDependencies": {
     "react": "catalog:peers",
     "react-dom": "catalog:peers",
-    "vitest": "^3.0.0"
+    "vitest": "catalog:"
   },
   "devDependencies": {
     "@repo/tsconfig": "workspace:*",
-    "@testing-library/user-event": "^14.6.1",
-    "@types/node": "^22.15.3",
+    "@testing-library/user-event": "catalog:",
+    "@types/node": "catalog:",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
-    "@vitejs/plugin-react": "^5.2.0",
-    "jsdom": "^29.1.1",
+    "@vitejs/plugin-react": "catalog:",
+    "jsdom": "catalog:",
     "react": "catalog:",
     "react-dom": "catalog:",
     "typescript": "catalog:",
-    "vitest": "^3.2.4"
+    "vitest": "catalog:"
   }
 }

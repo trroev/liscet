@@ -13,12 +13,12 @@
   },
   "dependencies": {
     "@t3-oss/env-nextjs": "^0.13.10",
-    "ts-pattern": "^5.9.0",
-    "zod": "^4.3.6"
+    "ts-pattern": "catalog:",
+    "zod": "catalog:"
   },
   "devDependencies": {
     "@repo/tsconfig": "workspace:*",
-    "@types/node": "^22.15.3",
+    "@types/node": "catalog:",
     "typescript": "catalog:"
   }
 }

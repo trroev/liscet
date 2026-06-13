@@ -27,7 +27,7 @@
     "@better-fetch/fetch": "catalog:",
     "@payloadcms/db-postgres": "catalog:",
     "@payloadcms/plugin-cloud-storage": "^3.85.0",
-    "@payloadcms/plugin-seo": "^3.85.0",
+    "@payloadcms/plugin-seo": "catalog:",
     "@payloadcms/richtext-lexical": "catalog:",
     "@repo/env": "workspace:*",
     "@repo/logger": "workspace:*",
@@ -36,7 +36,7 @@
     "@repo/ui": "workspace:*",
     "cloudinary": "^2.10.0",
     "lexical": "0.41.0",
-    "ts-pattern": "^5.9.0"
+    "ts-pattern": "catalog:"
   },
   "peerDependencies": {
     "next": "catalog:peers",
@@ -45,15 +45,15 @@
   "devDependencies": {
     "@repo/testing": "workspace:*",
     "@repo/tsconfig": "workspace:*",
-    "@testing-library/jest-dom": "^6.9.1",
-    "@testing-library/react": "^16.3.2",
-    "@types/node": "^22.15.3",
+    "@testing-library/jest-dom": "catalog:",
+    "@testing-library/react": "catalog:",
+    "@types/node": "catalog:",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
-    "@vitejs/plugin-react": "^5.2.0",
-    "jsdom": "^29.1.1",
-    "payload": "^3.85.0",
+    "@vitejs/plugin-react": "catalog:",
+    "jsdom": "catalog:",
+    "payload": "catalog:",
     "typescript": "catalog:",
-    "vitest": "^3.2.4"
+    "vitest": "catalog:"
   }
 }

@@ -18,16 +18,16 @@
     "@repo/payload": "workspace:*"
   },
   "peerDependencies": {
-    "better-auth": "^1.2.8",
-    "payload": "^3.85.0"
+    "better-auth": "catalog:",
+    "payload": "catalog:"
   },
   "devDependencies": {
     "@repo/testing": "workspace:*",
     "@repo/tsconfig": "workspace:*",
-    "@vitest/coverage-v8": "^3.2.4",
-    "better-auth": "^1.2.8",
-    "payload": "^3.85.0",
+    "@vitest/coverage-v8": "catalog:",
+    "better-auth": "catalog:",
+    "payload": "catalog:",
     "typescript": "catalog:",
-    "vitest": "^3.2.4"
+    "vitest": "catalog:"
   }
 }

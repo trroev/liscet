@@ -10,6 +10,6 @@
     }
   },
   "dependencies": {
-    "tailwindcss": "^4.2.4"
+    "tailwindcss": "catalog:"
   }
 }

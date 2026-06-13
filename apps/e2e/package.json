@@ -13,13 +13,13 @@
   "dependencies": {
     "@repo/env": "workspace:*",
     "@repo/payload": "workspace:*",
-    "payload": "^3.85.0",
+    "payload": "catalog:",
     "pg": "catalog:"
   },
   "devDependencies": {
     "@playwright/test": "^1.49.0",
     "@repo/tsconfig": "workspace:*",
-    "@types/node": "^22.15.3",
+    "@types/node": "catalog:",
     "@types/pg": "catalog:",
     "typescript": "catalog:"
   }
