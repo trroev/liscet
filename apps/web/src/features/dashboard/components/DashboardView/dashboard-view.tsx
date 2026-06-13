@@ -3,6 +3,7 @@
 import { Button } from "@repo/ui/components/Button"
 import { useQuery } from "@tanstack/react-query"
 import Link from "next/link"
+import { DASHBOARD_QUERY_KEY } from "~/lib/query-keys"
 import { getDashboardSummary } from "../../actions/get-dashboard-summary"
 import type { DashboardData } from "../../lib/types"
 import { LicenseProgressCard } from "../LicenseProgressCard"
@@ -12,8 +13,6 @@ export type DashboardViewProps = {
   userSlug: string
   nowIso: string
 }
-
-export const DASHBOARD_QUERY_KEY = ["dashboard-summary"] as const
 
 export const DashboardView = ({
   initialData,
