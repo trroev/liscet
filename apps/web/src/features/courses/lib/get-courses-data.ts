@@ -1,6 +1,7 @@
 import "server-only"
 
 import type { CourseCredit } from "@repo/payload/payload-types"
+import { practitionerData } from "@repo/payload/queries/practitioner-data"
 import { getPayload } from "payload"
 import config from "~/payload.config"
 import { toCourseView } from "./to-course-view"
@@ -15,29 +16,15 @@ export const getCoursesData = async (
   practitionerId: string
 ): Promise<CoursesData> => {
   const payload = await getPayload({ config })
+  const data = practitionerData({ payload, practitionerId })
 
-  const courseResult = await payload.find({
-    collection: "courses",
-    depth: 0,
-    overrideAccess: true,
-    pagination: false,
-    sort: "-completedAt",
-    where: { practitioner: { equals: practitionerId } },
-  })
-
-  const courseIds = courseResult.docs.map((course) => course.id)
-  const creditResult = courseIds.length
-    ? await payload.find({
-        collection: "course-credits",
-        depth: 1,
-        overrideAccess: true,
-        pagination: false,
-        where: { course: { in: courseIds } },
-      })
-    : { docs: [] as Array<CourseCredit> }
+  const courses = await data.courses()
+  const credits = await data.creditsForCourses(
+    courses.map((course) => course.id)
+  )
 
   const creditsByCourse = new Map<string, Array<CourseCredit>>()
-  for (const credit of creditResult.docs) {
+  for (const credit of credits) {
     const courseId =
       typeof credit.course === "object" ? credit.course.id : credit.course
     const existing = creditsByCourse.get(courseId) ?? []
@@ -46,7 +33,7 @@ export const getCoursesData = async (
   }
 
   return {
-    courses: courseResult.docs.map((course) =>
+    courses: courses.map((course) =>
       toCourseView({
         course,
         credits: creditsByCourse.get(course.id) ?? [],

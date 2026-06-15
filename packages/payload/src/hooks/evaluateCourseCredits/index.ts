@@ -2,6 +2,7 @@ import { createLogger } from "@repo/logger"
 import { captureException } from "@repo/observability"
 import { creditCourseForLicense, ruleSetKeyFor } from "@repo/payload/evaluation"
 import type { Course, License } from "@repo/payload/payload-types"
+import { practitionerData } from "@repo/payload/queries/practitioner-data"
 import type { CollectionAfterChangeHook } from "payload"
 import { type CreditToPersist, reconcileCredits } from "./reconcile-credits"
 
@@ -15,21 +16,13 @@ export const evaluateCourseCreditsOnCourseChange: CollectionAfterChangeHook<
 > = async ({ doc, req }) => {
   try {
     const { payload } = req
-    const licenses = await payload.find({
-      collection: "licenses",
-      depth: 0,
-      overrideAccess: true,
-      pagination: false,
+    const licenses = await practitionerData({
+      payload,
+      practitionerId: refId(doc.practitioner),
       req,
-      where: {
-        and: [
-          { practitioner: { equals: refId(doc.practitioner) } },
-          { status: { equals: "active" } },
-        ],
-      },
-    })
+    }).activeLicenses()
     const evaluatedAt = new Date()
-    const credits = licenses.docs
+    const credits = licenses
       .map((license) =>
         creditCourseForLicense({ course: doc, evaluatedAt, license })
       )
@@ -59,16 +52,13 @@ export const evaluateCourseCreditsOnLicenseChange: CollectionAfterChangeHook<
       await reconcileCredits({ credits: [], payload, req, scope })
       return doc
     }
-    const courses = await payload.find({
-      collection: "courses",
-      depth: 0,
-      overrideAccess: true,
-      pagination: false,
+    const courses = await practitionerData({
+      payload,
+      practitionerId: refId(doc.practitioner),
       req,
-      where: { practitioner: { equals: refId(doc.practitioner) } },
-    })
+    }).courses()
     const evaluatedAt = new Date()
-    const credits = courses.docs
+    const credits = courses
       .map((course) =>
         creditCourseForLicense({ course, evaluatedAt, license: doc })
       )

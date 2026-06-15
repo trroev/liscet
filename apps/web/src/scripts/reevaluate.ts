@@ -5,6 +5,7 @@ import {
   type CreditToPersist,
   reconcileCredits,
 } from "@repo/payload/hooks/evaluateCourseCredits/reconcile-credits"
+import { practitionerData } from "@repo/payload/queries/practitioner-data"
 import { RULE_SETS, type RuleSetKey } from "@repo/rules-engine/rule-sets"
 import { getPayload } from "payload"
 
@@ -99,14 +100,11 @@ async function reevaluate(args: CliArgs): Promise<void> {
     })
 
     for (const license of licenses.docs) {
-      const courses = await payload.find({
-        collection: "courses",
-        depth: 0,
-        overrideAccess: true,
-        pagination: false,
-        where: { practitioner: { equals: refId(license.practitioner) } },
-      })
-      const credits = courses.docs
+      const courses = await practitionerData({
+        payload,
+        practitionerId: refId(license.practitioner),
+      }).courses()
+      const credits = courses
         .map((course) =>
           creditCourseForLicense({ course, evaluatedAt, license })
         )

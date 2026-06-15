@@ -1,6 +1,7 @@
 import "server-only"
 
 import { summarizeLicenseFromRows } from "@repo/payload/evaluation"
+import { practitionerData } from "@repo/payload/queries/practitioner-data"
 import { getPayload } from "payload"
 import config from "~/payload.config"
 import type { DashboardData, LicenseSummaryView } from "./types"
@@ -16,35 +17,19 @@ export const getDashboardData = async (
   today: Date
 ): Promise<DashboardData> => {
   const payload = await getPayload({ config })
-  const licensesResult = await payload.find({
-    collection: "licenses",
-    depth: 0,
-    overrideAccess: true,
-    pagination: false,
-    where: {
-      and: [
-        { practitioner: { equals: practitionerId } },
-        { status: { equals: "active" } },
-      ],
-    },
-  })
+  const data = practitionerData({ payload, practitionerId })
+  const activeLicenses = await data.activeLicenses()
 
   const licenses = await Promise.all(
-    licensesResult.docs.map(async (license): Promise<LicenseSummaryView> => {
-      const creditsResult = await payload.find({
-        collection: "course-credits",
-        depth: 0,
-        overrideAccess: true,
-        pagination: false,
-        where: { license: { equals: license.id } },
-      })
+    activeLicenses.map(async (license): Promise<LicenseSummaryView> => {
+      const creditRows = await data.creditsForLicense(license.id)
       return {
         id: license.id,
         licenseNumber: license.licenseNumber,
         licenseType: license.licenseType,
         state: license.state,
         summary: summarizeLicenseFromRows({
-          creditRows: creditsResult.docs,
+          creditRows,
           license,
           today,
         }),

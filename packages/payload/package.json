@@ -17,7 +17,8 @@
     "./hooks/*": "./src/hooks/*/index.ts",
     "./hooks/evaluateCourseCredits/*": "./src/hooks/evaluateCourseCredits/*.ts",
     "./payload-config": "./src/payload.config.ts",
-    "./payload-types": "./src/types/payload-types.ts"
+    "./payload-types": "./src/types/payload-types.ts",
+    "./queries/*": "./src/queries/*.ts"
   },
   "scripts": {
     "test": "vitest run",

@@ -1,5 +1,6 @@
 import "server-only"
 
+import { practitionerData } from "@repo/payload/queries/practitioner-data"
 import { getPayload } from "payload"
 import config from "~/payload.config"
 import { toLicenseView } from "./to-license-view"
@@ -14,14 +15,10 @@ export const getLicensesData = async (
   practitionerId: string
 ): Promise<LicensesData> => {
   const payload = await getPayload({ config })
-  const result = await payload.find({
-    collection: "licenses",
-    depth: 0,
-    overrideAccess: true,
-    pagination: false,
-    sort: "expiresAt",
-    where: { practitioner: { equals: practitionerId } },
-  })
+  const licenses = await practitionerData({
+    payload,
+    practitionerId,
+  }).licenses()
 
-  return { licenses: result.docs.map(toLicenseView) }
+  return { licenses: licenses.map(toLicenseView) }
 }
