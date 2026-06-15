@@ -1,4 +1,6 @@
 import type { Metadata } from "next"
+import { LicensesView } from "~/features/licenses/components/LicensesView"
+import { getLicensesData } from "~/features/licenses/lib/get-licenses-data"
 import { requireSlugOwner } from "~/lib/queries/require-slug-owner"
 
 export const metadata: Metadata = {
@@ -12,7 +14,10 @@ export default async function LicensesPage({
   params: Promise<{ userSlug: string }>
 }) {
   const { userSlug } = await params
-  await requireSlugOwner({ userSlug })
+  const { user } = await requireSlugOwner({ userSlug })
+
+  const now = new Date()
+  const data = await getLicensesData(user.id)
 
   return (
     <section className="mx-auto w-full max-w-3xl space-y-6 px-6 py-10">
@@ -24,9 +29,7 @@ export default async function LicensesPage({
           Your professional licenses and renewal deadlines.
         </p>
       </header>
-      <p className="rounded-lg border border-border border-dashed bg-surface p-6 text-body-sm text-text-secondary">
-        License management is coming soon.
-      </p>
+      <LicensesView initialData={data} nowIso={now.toISOString()} />
     </section>
   )
 }
