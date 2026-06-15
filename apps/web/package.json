@@ -20,6 +20,7 @@
     "clean": "rm -rf .turbo .next dist storybook-static coverage *.tsbuildinfo test-results playwright-report"
   },
   "dependencies": {
+    "@date-fns/tz": "catalog:",
     "@payloadcms/live-preview-react": "^3.85.0",
     "@payloadcms/next": "^3.85.0",
     "@payloadcms/plugin-seo": "catalog:",
@@ -42,6 +43,7 @@
     "@tanstack/react-query": "catalog:",
     "@vercel/blob": "^2.4.0",
     "better-auth": "catalog:",
+    "date-fns": "catalog:",
     "minisearch": "^7.2.0",
     "next": "catalog:",
     "next-themes": "catalog:",

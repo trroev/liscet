@@ -4,6 +4,7 @@ packages:
 
 catalog:
   '@better-fetch/fetch': 1.1.21
+  '@date-fns/tz': ^1.5.0
   '@payloadcms/db-postgres': ^3.85.0
   '@payloadcms/plugin-seo': ^3.85.0
   '@payloadcms/richtext-lexical': 3.85.0
@@ -24,6 +25,7 @@ catalog:
   '@vitejs/plugin-react': ^5.2.0
   '@vitest/coverage-v8': ^3.2.4
   better-auth: ^1.2.8
+  date-fns: ^4.4.0
   drizzle-kit: ^0.31.10
   drizzle-orm: ^0.45.2
   jest-axe: ^10.0.0
