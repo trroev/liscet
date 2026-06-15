@@ -74,6 +74,7 @@ describe("deleteAccount", () => {
     const result = await deleteAccount({ password: "hunter22" })
 
     expect(result).toEqual({
+      code: "UNAUTHENTICATED",
       status: "error",
       message: "You must be signed in.",
     })
@@ -88,6 +89,7 @@ describe("deleteAccount", () => {
     const result = await deleteAccount({ password: "" })
 
     expect(result).toEqual({
+      code: "INVALID_INPUT",
       status: "error",
       message: "Password is required.",
     })

@@ -48,6 +48,7 @@ describe("cancelAccountDeletion", () => {
     const result = await cancelAccountDeletion()
 
     expect(result).toEqual({
+      code: "UNAUTHENTICATED",
       status: "error",
       message: "You must be signed in.",
     })

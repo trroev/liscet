@@ -2,10 +2,7 @@
 
 import "server-only"
 
-import { getPayload } from "payload"
-import { getCurrentViewer } from "~/lib/queries/current-viewer"
-import { serverAction } from "~/lib/server-action"
-import config from "~/payload.config"
+import { authedAction } from "~/lib/authed-action"
 import { formatSlug, isReservedSlug, validateSlugFormat } from "../lib/slug"
 import type { CheckSlugAvailabilityResult } from "../lib/types"
 import { suggestAvailableSlug } from "./suggest-available-slug"
@@ -16,14 +13,10 @@ export type {
   SlugAvailabilityReason,
 } from "../lib/types"
 
-const checkSlugAvailabilityImpl = async (
-  rawSlug: string
-): Promise<CheckSlugAvailabilityResult> => {
-  const viewer = await getCurrentViewer()
-  if (viewer?.kind !== "user") {
-    return { status: "error", message: "You must be signed in." }
-  }
-
+export const checkSlugAvailability = authedAction<
+  string,
+  CheckSlugAvailabilityResult
+>(async ({ payload, input: rawSlug }) => {
   const slug = formatSlug(rawSlug)
 
   if (validateSlugFormat(slug) !== null) {
@@ -32,8 +25,6 @@ const checkSlugAvailabilityImpl = async (
       data: { available: false, reason: "format" },
     }
   }
-
-  const payload = await getPayload({ config })
 
   if (isReservedSlug(slug)) {
     const suggestion = await suggestAvailableSlug({ base: slug, payload })
@@ -59,6 +50,4 @@ const checkSlugAvailabilityImpl = async (
     status: "success",
     data: { available: false, reason: "taken", suggestion },
   }
-}
-
-export const checkSlugAvailability = serverAction(checkSlugAvailabilityImpl)
+})

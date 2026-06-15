@@ -2,12 +2,9 @@
 
 import "server-only"
 
-import { getPayload } from "payload"
 import { z } from "zod"
-import { getCurrentViewer } from "~/lib/queries/current-viewer"
+import { authedAction } from "~/lib/authed-action"
 import { createMediaAsset } from "~/lib/queries/media"
-import { serverAction } from "~/lib/server-action"
-import config from "~/payload.config"
 import { logCourseSchema } from "../lib/schema"
 import type { LogCourseResult } from "../lib/types"
 
@@ -38,68 +35,62 @@ const certificateFileSchema = z
     message: "Certificate must be a PDF, JPEG, PNG, or WebP file.",
   })
 
-const logCourseImpl = async (formData: FormData): Promise<LogCourseResult> => {
-  const viewer = await getCurrentViewer()
-  if (viewer?.kind !== "user") {
-    return { status: "error", message: "You must be signed in." }
-  }
-  const userDoc = viewer.user
-
-  const providerEntry = formData.get("provider")
-  const parsed = logCourseSchema.safeParse({
-    completedAt: formData.get("completedAt"),
-    format: formData.get("format"),
-    hours: formData.get("hours"),
-    provider: providerEntry ? String(providerEntry) : "",
-    subjectCategories: formData.getAll("subjectCategories").map(String),
-    title: formData.get("title"),
-  })
-  if (!parsed.success) {
-    return {
-      status: "error",
-      message: parsed.error.issues[0]?.message ?? "Check the form for errors.",
-    }
-  }
-  const values = parsed.data
-
-  let certificateId: string | undefined
-  const certificateEntry = formData.get("certificate")
-  if (certificateEntry instanceof File && certificateEntry.size > 0) {
-    const parsedFile = certificateFileSchema.safeParse(certificateEntry)
-    if (!parsedFile.success) {
+export const logCourse = authedAction<FormData, LogCourseResult>(
+  async ({ user, payload, input: formData }) => {
+    const providerEntry = formData.get("provider")
+    const parsed = logCourseSchema.safeParse({
+      completedAt: formData.get("completedAt"),
+      format: formData.get("format"),
+      hours: formData.get("hours"),
+      provider: providerEntry ? String(providerEntry) : "",
+      subjectCategories: formData.getAll("subjectCategories").map(String),
+      title: formData.get("title"),
+    })
+    if (!parsed.success) {
       return {
         status: "error",
         message:
-          parsedFile.error.issues[0]?.message ??
-          "Upload a valid certificate file.",
+          parsed.error.issues[0]?.message ?? "Check the form for errors.",
       }
     }
-    const media = await createMediaAsset({
-      alt: `${values.title} certificate`,
-      fallbackName: "certificate",
-      file: parsedFile.data,
+    const values = parsed.data
+
+    let certificateId: string | undefined
+    const certificateEntry = formData.get("certificate")
+    if (certificateEntry instanceof File && certificateEntry.size > 0) {
+      const parsedFile = certificateFileSchema.safeParse(certificateEntry)
+      if (!parsedFile.success) {
+        return {
+          status: "error",
+          message:
+            parsedFile.error.issues[0]?.message ??
+            "Upload a valid certificate file.",
+        }
+      }
+      const media = await createMediaAsset({
+        alt: `${values.title} certificate`,
+        fallbackName: "certificate",
+        file: parsedFile.data,
+      })
+      certificateId = media.id
+    }
+
+    const course = await payload.create({
+      collection: "courses",
+      data: {
+        completedAt: values.completedAt,
+        format: values.format,
+        hours: values.hours,
+        practitioner: user.id,
+        provider: values.provider || undefined,
+        source: "manual",
+        subjectCategories: values.subjectCategories,
+        title: values.title,
+        ...(certificateId ? { certificate: certificateId } : {}),
+      },
+      overrideAccess: true,
     })
-    certificateId = media.id
+
+    return { status: "success", data: { courseId: String(course.id) } }
   }
-
-  const payload = await getPayload({ config })
-  const course = await payload.create({
-    collection: "courses",
-    data: {
-      completedAt: values.completedAt,
-      format: values.format,
-      hours: values.hours,
-      practitioner: userDoc.id,
-      provider: values.provider || undefined,
-      source: "manual",
-      subjectCategories: values.subjectCategories,
-      title: values.title,
-      ...(certificateId ? { certificate: certificateId } : {}),
-    },
-    overrideAccess: true,
-  })
-
-  return { status: "success", data: { courseId: String(course.id) } }
-}
-
-export const logCourse = serverAction(logCourseImpl)
+)

@@ -2,12 +2,8 @@
 
 import "server-only"
 
-import { captureException } from "@sentry/nextjs"
-import { unstable_rethrow } from "next/navigation"
-import { getPayload } from "payload"
 import { z } from "zod"
-import { getCurrentViewer } from "~/lib/queries/current-viewer"
-import config from "~/payload.config"
+import { authedAction } from "~/lib/authed-action"
 import {
   findLicenseOption,
   LICENSE_OPTION_VALUES,
@@ -64,110 +60,77 @@ const isUniqueConstraintViolation = (error: unknown): boolean => {
   return false
 }
 
-const completeOnboardingImpl = async (
-  rawInput: CompleteOnboardingInput
-): Promise<CompleteOnboardingResult> => {
-  const viewer = await getCurrentViewer()
-  if (viewer?.kind !== "user") {
-    return {
-      status: "error",
-      code: "UNAUTHENTICATED",
-      message: "You must be signed in.",
+export const completeOnboarding: (
+  input: CompleteOnboardingInput
+) => Promise<CompleteOnboardingResult> = authedAction(
+  inputSchema,
+  async ({ user, payload, input }): Promise<CompleteOnboardingResult> => {
+    const slug = formatSlug(input.slug)
+    if (validateSlugFormat(slug) !== null) {
+      return {
+        status: "error",
+        code: "SLUG_INVALID",
+        message:
+          "Slug must be 2–40 characters of lowercase letters, numbers, and single hyphens.",
+      }
     }
-  }
 
-  const parsed = inputSchema.safeParse(rawInput)
-  if (!parsed.success) {
-    return {
-      status: "error",
-      code: "INVALID_INPUT",
-      message: parsed.error.issues[0]?.message ?? "Check the form and retry.",
-    }
-  }
-
-  const slug = formatSlug(parsed.data.slug)
-  if (validateSlugFormat(slug) !== null) {
-    return {
-      status: "error",
-      code: "SLUG_INVALID",
-      message:
-        "Slug must be 2–40 characters of lowercase letters, numbers, and single hyphens.",
-    }
-  }
-
-  const payload = await getPayload({ config })
-
-  if (isReservedSlug(slug)) {
-    const suggestion = await suggestAvailableSlug({ base: slug, payload })
-    return {
-      status: "error",
-      code: "SLUG_RESERVED",
-      message: "That slug is reserved. Try another.",
-      suggestion,
-    }
-  }
-
-  try {
-    await payload.update({
-      collection: "users",
-      data: { slug },
-      id: viewer.user.id,
-      overrideAccess: true,
-    })
-  } catch (cause) {
-    if (isUniqueConstraintViolation(cause)) {
+    if (isReservedSlug(slug)) {
       const suggestion = await suggestAvailableSlug({ base: slug, payload })
       return {
         status: "error",
-        code: "SLUG_TAKEN",
-        message: "That slug is taken. Try another.",
+        code: "SLUG_RESERVED",
+        message: "That slug is reserved. Try another.",
         suggestion,
       }
     }
-    throw cause
-  }
 
-  const option = findLicenseOption(parsed.data.licenseOption)
-  if (!option) {
+    try {
+      await payload.update({
+        collection: "users",
+        data: { slug },
+        id: user.id,
+        overrideAccess: true,
+      })
+    } catch (cause) {
+      if (isUniqueConstraintViolation(cause)) {
+        const suggestion = await suggestAvailableSlug({ base: slug, payload })
+        return {
+          status: "error",
+          code: "SLUG_TAKEN",
+          message: "That slug is taken. Try another.",
+          suggestion,
+        }
+      }
+      throw cause
+    }
+
+    const option = findLicenseOption(input.licenseOption)
+    if (!option) {
+      return {
+        status: "error",
+        code: "INVALID_INPUT",
+        message: "Select a state and license type.",
+      }
+    }
+
+    await payload.create({
+      collection: "licenses",
+      data: {
+        expiresAt: input.expiresAt,
+        issuedAt: input.issuedAt,
+        licenseNumber: input.licenseNumber.trim(),
+        licenseType: option.licenseType,
+        practitioner: user.id,
+        state: option.state,
+        status: "active",
+      },
+      overrideAccess: true,
+    })
+
     return {
-      status: "error",
-      code: "INVALID_INPUT",
-      message: "Select a state and license type.",
+      status: "success",
+      data: { userSlug: slug },
     }
   }
-
-  await payload.create({
-    collection: "licenses",
-    data: {
-      expiresAt: parsed.data.expiresAt,
-      issuedAt: parsed.data.issuedAt,
-      licenseNumber: parsed.data.licenseNumber.trim(),
-      licenseType: option.licenseType,
-      practitioner: viewer.user.id,
-      state: option.state,
-      status: "active",
-    },
-    overrideAccess: true,
-  })
-
-  return {
-    status: "success",
-    data: { userSlug: slug },
-  }
-}
-
-export const completeOnboarding = async (
-  input: CompleteOnboardingInput
-): Promise<CompleteOnboardingResult> => {
-  try {
-    return await completeOnboardingImpl(input)
-  } catch (error) {
-    unstable_rethrow(error)
-    captureException(error)
-    return {
-      code: "INTERNAL_ERROR",
-      message: "Something went wrong. Please try again.",
-      status: "error",
-    }
-  }
-}
+)

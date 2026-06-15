@@ -57,6 +57,7 @@ describe("logCourse", () => {
     getCurrentViewer.mockResolvedValueOnce(null)
     const result = await logCourse(validFormData())
     expect(result).toEqual({
+      code: "UNAUTHENTICATED",
       status: "error",
       message: "You must be signed in.",
     })

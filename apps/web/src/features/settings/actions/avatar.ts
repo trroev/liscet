@@ -5,9 +5,8 @@ import "server-only"
 import type { ActionResult } from "@repo/types/ActionResult"
 import { match, P } from "ts-pattern"
 import { z } from "zod"
-import { getCurrentViewer } from "~/lib/queries/current-viewer"
+import { authedAction } from "~/lib/authed-action"
 import { createMediaAsset, deleteMediaAsset } from "~/lib/queries/media"
-import { serverAction } from "~/lib/server-action"
 import { updateUserAvatar } from "../api/update-user-avatar"
 
 const MAX_AVATAR_BYTES = 5 * 1024 * 1024
@@ -49,66 +48,53 @@ const extractAvatarId = (avatar: unknown): string | null =>
     .with({ id: P.number }, ({ id }) => String(id))
     .otherwise(() => null)
 
-const uploadAvatarImpl = async (
-  formData: FormData
-): Promise<UploadAvatarResult> => {
-  const viewer = await getCurrentViewer()
-  if (viewer?.kind !== "user") {
-    return { status: "error", message: "You must be signed in." }
-  }
-  const userDoc = viewer.user
+export const uploadAvatar = authedAction<FormData, UploadAvatarResult>(
+  async ({ user, input: formData }) => {
+    const parsed = avatarFileSchema.safeParse(formData.get("avatar"))
+    if (!parsed.success) {
+      return {
+        status: "error",
+        message:
+          parsed.error.issues[0]?.message ??
+          "Provide an image file under `avatar`.",
+      }
+    }
+    const file: AvatarFile = parsed.data
 
-  const parsed = avatarFileSchema.safeParse(formData.get("avatar"))
-  if (!parsed.success) {
+    const previousAvatarId = extractAvatarId(user.avatar)
+    const altLabel = user.displayName || user.email
+    const media = await createMediaAsset({
+      file,
+      alt: `${altLabel} profile photo`,
+      fallbackName: "avatar",
+    })
+
+    await updateUserAvatar({ userId: user.id, mediaId: media.id })
+
+    if (previousAvatarId && previousAvatarId !== media.id) {
+      await deleteMediaAsset(previousAvatarId)
+    }
+
     return {
-      status: "error",
-      message:
-        parsed.error.issues[0]?.message ??
-        "Provide an image file under `avatar`.",
+      status: "success",
+      data: {
+        mediaId: media.id,
+        url: media.url ?? "",
+      },
     }
   }
-  const file: AvatarFile = parsed.data
+)
 
-  const previousAvatarId = extractAvatarId(userDoc.avatar)
-  const altLabel = userDoc.displayName || userDoc.email
-  const media = await createMediaAsset({
-    file,
-    alt: `${altLabel} profile photo`,
-    fallbackName: "avatar",
-  })
+export const removeAvatar = authedAction<void, RemoveAvatarResult>(
+  async ({ user }) => {
+    const avatarId = extractAvatarId(user.avatar)
 
-  await updateUserAvatar({ userId: userDoc.id, mediaId: media.id })
+    await updateUserAvatar({ userId: user.id, mediaId: null })
 
-  if (previousAvatarId && previousAvatarId !== media.id) {
-    await deleteMediaAsset(previousAvatarId)
+    if (avatarId) {
+      await deleteMediaAsset(avatarId)
+    }
+
+    return { status: "success", data: undefined }
   }
-
-  return {
-    status: "success",
-    data: {
-      mediaId: media.id,
-      url: media.url ?? "",
-    },
-  }
-}
-
-const removeAvatarImpl = async (): Promise<RemoveAvatarResult> => {
-  const viewer = await getCurrentViewer()
-  if (viewer?.kind !== "user") {
-    return { status: "error", message: "You must be signed in." }
-  }
-  const userDoc = viewer.user
-
-  const avatarId = extractAvatarId(userDoc.avatar)
-
-  await updateUserAvatar({ userId: userDoc.id, mediaId: null })
-
-  if (avatarId) {
-    await deleteMediaAsset(avatarId)
-  }
-
-  return { status: "success", data: undefined }
-}
-
-export const uploadAvatar = serverAction(uploadAvatarImpl)
-export const removeAvatar = serverAction(removeAvatarImpl)
+)

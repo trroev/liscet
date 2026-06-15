@@ -75,6 +75,7 @@ describe("uploadAvatar", () => {
     const { uploadAvatar } = await import("./avatar")
     const result = await uploadAvatar(new FormData())
     expect(result).toEqual({
+      code: "UNAUTHENTICATED",
       status: "error",
       message: "You must be signed in.",
     })
@@ -124,6 +125,7 @@ describe("uploadAvatar", () => {
     const { uploadAvatar } = await import("./avatar")
     const result = await uploadAvatar(formData)
     expect(result).toEqual({
+      code: "UNAUTHENTICATED",
       status: "error",
       message: "You must be signed in.",
     })
@@ -212,6 +214,7 @@ describe("removeAvatar", () => {
     const { removeAvatar } = await import("./avatar")
     const result = await removeAvatar()
     expect(result).toEqual({
+      code: "UNAUTHENTICATED",
       status: "error",
       message: "You must be signed in.",
     })

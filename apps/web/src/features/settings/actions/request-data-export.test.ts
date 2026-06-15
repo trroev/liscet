@@ -63,6 +63,7 @@ describe("requestDataExport", () => {
     const result = await requestDataExport()
 
     expect(result).toEqual({
+      code: "UNAUTHENTICATED",
       status: "error",
       message: "You must be signed in.",
     })
