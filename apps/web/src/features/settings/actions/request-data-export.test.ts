@@ -41,10 +41,6 @@ vi.mock("@repo/env/blob", () => ({
   env: { BLOB_READ_WRITE_TOKEN: "blob-token" },
 }))
 
-vi.mock("@repo/env/email", () => ({
-  env: { EMAIL_FROM: "Liscet <noreply@liscet.test>" },
-}))
-
 describe("requestDataExport", () => {
   beforeEach(() => {
     vi.resetModules()
@@ -114,9 +110,8 @@ describe("requestDataExport", () => {
 
     expect(sendEmail).toHaveBeenCalledTimes(1)
     const [emailArgs] = sendEmail.mock.calls[0] as [
-      { from: string; subject: string; to: string },
+      { subject: string; to: string },
     ]
-    expect(emailArgs.from).toBe("Liscet <noreply@liscet.test>")
     expect(emailArgs.to).toBe("u@e.co")
     expect(emailArgs.subject).toBe("Your Liscet data export")
   })

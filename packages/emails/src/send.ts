@@ -8,7 +8,7 @@ const resend = new Resend(env.RESEND_API_KEY)
 const recipientSchema = z.union([z.email(), z.array(z.email()).nonempty()])
 
 const sendEmailSchema = z.object({
-  from: z.string().min(1),
+  from: z.string().min(1).default(env.RESEND_FROM_ADDRESS),
   react: z.custom<ReactElement>(isValidElement, {
     message: "react must be a valid React element",
   }),
@@ -17,7 +17,7 @@ const sendEmailSchema = z.object({
   to: recipientSchema,
 })
 
-type SendEmailInput = z.infer<typeof sendEmailSchema>
+type SendEmailInput = z.input<typeof sendEmailSchema>
 
 type SendEmailResult = Awaited<ReturnType<typeof resend.emails.send>>
 

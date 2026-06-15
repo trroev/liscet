@@ -5,12 +5,15 @@
   "type": "module",
   "exports": {
     "./send": "./src/send.ts",
+    "./webhook": "./src/webhook.ts",
     "./layouts/*": "./src/layouts/*/index.tsx",
     "./templates/*": "./src/templates/*/index.tsx"
   },
   "scripts": {
     "email:preview": "email dev --dir ./src",
     "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "coverage": "vitest run --coverage",
     "clean": "rm -rf .turbo .next .react-email dist storybook-static coverage *.tsbuildinfo test-results playwright-report"
   },
   "dependencies": {
@@ -19,14 +22,18 @@
     "react": "catalog:",
     "react-dom": "catalog:",
     "resend": "^6.12.4",
+    "svix": "^1.95.2",
     "zod": "catalog:"
   },
   "devDependencies": {
+    "@repo/testing": "workspace:*",
     "@repo/tsconfig": "workspace:*",
     "@types/node": "catalog:",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
+    "@vitest/coverage-v8": "catalog:",
     "react-email": "^6.5.0",
-    "typescript": "catalog:"
+    "typescript": "catalog:",
+    "vitest": "catalog:"
   }
 }

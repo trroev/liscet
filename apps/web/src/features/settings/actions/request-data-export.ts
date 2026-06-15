@@ -6,7 +6,6 @@ import { sendEmail } from "@repo/emails/send"
 import { DataExportEmail } from "@repo/emails/templates/DataExportEmail"
 import { env as appEnv } from "@repo/env/app"
 import { env as blobEnv } from "@repo/env/blob"
-import { env as emailEnv } from "@repo/env/email"
 import type { ActionResult } from "@repo/types/ActionResult"
 import { put } from "@vercel/blob"
 import { authedAction } from "~/lib/authed-action"
@@ -36,7 +35,6 @@ export const requestDataExport = authedAction<void, RequestDataExportResult>(
     downloadUrl.searchParams.set("token", token)
 
     await sendEmail({
-      from: emailEnv.EMAIL_FROM,
       react: DataExportEmail({
         downloadUrl: downloadUrl.toString(),
         expiresAt: new Date(expiresAt),
