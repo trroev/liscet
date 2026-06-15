@@ -1,5 +1,5 @@
 import { createLogger } from "@repo/logger"
-import { captureException } from "@repo/observability"
+import { captureException, scopeSentry } from "@repo/observability"
 import { creditCourseForLicense, ruleSetKeyFor } from "@repo/payload/evaluation"
 import type { Course, License } from "@repo/payload/payload-types"
 import { practitionerData } from "@repo/payload/queries/practitioner-data"
@@ -16,6 +16,7 @@ export const evaluateCourseCreditsOnCourseChange: CollectionAfterChangeHook<
 > = async ({ doc, req }) => {
   try {
     const { payload } = req
+    scopeSentry({ practitionerId: refId(doc.practitioner) })
     const licenses = await practitionerData({
       payload,
       practitionerId: refId(doc.practitioner),
@@ -47,6 +48,10 @@ export const evaluateCourseCreditsOnLicenseChange: CollectionAfterChangeHook<
 > = async ({ doc, req }) => {
   try {
     const { payload } = req
+    scopeSentry({
+      license: { licenseType: doc.licenseType, state: doc.state },
+      practitionerId: refId(doc.practitioner),
+    })
     const scope = { license: { equals: doc.id } }
     if (doc.status !== "active" || ruleSetKeyFor(doc) === null) {
       await reconcileCredits({ credits: [], payload, req, scope })

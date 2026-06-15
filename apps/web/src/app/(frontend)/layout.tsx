@@ -10,6 +10,7 @@ import { QueryProvider } from "~/components/QueryProvider"
 import { SentryUser } from "~/components/SentryUser"
 import { auth } from "~/features/auth/auth.server"
 import { geist, geistMono } from "~/fonts"
+import { getPayloadUserByBetterAuthId } from "~/lib/queries/payload-user-by-better-auth-id"
 
 import "../globals.css"
 
@@ -31,6 +32,9 @@ export default async function FrontendLayout({
   children: React.ReactNode
 }) {
   const session = await auth.api.getSession({ headers: await headers() })
+  const practitioner = session?.user
+    ? await getPayloadUserByBetterAuthId(session.user.id)
+    : null
 
   return (
     <html
@@ -48,7 +52,7 @@ export default async function FrontendLayout({
         >
           <SessionProvider initialUser={session?.user ?? null}>
             <QueryProvider>
-              <SentryUser />
+              <SentryUser practitionerId={practitioner?.id ?? null} />
               {session ? (
                 <PostHogProvider>
                   {children}

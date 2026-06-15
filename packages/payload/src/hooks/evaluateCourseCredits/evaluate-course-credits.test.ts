@@ -1,8 +1,11 @@
 import type { Course, License } from "@repo/payload/payload-types"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 
-const { captureException } = vi.hoisted(() => ({ captureException: vi.fn() }))
-vi.mock("@repo/observability", () => ({ captureException }))
+const { captureException, scopeSentry } = vi.hoisted(() => ({
+  captureException: vi.fn(),
+  scopeSentry: vi.fn(),
+}))
+vi.mock("@repo/observability", () => ({ captureException, scopeSentry }))
 vi.mock("@repo/logger", () => ({
   createLogger: () => ({
     withError: () => ({ error: vi.fn() }),
@@ -102,6 +105,12 @@ describe("evaluateCourseCreditsOnCourseChange", () => {
     )
   })
 
+  it("scopes Sentry to the practitioner", async () => {
+    const payload = makePayload({ licenses: [license()] })
+    await callCourseHook(course(), payload)
+    expect(scopeSentry).toHaveBeenCalledWith({ practitionerId: "user-1" })
+  })
+
   it("only queries active licenses", async () => {
     const payload = makePayload({ licenses: [license()] })
     await callCourseHook(course(), payload)
@@ -154,6 +163,15 @@ describe("evaluateCourseCreditsOnLicenseChange", () => {
         data: expect.objectContaining({ course: "course-1" }),
       })
     )
+  })
+
+  it("scopes Sentry to the practitioner and license", async () => {
+    const payload = makePayload({ courses: [course()] })
+    await callLicenseHook(license(), payload)
+    expect(scopeSentry).toHaveBeenCalledWith({
+      license: { licenseType: "LCSW", state: "CA" },
+      practitionerId: "user-1",
+    })
   })
 
   it("reconciles to empty for a non-active license, deleting stale credits", async () => {

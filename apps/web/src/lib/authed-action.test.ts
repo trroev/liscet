@@ -4,12 +4,14 @@ import { z } from "zod"
 const getCurrentViewer = vi.fn()
 const getPayload = vi.fn()
 const captureException = vi.fn()
+const scopeSentry = vi.fn()
 
 vi.mock("server-only", () => ({}))
 vi.mock("~/payload.config", () => ({ default: {} }))
 vi.mock("payload", () => ({ getPayload }))
 vi.mock("~/lib/queries/current-viewer", () => ({ getCurrentViewer }))
 vi.mock("@sentry/nextjs", () => ({ captureException }))
+vi.mock("@repo/observability", () => ({ scopeSentry }))
 vi.mock("next/navigation", () => ({ unstable_rethrow: vi.fn() }))
 
 const { authedAction } = await import("./authed-action")
@@ -39,6 +41,7 @@ describe("authedAction", () => {
       payload,
       user: { id: "user-7" },
     })
+    expect(scopeSentry).toHaveBeenCalledWith({ practitionerId: "user-7" })
   })
 
   it("returns UNAUTHENTICATED without invoking the handler when no user", async () => {
@@ -55,6 +58,7 @@ describe("authedAction", () => {
     })
     expect(handler).not.toHaveBeenCalled()
     expect(getPayload).not.toHaveBeenCalled()
+    expect(scopeSentry).not.toHaveBeenCalled()
   })
 
   it("treats an admin viewer as unauthenticated for product actions", async () => {

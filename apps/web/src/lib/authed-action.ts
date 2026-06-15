@@ -1,5 +1,6 @@
 import "server-only"
 
+import { scopeSentry } from "@repo/observability"
 import type { User } from "@repo/payload/payload-types"
 import { getPayload, type Payload } from "payload"
 import type { z } from "zod"
@@ -70,6 +71,7 @@ export function authedAction(
       if (viewer?.kind !== "user") {
         return UNAUTHENTICATED
       }
+      scopeSentry({ practitionerId: viewer.user.id })
 
       let resolvedInput = input
       if (schema) {

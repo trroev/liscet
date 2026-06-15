@@ -2,6 +2,7 @@
 
 import "server-only"
 
+import { scopeSentry } from "@repo/observability"
 import type { ActionResult } from "@repo/types/ActionResult"
 import { z } from "zod"
 import { authedAction } from "~/lib/authed-action"
@@ -40,6 +41,10 @@ export const updateLicense = authedAction(
         status: "error",
       }
     }
+
+    scopeSentry({
+      license: { licenseType: existing.licenseType, state: existing.state },
+    })
 
     const updated = await payload.update({
       collection: "licenses",

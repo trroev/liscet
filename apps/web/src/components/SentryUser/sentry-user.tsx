@@ -1,17 +1,16 @@
 "use client"
 
-import { useSession } from "@repo/auth/session"
-import { setUser } from "@sentry/nextjs"
+import { scopeSentry } from "@repo/observability"
 import { useEffect } from "react"
 
-export const SentryUser = (): null => {
-  const { user } = useSession()
+type SentryUserProps = {
+  /** Canonical practitioner id, resolved server-side; `null` when signed out. */
+  practitionerId: string | null
+}
+
+export const SentryUser = ({ practitionerId }: SentryUserProps): null => {
   useEffect(() => {
-    if (user) {
-      setUser({ id: user.id })
-      return
-    }
-    setUser(null)
-  }, [user])
+    scopeSentry({ practitionerId })
+  }, [practitionerId])
   return null
 }
