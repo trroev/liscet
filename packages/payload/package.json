@@ -10,6 +10,7 @@
     "./blocks/*": "./src/blocks/*/index.ts",
     "./collections/*": "./src/collections/*/index.ts",
     "./components/*": "./src/components/*/index.ts",
+    "./evaluation": "./src/evaluation/index.ts",
     "./fields/*": "./src/fields/*/index.ts",
     "./globals/*": "./src/globals/*/index.ts",
     "./helpers/*": "./src/helpers/*/index.ts",

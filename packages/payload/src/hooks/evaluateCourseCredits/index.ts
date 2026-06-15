@@ -1,8 +1,8 @@
 import { createLogger } from "@repo/logger"
 import { captureException } from "@repo/observability"
+import { creditCourseForLicense, ruleSetKeyFor } from "@repo/payload/evaluation"
 import type { Course, License } from "@repo/payload/payload-types"
 import type { CollectionAfterChangeHook } from "payload"
-import { creditFor, ruleSetKeyFor } from "./credit-for"
 import { type CreditToPersist, reconcileCredits } from "./reconcile-credits"
 
 const log = createLogger({ name: "payload.evaluate-course-credits" })
@@ -30,7 +30,9 @@ export const evaluateCourseCreditsOnCourseChange: CollectionAfterChangeHook<
     })
     const evaluatedAt = new Date()
     const credits = licenses.docs
-      .map((license) => creditFor({ course: doc, evaluatedAt, license }))
+      .map((license) =>
+        creditCourseForLicense({ course: doc, evaluatedAt, license })
+      )
       .filter((credit): credit is CreditToPersist => credit !== null)
     await reconcileCredits({
       credits,
@@ -67,7 +69,9 @@ export const evaluateCourseCreditsOnLicenseChange: CollectionAfterChangeHook<
     })
     const evaluatedAt = new Date()
     const credits = courses.docs
-      .map((course) => creditFor({ course, evaluatedAt, license: doc }))
+      .map((course) =>
+        creditCourseForLicense({ course, evaluatedAt, license: doc })
+      )
       .filter((credit): credit is CreditToPersist => credit !== null)
     await reconcileCredits({ credits, payload, req, scope })
   } catch (err) {

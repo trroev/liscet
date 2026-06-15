@@ -1,4 +1,4 @@
-const DEFAULT_RENEWAL_CYCLE_MONTHS = 24
+import { DEFAULT_RENEWAL_CYCLE_MONTHS } from "./default-renewal-cycle"
 
 type DeriveRenewalCycleStartArgs = {
   readonly expiresAt: string

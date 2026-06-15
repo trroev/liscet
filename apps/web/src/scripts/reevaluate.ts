@@ -1,6 +1,6 @@
 import config from "@payload-config"
 import { createLogger } from "@repo/logger"
-import { creditFor } from "@repo/payload/hooks/evaluateCourseCredits/credit-for"
+import { creditCourseForLicense } from "@repo/payload/evaluation"
 import {
   type CreditToPersist,
   reconcileCredits,
@@ -107,7 +107,9 @@ async function reevaluate(args: CliArgs): Promise<void> {
         where: { practitioner: { equals: refId(license.practitioner) } },
       })
       const credits = courses.docs
-        .map((course) => creditFor({ course, evaluatedAt, license }))
+        .map((course) =>
+          creditCourseForLicense({ course, evaluatedAt, license })
+        )
         .filter((credit): credit is CreditToPersist => credit !== null)
       const summary = await reconcileCredits({
         credits,
