@@ -77,8 +77,21 @@ const page = (
   totalDocs: docs.length,
 })
 
+// The Postgres/Drizzle adapter matches relationship filters with `in`, not
+// `equals` (verified live). The double mirrors that: a logged row is only
+// "found" when the notification-log query filters the relationships with `in`,
+// so a regression to `equals` resurfaces the duplicate-send bug as a failure.
+const usesRelationshipInFilter = (where: {
+  and?: ReadonlyArray<Record<string, { in?: ReadonlyArray<string> }>>
+}): boolean =>
+  Boolean(
+    where.and?.some((clause) => Array.isArray(clause.license?.in)) &&
+      where.and?.some((clause) => Array.isArray(clause.practitioner?.in))
+  )
+
 // Builds a Payload double: `licensePages` are returned to the licenses query by
-// page number; the notification-log query returns `logTotalDocs`.
+// page number; the notification-log query returns `logTotalDocs` when its
+// relationship filters are well-formed.
 const fakePayload = ({
   create = vi.fn(),
   licensePages,
@@ -89,12 +102,22 @@ const fakePayload = ({
   logTotalDocs?: number
 }): Payload => {
   const find = vi.fn(
-    ({ collection, page: pageNumber }: { collection: string; page: number }) =>
-      Promise.resolve(
-        collection === "licenses"
-          ? (licensePages[pageNumber - 1] ?? page([]))
-          : page(logTotalDocs > 0 ? [{ id: "log-1" }] : [])
-      )
+    ({
+      collection,
+      page: pageNumber,
+      where,
+    }: {
+      collection: string
+      page: number
+      where: Parameters<typeof usesRelationshipInFilter>[0]
+    }) => {
+      if (collection === "licenses") {
+        return Promise.resolve(licensePages[pageNumber - 1] ?? page([]))
+      }
+
+      const found = logTotalDocs > 0 && usesRelationshipInFilter(where)
+      return Promise.resolve(page(found ? [{ id: "log-1" }] : []))
+    }
   )
 
   return { create, find } as unknown as Payload

@@ -76,6 +76,10 @@ const processLicense = async ({
 
   const notificationType = renewalNotificationType(threshold)
 
+  // Relationship fields are filtered with `in` rather than `equals`: against
+  // the Postgres/Drizzle adapter with UUID primary keys, `equals` on a
+  // relationship field does not match, whereas `in` does. The `notificationType`
+  // select field matches with `equals` as normal.
   const alreadyLogged = await payload.find({
     collection: "notification-log",
     depth: 0,
@@ -83,8 +87,8 @@ const processLicense = async ({
     overrideAccess: true,
     where: {
       and: [
-        { practitioner: { equals: practitioner.id } },
-        { license: { equals: license.id } },
+        { practitioner: { in: [practitioner.id] } },
+        { license: { in: [license.id] } },
         { notificationType: { equals: notificationType } },
       ],
     },
