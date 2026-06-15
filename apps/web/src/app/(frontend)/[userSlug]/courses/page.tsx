@@ -1,4 +1,6 @@
 import type { Metadata } from "next"
+import { CoursesList } from "~/features/courses/components/CoursesList"
+import { getCoursesData } from "~/features/courses/lib/get-courses-data"
 import { requireSlugOwner } from "~/lib/queries/require-slug-owner"
 
 export const metadata: Metadata = {
@@ -12,7 +14,9 @@ export default async function CoursesPage({
   params: Promise<{ userSlug: string }>
 }) {
   const { userSlug } = await params
-  await requireSlugOwner({ userSlug })
+  const { user } = await requireSlugOwner({ userSlug })
+
+  const data = await getCoursesData(user.id)
 
   return (
     <section className="mx-auto w-full max-w-3xl space-y-6 px-6 py-10">
@@ -21,12 +25,10 @@ export default async function CoursesPage({
           Courses
         </h1>
         <p className="font-sans text-body-sm text-text-muted">
-          Your continuing-education course history.
+          Your logged continuing-education courses and the credits they earned.
         </p>
       </header>
-      <p className="rounded-lg border border-border border-dashed bg-surface p-6 text-body-sm text-text-secondary">
-        Course history is coming soon.
-      </p>
+      <CoursesList courses={data.courses} />
     </section>
   )
 }
