@@ -13,6 +13,7 @@ const env = createEnv({
   ...baseEnvOptions,
   server: {
     BASE_URL: baseUrlSchema,
+    CRON_SECRET: z.string().min(1),
     REVALIDATION_SECRET: z.string(),
     SENTRY_AUTH_TOKEN: z.string().optional(),
     SENTRY_ORG: z.string().optional(),

@@ -21,6 +21,8 @@
     "vitest": "catalog:"
   },
   "dependencies": {
+    "@date-fns/tz": "catalog:",
+    "date-fns": "catalog:",
     "ts-pattern": "catalog:"
   }
 }

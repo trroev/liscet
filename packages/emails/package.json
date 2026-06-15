@@ -19,6 +19,7 @@
   "dependencies": {
     "@react-email/components": "^1.0.12",
     "@repo/env": "workspace:*",
+    "@repo/utils": "workspace:*",
     "react": "catalog:",
     "react-dom": "catalog:",
     "resend": "^6.12.4",

@@ -1,4 +1,10 @@
 {
   "buildCommand": "cd ../.. && pnpm migrate && pnpm turbo run build --filter=web",
+  "crons": [
+    {
+      "path": "/api/cron/notifications",
+      "schedule": "0 13 * * *"
+    }
+  ],
   "ignoreCommand": "cd ../.. && npx turbo-ignore web"
 }
