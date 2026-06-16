@@ -79,23 +79,32 @@ const clamavRestScanner: Scanner = async ({ data, filename, mimetype }) => {
 }
 
 /**
+ * Scans an uploaded file, applying the configuration gate: when no
+ * `VIRUS_SCAN_URL` is set, production fails closed (throws) while dev/test logs
+ * and treats the file as clean so local uploads still work. Shared by the Media
+ * `beforeChange` hook and the certificate upload action — both upload paths run
+ * the same gate. Throws on provider error/timeout so callers fail closed.
+ */
+export const scanUploadedFile: Scanner = (args) => {
+  if (!env.VIRUS_SCAN_URL) {
+    if (process.env.NODE_ENV === "production") {
+      throw new Error("virus scan is not configured")
+    }
+    log.warn("virus scan skipped — VIRUS_SCAN_URL is not set")
+    return Promise.resolve({ clean: true })
+  }
+  return clamavRestScanner(args)
+}
+
+/**
  * Builds the `beforeChange` virus-scan gate. The scanner is injected (defaulting
- * to {@link clamavRestScanner}) so tests can drive every branch with a mock.
+ * to {@link scanUploadedFile}) so tests can drive every branch with a mock.
  */
 export const createVirusScanHook =
-  (scan: Scanner = clamavRestScanner): CollectionBeforeChangeHook =>
+  (scan: Scanner = scanUploadedFile): CollectionBeforeChangeHook =>
   async ({ data, req }) => {
     const file = req.file
     if (!file) {
-      return data
-    }
-
-    if (!env.VIRUS_SCAN_URL) {
-      if (process.env.NODE_ENV === "production") {
-        captureException(new Error("virus scan is not configured"))
-        throw new APIError("Unable to verify file safety.", 422)
-      }
-      log.warn("virus scan skipped — VIRUS_SCAN_URL is not set")
       return data
     }
 

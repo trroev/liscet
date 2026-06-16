@@ -261,6 +261,10 @@ export interface Media {
   id: string;
   _order?: string | null;
   alt: string;
+  /**
+   * Pathname of the private Vercel Blob for certificate docs; empty for adapter-managed public media.
+   */
+  blobPathname?: string | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -527,6 +531,7 @@ export interface LicensesSelect<T extends boolean = true> {
 export interface MediaSelect<T extends boolean = true> {
   _order?: T;
   alt?: T;
+  blobPathname?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;

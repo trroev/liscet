@@ -2,15 +2,16 @@
 
 import "server-only"
 
+import { scanUploadedFile } from "@repo/payload/hooks/virusScan"
 import { z } from "zod"
 import { authedAction } from "~/lib/authed-action"
-import { createMediaAsset } from "~/lib/queries/media"
+import { uploadCertificateBlob } from "../lib/certificate-blob"
 import { logCourseSchema } from "../lib/schema"
 import type { LogCourseResult } from "../lib/types"
 
 const MAX_CERTIFICATE_BYTES = 10 * 1024 * 1024
 
-// TODO(#58): virus-scan certificate uploads; v1 mitigates with the allowlist below.
+// Allowlist is defense-in-depth alongside the virus scan run before upload.
 const ALLOWED_CERTIFICATE_MIME_TYPES = [
   "application/pdf",
   "image/jpeg",
@@ -67,12 +68,43 @@ export const logCourse = authedAction<FormData, LogCourseResult>(
             "Upload a valid certificate file.",
         }
       }
-      const media = await createMediaAsset({
-        alt: `${values.title} certificate`,
-        fallbackName: "certificate",
-        file: parsedFile.data,
+
+      const file = parsedFile.data
+      const buffer = Buffer.from(await file.arrayBuffer())
+      const filename = file.name || "certificate"
+      const contentType = file.type || "application/octet-stream"
+
+      let verdict: { clean: boolean }
+      try {
+        verdict = await scanUploadedFile({
+          data: buffer,
+          filename,
+          mimetype: contentType,
+        })
+      } catch {
+        return {
+          status: "error",
+          message: "Could not verify the certificate file. Please try again.",
+        }
+      }
+      if (!verdict.clean) {
+        return {
+          status: "error",
+          message: "This certificate file failed a virus scan.",
+        }
+      }
+
+      const { pathname } = await uploadCertificateBlob({
+        buffer,
+        contentType,
+        filename,
       })
-      certificateId = media.id
+      const media = await payload.create({
+        collection: "media",
+        data: { alt: `${values.title} certificate`, blobPathname: pathname },
+        overrideAccess: true,
+      })
+      certificateId = String(media.id)
     }
 
     const course = await payload.create({

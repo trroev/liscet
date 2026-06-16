@@ -36,6 +36,7 @@
     "@repo/observability": "workspace:*",
     "@repo/rules-engine": "workspace:*",
     "@repo/ui": "workspace:*",
+    "@vercel/blob": "catalog:",
     "lexical": "0.41.0",
     "ts-pattern": "catalog:",
     "zod": "catalog:"

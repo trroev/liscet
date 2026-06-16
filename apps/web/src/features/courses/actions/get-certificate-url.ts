@@ -2,12 +2,8 @@
 
 import "server-only"
 
-import { env } from "@repo/env/app"
 import { authedAction } from "~/lib/authed-action"
-import {
-  CERTIFICATE_LINK_TTL_MS,
-  signCertificateToken,
-} from "../lib/certificate-token"
+import { presignCertificateUrl } from "../lib/certificate-blob"
 import type { CertificateUrlResult } from "../lib/types"
 
 export const getCertificateUrl = authedAction<string, CertificateUrlResult>(
@@ -36,11 +32,21 @@ export const getCertificateUrl = authedAction<string, CertificateUrlResult>(
       return { status: "error", message: "This course has no certificate." }
     }
 
-    const expiresAt = Date.now() + CERTIFICATE_LINK_TTL_MS
-    const token = signCertificateToken({ expiresAt, mediaId })
-    const url = new URL("/api/courses/certificate", env.BASE_URL)
-    url.searchParams.set("token", token)
+    // Read as the practitioner (not overrideAccess) so `canReadOwnMedia` is the
+    // authorization gate, then presign the private blob.
+    const media = await payload.findByID({
+      collection: "media",
+      depth: 0,
+      disableErrors: true,
+      id: mediaId,
+      overrideAccess: false,
+      user,
+    })
+    if (!media?.blobPathname) {
+      return { status: "error", message: "Certificate not found." }
+    }
 
-    return { status: "success", data: { url: url.toString() } }
+    const url = await presignCertificateUrl({ pathname: media.blobPathname })
+    return { status: "success", data: { url } }
   }
 )

@@ -11,6 +11,7 @@ import * as migration_20260609_222845_slug_field_on_users from './20260609_22284
 import * as migration_20260611_195545_course_credit_dimensions from './20260611_195545_course_credit_dimensions';
 import * as migration_20260612_191556_deleted_at_on_users from './20260612_191556_deleted_at_on_users';
 import * as migration_20260616_141229_co_telehealth_notification_types from './20260616_141229_co_telehealth_notification_types';
+import * as migration_20260616_194400_blob_pathname_on_media from './20260616_194400_blob_pathname_on_media';
 
 export const migrations = [
   {
@@ -76,6 +77,11 @@ export const migrations = [
   {
     up: migration_20260616_141229_co_telehealth_notification_types.up,
     down: migration_20260616_141229_co_telehealth_notification_types.down,
-    name: '20260616_141229_co_telehealth_notification_types'
+    name: '20260616_141229_co_telehealth_notification_types',
+  },
+  {
+    up: migration_20260616_194400_blob_pathname_on_media.up,
+    down: migration_20260616_194400_blob_pathname_on_media.down,
+    name: '20260616_194400_blob_pathname_on_media'
   },
 ];

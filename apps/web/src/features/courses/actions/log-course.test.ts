@@ -1,14 +1,17 @@
 import { beforeEach, describe, expect, it, vi } from "vitest"
 
 const getCurrentViewer = vi.fn()
-const createMediaAsset = vi.fn()
+const scanUploadedFile = vi.fn()
+const uploadCertificateBlob = vi.fn()
 const create = vi.fn()
 
 vi.mock("server-only", () => ({}))
 
 vi.mock("~/lib/queries/current-viewer", () => ({ getCurrentViewer }))
 
-vi.mock("~/lib/queries/media", () => ({ createMediaAsset }))
+vi.mock("@repo/payload/hooks/virusScan", () => ({ scanUploadedFile }))
+
+vi.mock("../lib/certificate-blob", () => ({ uploadCertificateBlob }))
 
 vi.mock("payload", () => ({
   getPayload: vi.fn(async () => ({ create })),
@@ -48,7 +51,10 @@ const validFormData = (): FormData => {
 describe("logCourse", () => {
   beforeEach(() => {
     getCurrentViewer.mockReset()
-    createMediaAsset.mockReset()
+    scanUploadedFile.mockReset()
+    scanUploadedFile.mockResolvedValue({ clean: true })
+    uploadCertificateBlob.mockReset()
+    uploadCertificateBlob.mockResolvedValue({ pathname: "media/cert-abc.pdf" })
     create.mockReset()
     create.mockResolvedValue({ id: "course-1" })
   })
@@ -84,25 +90,41 @@ describe("logCourse", () => {
         overrideAccess: true,
       })
     )
-    expect(createMediaAsset).not.toHaveBeenCalled()
+    expect(scanUploadedFile).not.toHaveBeenCalled()
+    expect(uploadCertificateBlob).not.toHaveBeenCalled()
     expect(result).toEqual({
       status: "success",
       data: { courseId: "course-1" },
     })
   })
 
-  it("uploads a certificate and links it to the course", async () => {
+  it("scans, privately uploads, and links a clean certificate", async () => {
     stubViewer()
-    createMediaAsset.mockResolvedValueOnce({ id: "media-1", url: null })
+    create.mockResolvedValueOnce({ id: "media-1" })
     const formData = validFormData()
     formData.set("certificate", makeFile("cert.pdf", "application/pdf", 2048))
 
     await logCourse(formData)
 
-    expect(createMediaAsset).toHaveBeenCalledWith(
+    expect(scanUploadedFile).toHaveBeenCalledWith(
       expect.objectContaining({
-        alt: "Ethics 101 certificate",
-        file: expect.any(File),
+        filename: "cert.pdf",
+        mimetype: "application/pdf",
+      })
+    )
+    expect(uploadCertificateBlob).toHaveBeenCalledWith(
+      expect.objectContaining({
+        contentType: "application/pdf",
+        filename: "cert.pdf",
+      })
+    )
+    expect(create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        collection: "media",
+        data: expect.objectContaining({
+          alt: "Ethics 101 certificate",
+          blobPathname: "media/cert-abc.pdf",
+        }),
       })
     )
     expect(create).toHaveBeenCalledWith(
@@ -110,6 +132,32 @@ describe("logCourse", () => {
         data: expect.objectContaining({ certificate: "media-1" }),
       })
     )
+  })
+
+  it("rejects an infected certificate without uploading or creating", async () => {
+    stubViewer()
+    scanUploadedFile.mockResolvedValueOnce({ clean: false })
+    const formData = validFormData()
+    formData.set("certificate", makeFile("cert.pdf", "application/pdf", 2048))
+
+    const result = await logCourse(formData)
+
+    expect(result.status).toBe("error")
+    expect(uploadCertificateBlob).not.toHaveBeenCalled()
+    expect(create).not.toHaveBeenCalled()
+  })
+
+  it("fails closed when the scan provider errors", async () => {
+    stubViewer()
+    scanUploadedFile.mockRejectedValueOnce(new Error("scanner down"))
+    const formData = validFormData()
+    formData.set("certificate", makeFile("cert.pdf", "application/pdf", 2048))
+
+    const result = await logCourse(formData)
+
+    expect(result.status).toBe("error")
+    expect(uploadCertificateBlob).not.toHaveBeenCalled()
+    expect(create).not.toHaveBeenCalled()
   })
 
   it("rejects a disallowed certificate mime type without creating a course", async () => {
@@ -120,7 +168,7 @@ describe("logCourse", () => {
     const result = await logCourse(formData)
 
     expect(result.status).toBe("error")
-    expect(createMediaAsset).not.toHaveBeenCalled()
+    expect(scanUploadedFile).not.toHaveBeenCalled()
     expect(create).not.toHaveBeenCalled()
   })
 
