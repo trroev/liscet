@@ -34,6 +34,7 @@
     "husky": "^9.1.7",
     "lint-staged": "^17.0.5",
     "only-allow": "^1.2.1",
+    "portless": "catalog:",
     "turbo": "^2.9.6",
     "turbo-ignore": "^2.9.15",
     "typescript": "catalog:",
