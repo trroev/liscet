@@ -5,7 +5,6 @@ import { lexicalEditor } from "@payloadcms/richtext-lexical"
 import { vercelBlobStorage } from "@payloadcms/storage-vercel-blob"
 import { env as blobEnv } from "@repo/env/blob"
 import { env as databaseEnv } from "@repo/env/database"
-import { env as loggerEnv } from "@repo/env/logger"
 import { env as payloadEnv } from "@repo/env/payload"
 import { Admins } from "@repo/payload/collections/Admins"
 import { CourseCredits } from "@repo/payload/collections/CourseCredits"
@@ -18,7 +17,11 @@ import { buildConfig } from "payload"
 
 const dirname = path.dirname(fileURLToPath(import.meta.url))
 
-const isDev = loggerEnv.NODE_ENV === "development"
+const VERCEL_BLOB_TOKEN_RE = /^vercel_blob_rw_[a-z\d]+_[a-z\d]+$/i
+
+const hasVercelBlobToken = VERCEL_BLOB_TOKEN_RE.test(
+  blobEnv.BLOB_READ_WRITE_TOKEN
+)
 
 type CreatePayloadConfigOptions = {
   readonly baseDir: string
@@ -63,7 +66,7 @@ export function createPayloadConfig({ baseDir }: CreatePayloadConfigOptions) {
     plugins: [
       vercelBlobStorage({
         collections: { media: true },
-        enabled: !isDev,
+        enabled: hasVercelBlobToken,
         token: blobEnv.BLOB_READ_WRITE_TOKEN,
       }),
     ],
