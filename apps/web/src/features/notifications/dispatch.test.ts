@@ -25,6 +25,12 @@ vi.mock("@repo/emails/templates/CategoryShortfall", () => ({
   categoryShortfallSubject: () => "Some required CE categories are still short",
 }))
 
+vi.mock("@repo/emails/templates/CoTelehealthReminder", () => ({
+  CoTelehealthReminder: () => null,
+  coTelehealthSubject: (days: number) =>
+    `Your Colorado telehealth registration expires in ${days} days`,
+}))
+
 vi.mock("@repo/payload/evaluation", () => ({ summarizeLicenseFromRows }))
 
 vi.mock("@repo/payload/queries/practitioner-data", () => ({
@@ -182,6 +188,62 @@ const shortfallPayload = ({
   return { create, find } as unknown as Payload
 }
 
+// Resolves notification-log idempotency by notification type so the CO
+// telehealth track can be isolated: renewal/shortfall types report as already
+// logged, while the co-telehealth-* types are configurable per test.
+const coTelehealthPayload = ({
+  create = vi.fn(),
+  coLogged = false,
+  licensePages,
+  renewalLogged = true,
+}: {
+  create?: ReturnType<typeof vi.fn>
+  coLogged?: boolean
+  licensePages: ReadonlyArray<FindResult>
+  renewalLogged?: boolean
+}): Payload => {
+  const find = vi.fn(
+    ({
+      collection,
+      page: pageNumber,
+      where,
+    }: {
+      collection: string
+      page: number
+      where: {
+        and?: ReadonlyArray<{ notificationType?: { equals?: string } }>
+      }
+    }) => {
+      if (collection === "licenses") {
+        return Promise.resolve(licensePages[pageNumber - 1] ?? page([]))
+      }
+      if (collection === "course-credits") {
+        return Promise.resolve(page([]))
+      }
+
+      const type = where.and?.find((clause) => clause.notificationType)
+        ?.notificationType?.equals
+      if (typeof type === "string" && type.startsWith("co-telehealth")) {
+        return Promise.resolve(page(coLogged ? [{ id: "co-log" }] : []))
+      }
+
+      return Promise.resolve(page(renewalLogged ? [{ id: "renewal-log" }] : []))
+    }
+  )
+
+  return { create, find } as unknown as Payload
+}
+
+const registeredLicense = (
+  coTelehealthRegistration: {
+    expiresAt?: string
+    isRegistered?: boolean
+    registrationNumber?: string
+  },
+  overrides: Partial<License> = {}
+): License =>
+  license({ coTelehealthRegistration, ...overrides } as Partial<License>)
+
 describe("dispatchRenewalNotifications", () => {
   beforeEach(() => {
     captureException.mockReset()
@@ -197,7 +259,7 @@ describe("dispatchRenewalNotifications", () => {
 
     const summary = await dispatchRenewalNotifications({ now: NOW, payload })
 
-    expect(summary).toEqual({ failed: 0, scanned: 1, sent: 1, skipped: 1 })
+    expect(summary).toEqual({ failed: 0, scanned: 1, sent: 1, skipped: 2 })
     expect(sendEmail).toHaveBeenCalledOnce()
     expect(create).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -221,7 +283,7 @@ describe("dispatchRenewalNotifications", () => {
 
     const summary = await dispatchRenewalNotifications({ now: NOW, payload })
 
-    expect(summary).toEqual({ failed: 0, scanned: 1, sent: 0, skipped: 2 })
+    expect(summary).toEqual({ failed: 0, scanned: 1, sent: 0, skipped: 3 })
     expect(sendEmail).not.toHaveBeenCalled()
     expect(create).not.toHaveBeenCalled()
   })
@@ -233,7 +295,7 @@ describe("dispatchRenewalNotifications", () => {
 
     const summary = await dispatchRenewalNotifications({ now: NOW, payload })
 
-    expect(summary).toEqual({ failed: 0, scanned: 1, sent: 0, skipped: 2 })
+    expect(summary).toEqual({ failed: 0, scanned: 1, sent: 0, skipped: 3 })
     expect(sendEmail).not.toHaveBeenCalled()
   })
 
@@ -250,7 +312,7 @@ describe("dispatchRenewalNotifications", () => {
 
     const summary = await dispatchRenewalNotifications({ now: NOW, payload })
 
-    expect(summary).toEqual({ failed: 0, scanned: 1, sent: 0, skipped: 2 })
+    expect(summary).toEqual({ failed: 0, scanned: 1, sent: 0, skipped: 3 })
     expect(sendEmail).not.toHaveBeenCalled()
   })
 
@@ -264,7 +326,7 @@ describe("dispatchRenewalNotifications", () => {
 
     const summary = await dispatchRenewalNotifications({ now: NOW, payload })
 
-    expect(summary).toEqual({ failed: 0, scanned: 2, sent: 2, skipped: 2 })
+    expect(summary).toEqual({ failed: 0, scanned: 2, sent: 2, skipped: 4 })
     expect(sendEmail).toHaveBeenCalledTimes(2)
   })
 
@@ -281,7 +343,7 @@ describe("dispatchRenewalNotifications", () => {
 
     const summary = await dispatchRenewalNotifications({ now: NOW, payload })
 
-    expect(summary).toEqual({ failed: 1, scanned: 2, sent: 1, skipped: 2 })
+    expect(summary).toEqual({ failed: 1, scanned: 2, sent: 1, skipped: 4 })
     expect(captureException).toHaveBeenCalledOnce()
   })
 
@@ -295,7 +357,7 @@ describe("dispatchRenewalNotifications", () => {
 
     const summary = await dispatchRenewalNotifications({ now: NOW, payload })
 
-    expect(summary).toEqual({ failed: 1, scanned: 1, sent: 0, skipped: 1 })
+    expect(summary).toEqual({ failed: 1, scanned: 1, sent: 0, skipped: 2 })
     expect(create).not.toHaveBeenCalled()
     expect(captureException).toHaveBeenCalledOnce()
   })
@@ -315,7 +377,7 @@ describe("dispatchRenewalNotifications", () => {
 
     const summary = await dispatchRenewalNotifications({ now: NOW, payload })
 
-    expect(summary).toEqual({ failed: 0, scanned: 1, sent: 1, skipped: 1 })
+    expect(summary).toEqual({ failed: 0, scanned: 1, sent: 1, skipped: 2 })
     expect(sendEmail).toHaveBeenCalledOnce()
     expect(create).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -341,7 +403,7 @@ describe("dispatchRenewalNotifications", () => {
 
     const summary = await dispatchRenewalNotifications({ now: NOW, payload })
 
-    expect(summary).toEqual({ failed: 0, scanned: 1, sent: 0, skipped: 2 })
+    expect(summary).toEqual({ failed: 0, scanned: 1, sent: 0, skipped: 3 })
     expect(sendEmail).not.toHaveBeenCalled()
     expect(create).not.toHaveBeenCalled()
   })
@@ -359,7 +421,7 @@ describe("dispatchRenewalNotifications", () => {
 
     const summary = await dispatchRenewalNotifications({ now: NOW, payload })
 
-    expect(summary).toEqual({ failed: 0, scanned: 1, sent: 0, skipped: 2 })
+    expect(summary).toEqual({ failed: 0, scanned: 1, sent: 0, skipped: 3 })
     expect(sendEmail).not.toHaveBeenCalled()
     expect(create).not.toHaveBeenCalled()
   })
@@ -374,7 +436,7 @@ describe("dispatchRenewalNotifications", () => {
 
     const summary = await dispatchRenewalNotifications({ now: NOW, payload })
 
-    expect(summary).toEqual({ failed: 0, scanned: 1, sent: 0, skipped: 2 })
+    expect(summary).toEqual({ failed: 0, scanned: 1, sent: 0, skipped: 3 })
     expect(sendEmail).not.toHaveBeenCalled()
     expect(summarizeLicenseFromRows).not.toHaveBeenCalled()
   })
@@ -387,7 +449,128 @@ describe("dispatchRenewalNotifications", () => {
 
     const summary = await dispatchRenewalNotifications({ now: NOW, payload })
 
-    expect(summary).toEqual({ failed: 0, scanned: 1, sent: 0, skipped: 2 })
+    expect(summary).toEqual({ failed: 0, scanned: 1, sent: 0, skipped: 3 })
     expect(sendEmail).not.toHaveBeenCalled()
+  })
+
+  it("sends and logs a CO telehealth reminder for a registered license in a window", async () => {
+    const create = vi.fn()
+    const payload = coTelehealthPayload({
+      create,
+      licensePages: [
+        page([
+          registeredLicense({
+            expiresAt: EXPIRES_IN_90D,
+            isRegistered: true,
+            registrationNumber: "CO-1",
+          }),
+        ]),
+      ],
+    })
+
+    const summary = await dispatchRenewalNotifications({ now: NOW, payload })
+
+    expect(summary).toEqual({ failed: 0, scanned: 1, sent: 1, skipped: 2 })
+    expect(sendEmail).toHaveBeenCalledOnce()
+    expect(create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        collection: "notification-log",
+        data: expect.objectContaining({
+          license: "lic-1",
+          notificationType: "co-telehealth-90d",
+          practitioner: "user-1",
+        }),
+      })
+    )
+  })
+
+  it("sends the CO reminder independently of an already-sent renewal reminder", async () => {
+    const create = vi.fn()
+    const payload = coTelehealthPayload({
+      create,
+      licensePages: [
+        page([
+          registeredLicense({
+            expiresAt: EXPIRES_IN_90D,
+            isRegistered: true,
+          }),
+        ]),
+      ],
+      renewalLogged: false,
+    })
+
+    const summary = await dispatchRenewalNotifications({ now: NOW, payload })
+
+    expect(summary).toEqual({ failed: 0, scanned: 1, sent: 2, skipped: 1 })
+    expect(sendEmail).toHaveBeenCalledTimes(2)
+    expect(create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({ notificationType: "renewal-90d" }),
+      })
+    )
+    expect(create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          notificationType: "co-telehealth-90d",
+        }),
+      })
+    )
+  })
+
+  it("does not send a CO reminder when the license is not registered", async () => {
+    const create = vi.fn()
+    const payload = coTelehealthPayload({
+      create,
+      licensePages: [
+        page([
+          registeredLicense({
+            expiresAt: EXPIRES_IN_90D,
+            isRegistered: false,
+          }),
+        ]),
+      ],
+    })
+
+    const summary = await dispatchRenewalNotifications({ now: NOW, payload })
+
+    expect(summary).toEqual({ failed: 0, scanned: 1, sent: 0, skipped: 3 })
+    expect(sendEmail).not.toHaveBeenCalled()
+    expect(create).not.toHaveBeenCalled()
+  })
+
+  it("does not send a CO reminder when no CO expiry is set", async () => {
+    const create = vi.fn()
+    const payload = coTelehealthPayload({
+      create,
+      licensePages: [page([registeredLicense({ isRegistered: true })])],
+    })
+
+    const summary = await dispatchRenewalNotifications({ now: NOW, payload })
+
+    expect(summary).toEqual({ failed: 0, scanned: 1, sent: 0, skipped: 3 })
+    expect(sendEmail).not.toHaveBeenCalled()
+    expect(create).not.toHaveBeenCalled()
+  })
+
+  it("does not repeat a CO reminder already recorded in the log", async () => {
+    const create = vi.fn()
+    const payload = coTelehealthPayload({
+      coLogged: true,
+      create,
+      licensePages: [
+        page([
+          registeredLicense({
+            expiresAt: EXPIRES_IN_90D,
+            isRegistered: true,
+          }),
+        ]),
+      ],
+    })
+
+    const summary = await dispatchRenewalNotifications({ now: NOW, payload })
+
+    expect(summary).toEqual({ failed: 0, scanned: 1, sent: 0, skipped: 3 })
+    expect(sendEmail).not.toHaveBeenCalled()
+    expect(create).not.toHaveBeenCalled()
   })
 })

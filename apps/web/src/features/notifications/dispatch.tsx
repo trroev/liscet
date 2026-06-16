@@ -6,6 +6,10 @@ import {
   categoryShortfallSubject,
 } from "@repo/emails/templates/CategoryShortfall"
 import {
+  CoTelehealthReminder,
+  coTelehealthSubject,
+} from "@repo/emails/templates/CoTelehealthReminder"
+import {
   RenewalReminder,
   renewalSubject,
 } from "@repo/emails/templates/RenewalReminder"
@@ -13,6 +17,7 @@ import { createLogger } from "@repo/logger"
 import { summarizeLicenseFromRows } from "@repo/payload/evaluation"
 import type { License, User } from "@repo/payload/payload-types"
 import { practitionerData } from "@repo/payload/queries/practitioner-data"
+import { coTelehealthNotificationType } from "@repo/utils/coTelehealthThreshold"
 import { daysUntilExpiry } from "@repo/utils/daysUntilExpiry"
 import {
   activeRenewalThreshold,
@@ -256,6 +261,99 @@ const processShortfall = async ({
   return "sent"
 }
 
+// A second, independent reminder track for the out-of-state telehealth-into-CO
+// registration expiry (C.R.S. § 12-30-124). It mirrors processRenewal's
+// once-per-threshold idempotency but reads its own date and notification types,
+// so a lapsing registration never suppresses a license-renewal reminder.
+const processCoTelehealth = async ({
+  license,
+  now,
+  payload,
+}: ProcessInput): Promise<"sent" | "skipped"> => {
+  const practitioner = resolvePractitioner(license)
+
+  if (practitioner === null) {
+    return "skipped"
+  }
+
+  const registration = license.coTelehealthRegistration
+  if (registration?.isRegistered !== true || !registration.expiresAt) {
+    return "skipped"
+  }
+
+  const timezone = stateToTimezone(license.state)
+  const daysRemaining = daysUntilExpiry({
+    expiresAt: registration.expiresAt,
+    now,
+    timezone,
+  })
+
+  const threshold = activeRenewalThreshold(daysRemaining)
+  if (threshold === null) {
+    return "skipped"
+  }
+
+  const notificationType = coTelehealthNotificationType(threshold)
+
+  const alreadyLogged = await payload.find({
+    collection: "notification-log",
+    depth: 0,
+    limit: 1,
+    overrideAccess: true,
+    where: {
+      and: [
+        { practitioner: { in: [practitioner.id] } },
+        { license: { in: [license.id] } },
+        { notificationType: { equals: notificationType } },
+      ],
+    },
+  })
+
+  if (alreadyLogged.totalDocs > 0) {
+    return "skipped"
+  }
+
+  const { error } = await sendEmail({
+    react: (
+      <CoTelehealthReminder
+        daysRemaining={daysRemaining}
+        expiresAt={registration.expiresAt}
+        licenseType={license.licenseType}
+        notificationType={notificationType}
+        practitionerName={practitioner.displayName ?? "there"}
+        registrationNumber={registration.registrationNumber ?? undefined}
+        state={license.state}
+      />
+    ),
+    subject: coTelehealthSubject(daysRemaining),
+    to: practitioner.email,
+  })
+
+  if (error) {
+    throw new Error(
+      `Resend rejected the CO telehealth reminder email: ${error.message}`
+    )
+  }
+
+  await payload.create({
+    collection: "notification-log",
+    data: {
+      license: license.id,
+      notificationType,
+      practitioner: practitioner.id,
+      sentAt: now.toISOString(),
+      sentForDate: calendarDateInTimezone(now, timezone),
+    },
+    overrideAccess: true,
+  })
+
+  log
+    .withMetadata({ daysRemaining, licenseId: license.id, notificationType })
+    .info("sent CO telehealth reminder notification")
+
+  return "sent"
+}
+
 const dispatchRenewalNotifications = async ({
   now,
   payload,
@@ -277,7 +375,11 @@ const dispatchRenewalNotifications = async ({
     for (const license of result.docs) {
       summary.scanned += 1
 
-      for (const process of [processRenewal, processShortfall]) {
+      for (const process of [
+        processRenewal,
+        processShortfall,
+        processCoTelehealth,
+      ]) {
         try {
           const outcome = await process({ license, now, payload })
           summary[outcome] += 1

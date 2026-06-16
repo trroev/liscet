@@ -325,7 +325,18 @@ export interface NotificationLog {
   id: string;
   practitioner: string | User;
   license: string | License;
-  notificationType: 'renewal-90d' | 'renewal-60d' | 'renewal-30d' | 'renewal-7d' | 'renewal-1d' | 'category-shortfall';
+  notificationType:
+    | 'renewal-90d'
+    | 'renewal-60d'
+    | 'renewal-30d'
+    | 'renewal-7d'
+    | 'renewal-1d'
+    | 'category-shortfall'
+    | 'co-telehealth-90d'
+    | 'co-telehealth-60d'
+    | 'co-telehealth-30d'
+    | 'co-telehealth-7d'
+    | 'co-telehealth-1d';
   sentAt: string;
   /**
    * The calendar date the cron ran.
