@@ -99,6 +99,9 @@ catalogs:
     pg:
       specifier: ^8.21.0
       version: 8.21.0
+    portless:
+      specifier: 0.14.0
+      version: 0.14.0
     posthog-js:
       specifier: ^1.382.0
       version: 1.382.0
@@ -275,6 +278,9 @@ importers:
       next:
         specifier: 'catalog:'
         version: 16.2.7(@babel/core@7.29.0)(@opentelemetry/api@1.9.1)(@playwright/test@1.60.0)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)(sass@1.77.4)
+      portless:
+        specifier: 'catalog:'
+        version: 0.14.0
       tailwindcss:
         specifier: 'catalog:'
         version: 4.2.4
@@ -438,6 +444,9 @@ importers:
       jsdom:
         specifier: 'catalog:'
         version: 29.1.1(@noble/hashes@2.2.0)
+      portless:
+        specifier: 'catalog:'
+        version: 0.14.0
       storybook:
         specifier: 'catalog:'
         version: 10.3.6(@testing-library/dom@10.4.1)(prettier@3.8.3)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
@@ -6236,6 +6245,12 @@ packages:
   pluralize@8.0.0:
     resolution: {integrity: sha512-Nc3IT5yHzflTfbjgqWcCPpo7DaKy4FnpB0l/zCAW0Tc7jxAiuqSxHasntB3D7887LSrA93kDJ9IXovxJYxyLCA==}
     engines: {node: '>=4'}
+
+  portless@0.14.0:
+    resolution: {integrity: sha512-kKxmxB1DQ9gI8t+V13VhuwTXu31io5nbFubvZAE82AxzXBsvcJV7qQJbmomrQUpbVxo2UVHqs14iX4YK0BClmQ==}
+    engines: {node: '>=24'}
+    os: [darwin, linux, win32]
+    hasBin: true
 
   postal-mime@2.7.4:
     resolution: {integrity: sha512-0WdnFQYUrPGGTFu1uOqD2s7omwua8xaeYGdO6rb88oD5yJ/4pPHDA4sdWqfD8wQVfCny563n/HQS7zTFft+f/g==}
@@ -12520,6 +12535,8 @@ snapshots:
       fsevents: 2.3.2
 
   pluralize@8.0.0: {}
+
+  portless@0.14.0: {}
 
   postal-mime@2.7.4: {}
 

@@ -34,6 +34,7 @@ catalog:
   next-themes: ^0.4.6
   payload: ^3.85.0
   pg: ^8.21.0
+  portless: 0.14.0
   posthog-js: ^1.382.0
   react: ^19.2.0
   react-dom: ^19.2.0

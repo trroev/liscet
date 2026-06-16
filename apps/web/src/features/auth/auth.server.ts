@@ -19,6 +19,7 @@ const safe =
   }
 
 export const auth = createAuth({
+  trustedOrigins: ["https://liscet.localhost", "https://*.liscet.localhost"],
   databaseHooks: {
     user: {
       create: {

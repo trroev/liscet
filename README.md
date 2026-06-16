@@ -36,8 +36,10 @@ gh repo create my-app --template trroev/next-payload-starter --public
 cd my-app
 pnpm install
 docker compose up -d postgres          # local Postgres on :5432
-pnpm dev                               # app at :3000, admin at /admin
+pnpm dev                               # first run trusts a local CA (sudo); app at https://liscet.localhost
 ```
+
+> `pnpm dev` serves over HTTPS on `.localhost` domains via [portless](#local-dev-domains-portless). To stay on plain `http://localhost:3000`, run `PORTLESS=0 pnpm dev`.
 
 ### Prerequisites
 
@@ -63,6 +65,26 @@ dotenvx set SOME_SECRET "value" -f .env.production
 ```
 
 Each `@repo/env/<subsystem>` module validates only the keys it owns; see [`packages/env/README.md`](./packages/env/README.md) for the subpath map.
+
+### Local dev domains (portless)
+
+`pnpm dev` and `pnpm storybook` serve over HTTPS on stable `.localhost` domains via [portless](https://portless.sh) — a catalogued dev dependency, so `pnpm install` is all the setup required (no global install):
+
+| App           | URL                              |
+| ------------- | -------------------------------- |
+| web           | <https://liscet.localhost>       |
+| Payload admin | <https://liscet.localhost/admin> |
+| Storybook     | <https://storybook.localhost>    |
+
+portless runs a reverse proxy on `:443`. The root `predev`/`prestorybook` hooks start it automatically; on first run it generates and trusts a local CA (prompts for `sudo` on macOS to bind `:443`) so there are no browser warnings. Requires Node 24+ (already the floor).
+
+To stay on plain `http://localhost:3000` instead — e.g. if you can't trust the CA — bypass portless:
+
+```sh
+PORTLESS=0 pnpm dev
+```
+
+In bypass mode the app serves on `localhost:3000`; for auth flows there, override `BASE_URL` / `BETTER_AUTH_URL` to match in `apps/web/.env.development.local`.
 
 ### Database (Postgres)
 
