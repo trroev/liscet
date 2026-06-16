@@ -13,10 +13,6 @@ const NOTIFICATION_TYPE_BY_THRESHOLD = {
 type RenewalNotificationType =
   (typeof NOTIFICATION_TYPE_BY_THRESHOLD)[RenewalThreshold]
 
-// Nearest un-passed reminder window: the smallest threshold still at or above
-// `daysRemaining`. On a healthy daily cron this equals exact-day matching; when
-// a run is missed it self-heals to the current window and never re-sends a
-// wider window once a tighter one is active. Returns null outside [1, 90].
 const activeRenewalThreshold = (
   daysRemaining: number
 ): RenewalThreshold | null => {

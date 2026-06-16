@@ -30,8 +30,6 @@ vi.mock("@repo/logger", () => {
 
 import { dispatchRenewalNotifications } from "./dispatch"
 
-// 2026-06-15 in America/Los_Angeles; 2026-09-13T12:00Z lands 90 LA-calendar
-// days out, exercising the renewal-90d window.
 const NOW = new Date("2026-06-15T13:00:00Z")
 const EXPIRES_IN_90D = "2026-09-13T12:00:00Z"
 const EXPIRES_IN_200D = "2027-01-01T12:00:00Z"
@@ -77,9 +75,7 @@ const page = (
   totalDocs: docs.length,
 })
 
-// The Postgres/Drizzle adapter matches relationship filters with `in`, not
-// `equals` (verified live). The double mirrors that: a logged row is only
-// "found" when the notification-log query filters the relationships with `in`,
+// A logged row is matched only when the query filters relationships with `in`,
 // so a regression to `equals` resurfaces the duplicate-send bug as a failure.
 const usesRelationshipInFilter = (where: {
   and?: ReadonlyArray<Record<string, { in?: ReadonlyArray<string> }>>
@@ -89,9 +85,6 @@ const usesRelationshipInFilter = (where: {
       where.and?.some((clause) => Array.isArray(clause.practitioner?.in))
   )
 
-// Builds a Payload double: `licensePages` are returned to the licenses query by
-// page number; the notification-log query returns `logTotalDocs` when its
-// relationship filters are well-formed.
 const fakePayload = ({
   create = vi.fn(),
   licensePages,
@@ -127,6 +120,7 @@ describe("dispatchRenewalNotifications", () => {
   beforeEach(() => {
     captureException.mockReset()
     sendEmail.mockReset()
+    sendEmail.mockResolvedValue({ data: { id: "email-default" }, error: null })
   })
 
   it("sends and logs a due reminder that has not been sent", async () => {
@@ -209,7 +203,7 @@ describe("dispatchRenewalNotifications", () => {
   it("isolates a single license failure and continues the batch", async () => {
     sendEmail
       .mockRejectedValueOnce(new Error("resend down"))
-      .mockResolvedValueOnce({ data: { id: "email-2" } })
+      .mockResolvedValueOnce({ data: { id: "email-2" }, error: null })
 
     const payload = fakePayload({
       licensePages: [
@@ -220,6 +214,21 @@ describe("dispatchRenewalNotifications", () => {
     const summary = await dispatchRenewalNotifications({ now: NOW, payload })
 
     expect(summary).toEqual({ failed: 1, scanned: 2, sent: 1, skipped: 0 })
+    expect(captureException).toHaveBeenCalledOnce()
+  })
+
+  it("treats a Resend error tuple as a failure and does not log it", async () => {
+    sendEmail.mockResolvedValueOnce({
+      data: null,
+      error: { message: "API key is invalid", name: "validation_error" },
+    })
+    const create = vi.fn()
+    const payload = fakePayload({ create, licensePages: [page([license()])] })
+
+    const summary = await dispatchRenewalNotifications({ now: NOW, payload })
+
+    expect(summary).toEqual({ failed: 1, scanned: 1, sent: 0, skipped: 0 })
+    expect(create).not.toHaveBeenCalled()
     expect(captureException).toHaveBeenCalledOnce()
   })
 })

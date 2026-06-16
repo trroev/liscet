@@ -11,9 +11,7 @@ describe("activeRenewalThreshold", () => {
   })
 
   it("catches up to the current window after a missed run", () => {
-    // Cron missed day 90; running at day 88 still fires the 90-day window.
     expect(activeRenewalThreshold(88)).toBe(90)
-    // Cron down across the 90 window; running at day 58 fires 60, not a stale 90.
     expect(activeRenewalThreshold(58)).toBe(60)
   })
 
@@ -28,7 +26,6 @@ describe("activeRenewalThreshold", () => {
   })
 
   it("holds at the prior window between thresholds", () => {
-    // Two days out, the 1-day reminder has not triggered yet; 7-day already sent.
     expect(activeRenewalThreshold(2)).toBe(7)
   })
 })

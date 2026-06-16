@@ -1,8 +1,5 @@
 import type { RenewalNotificationType } from "@repo/utils/renewalThreshold"
 
-// Urgency copy keyed by reminder window. The actual day count is rendered
-// separately from `daysRemaining`, so a catch-up send (e.g. the 90-day window
-// firing at 88 days) reads correctly without hardcoding a number here.
 const RENEWAL_TONE = {
   "renewal-1d": "Your license renews tomorrow — act now to avoid a lapse.",
   "renewal-7d":

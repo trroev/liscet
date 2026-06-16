@@ -7,10 +7,6 @@ type DaysUntilExpiryInput = {
   readonly timezone: string
 }
 
-// Whole calendar days between `now` and `expiresAt`, both resolved in the given
-// IANA timezone. Returns 0 the day a license expires, negative once it has
-// lapsed, and is DST-safe because the comparison is calendar-day based rather
-// than a raw millisecond delta.
 const daysUntilExpiry = ({
   expiresAt,
   now,

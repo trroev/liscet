@@ -1,7 +1,3 @@
-// The license-state union is duplicated here rather than imported from
-// @repo/payload: packages/utils may not depend on packages/payload (import
-// boundary). Keep this in sync with LICENSE_STATES in
-// packages/payload/src/fields/licenseStates.
 type LicenseState = "CA" | "MA" | "MI" | "CT"
 
 const STATE_TIMEZONES = {

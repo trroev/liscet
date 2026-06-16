@@ -83,8 +83,6 @@ const RenewalReminder = ({
   )
 }
 
-// Default export consumed only by React Email's preview server (`email dev`).
-// Application code imports the named `RenewalReminder` via the package barrel.
 const RenewalReminderPreview = (): ReactElement => (
   <RenewalReminder
     daysRemaining={30}

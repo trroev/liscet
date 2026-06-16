@@ -8,7 +8,6 @@ import config from "~/payload.config"
 const log = createLogger({ name: "cron.notifications" })
 
 export async function GET(request: Request): Promise<Response> {
-  // Vercel Cron injects `Authorization: Bearer <CRON_SECRET>` on each run.
   if (request.headers.get("authorization") !== `Bearer ${env.CRON_SECRET}`) {
     return new Response("Unauthorized", { status: 401 })
   }

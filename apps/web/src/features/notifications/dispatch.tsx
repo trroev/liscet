@@ -46,9 +46,6 @@ const calendarDateInTimezone = (now: Date, timezone: string): string =>
     year: "numeric",
   }).format(now)
 
-// Decide and dispatch the due renewal reminder for a single license. Returns
-// "skipped" when no window is active, the practitioner is unreachable, or the
-// reminder has already been logged; "sent" when an email goes out.
 const processLicense = async ({
   license,
   now,
@@ -56,8 +53,6 @@ const processLicense = async ({
 }: ProcessInput): Promise<"sent" | "skipped"> => {
   const practitioner = license.practitioner
 
-  // depth: 1 populates the relationship; a bare id means a broken reference,
-  // and a soft-deleted practitioner should not receive mail.
   if (typeof practitioner === "string" || practitioner.deletedAt) {
     return "skipped"
   }
@@ -76,10 +71,8 @@ const processLicense = async ({
 
   const notificationType = renewalNotificationType(threshold)
 
-  // Relationship fields are filtered with `in` rather than `equals`: against
-  // the Postgres/Drizzle adapter with UUID primary keys, `equals` on a
-  // relationship field does not match, whereas `in` does. The `notificationType`
-  // select field matches with `equals` as normal.
+  // Relationship fields must use `in`, not `equals`: under the Postgres/Drizzle
+  // adapter with UUID keys, `equals` on a relationship never matches.
   const alreadyLogged = await payload.find({
     collection: "notification-log",
     depth: 0,
@@ -98,7 +91,7 @@ const processLicense = async ({
     return "skipped"
   }
 
-  await sendEmail({
+  const { error } = await sendEmail({
     react: (
       <RenewalReminder
         daysRemaining={daysRemaining}
@@ -114,10 +107,13 @@ const processLicense = async ({
     to: practitioner.email,
   })
 
-  // Logged after a successful send so the idempotency record reflects mail that
-  // actually went out. The collection's unique index on
-  // (practitioner, license, notificationType, sentForDate) is the backstop
-  // against a same-day double run.
+  // Resend signals failures in the returned tuple, not by throwing. Re-throw so
+  // the license counts as failed and is not logged, keeping it eligible for the
+  // next run rather than silently suppressed.
+  if (error) {
+    throw new Error(`Resend rejected the renewal email: ${error.message}`)
+  }
+
   await payload.create({
     collection: "notification-log",
     data: {
@@ -137,8 +133,6 @@ const processLicense = async ({
   return "sent"
 }
 
-// Paginate active licenses and dispatch any due renewal reminders. A single
-// license failure is captured and counted but never aborts the batch.
 const dispatchRenewalNotifications = async ({
   now,
   payload,
