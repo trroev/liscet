@@ -3,13 +3,9 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
-  "portless": {
-    "name": "storybook",
-    "appPort": 6006
-  },
   "scripts": {
-    "dev": "portless run storybook dev -p 6006",
-    "storybook": "portless run storybook dev -p 6006",
+    "dev": "storybook dev -p 6006",
+    "storybook": "storybook dev -p 6006",
     "build": "storybook build",
     "typecheck": "tsc --noEmit",
     "clean": "rm -rf .turbo .next dist storybook-static coverage *.tsbuildinfo test-results playwright-report"
@@ -38,7 +34,6 @@
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
     "next": "catalog:",
-    "portless": "catalog:",
     "tailwindcss": "catalog:",
     "typescript": "catalog:",
     "vite": "^8.0.10"

@@ -25,7 +25,6 @@ const config: StorybookConfig = {
   viteFinal: (viteConfig) => ({
     ...viteConfig,
     plugins: [...(viteConfig.plugins ?? []), tailwindcss()],
-    server: { ...viteConfig.server, allowedHosts: [".localhost"] },
   }),
 }
 

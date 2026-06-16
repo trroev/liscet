@@ -68,15 +68,14 @@ Each `@repo/env/<subsystem>` module validates only the keys it owns; see [`packa
 
 ### Local dev domains (portless)
 
-`pnpm dev` and `pnpm storybook` serve over HTTPS on stable `.localhost` domains via [portless](https://portless.sh) — a catalogued dev dependency, so `pnpm install` is all the setup required (no global install):
+`pnpm dev` serves the web app over HTTPS on a stable `.localhost` domain via [portless](https://portless.sh) — a catalogued dev dependency, so `pnpm install` is all the setup required (no global install):
 
 | App           | URL                              |
 | ------------- | -------------------------------- |
 | web           | <https://liscet.localhost>       |
 | Payload admin | <https://liscet.localhost/admin> |
-| Storybook     | <https://storybook.localhost>    |
 
-portless runs a reverse proxy on `:443`. The root `predev`/`prestorybook` hooks start it automatically; on first run it generates and trusts a local CA (prompts for `sudo` on macOS to bind `:443`) so there are no browser warnings. Requires Node 24+ (already the floor).
+portless runs a reverse proxy on `:443`. The root `predev` hook starts it automatically; on first run it generates and trusts a local CA (prompts for `sudo` on macOS to bind `:443`) so there are no browser warnings. Requires Node 24+ (already the floor). Storybook stays on plain `http://localhost:6006`.
 
 To stay on plain `http://localhost:3000` instead — e.g. if you can't trust the CA — bypass portless:
 
