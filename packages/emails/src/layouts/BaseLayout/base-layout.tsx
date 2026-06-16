@@ -43,7 +43,7 @@ const headerStyle = {
 } as const satisfies CSSProperties
 
 const wordmarkStyle = {
-  color: "#4f39f6",
+  color: "#2258e5",
   fontSize: "20px",
   fontWeight: "700",
   letterSpacing: "-0.01em",
@@ -80,7 +80,7 @@ const unsubscribeStyle = {
 } as const satisfies CSSProperties
 
 const unsubscribeLinkStyle = {
-  color: "#4f39f6",
+  color: "#2258e5",
   textDecoration: "underline",
 } as const satisfies CSSProperties
 
