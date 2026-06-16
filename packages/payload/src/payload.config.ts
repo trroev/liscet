@@ -1,12 +1,12 @@
 import path from "node:path"
 import { fileURLToPath } from "node:url"
 import { postgresAdapter } from "@payloadcms/db-postgres"
-import { cloudStoragePlugin } from "@payloadcms/plugin-cloud-storage"
 import { lexicalEditor } from "@payloadcms/richtext-lexical"
-import { env as cloudinaryEnv } from "@repo/env/cloudinary"
+import { vercelBlobStorage } from "@payloadcms/storage-vercel-blob"
+import { env as blobEnv } from "@repo/env/blob"
 import { env as databaseEnv } from "@repo/env/database"
+import { env as loggerEnv } from "@repo/env/logger"
 import { env as payloadEnv } from "@repo/env/payload"
-import { cloudinaryAdapter } from "@repo/payload/adapters/cloudinary"
 import { Admins } from "@repo/payload/collections/Admins"
 import { CourseCredits } from "@repo/payload/collections/CourseCredits"
 import { Courses } from "@repo/payload/collections/Courses"
@@ -18,32 +18,13 @@ import { buildConfig } from "payload"
 
 const dirname = path.dirname(fileURLToPath(import.meta.url))
 
-type CloudinaryConfig = {
-  readonly cloud_name: string
-  readonly api_key: string
-  readonly api_secret: string
-}
-
-const resolveCloudinaryConfig = (): CloudinaryConfig | undefined => {
-  const { CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET } =
-    cloudinaryEnv
-  if (!(CLOUDINARY_CLOUD_NAME && CLOUDINARY_API_KEY && CLOUDINARY_API_SECRET)) {
-    return
-  }
-  return {
-    cloud_name: CLOUDINARY_CLOUD_NAME,
-    api_key: CLOUDINARY_API_KEY,
-    api_secret: CLOUDINARY_API_SECRET,
-  }
-}
+const isDev = loggerEnv.NODE_ENV === "development"
 
 type CreatePayloadConfigOptions = {
   readonly baseDir: string
 }
 
 export function createPayloadConfig({ baseDir }: CreatePayloadConfigOptions) {
-  const cloudinaryConfig = resolveCloudinaryConfig()
-
   return buildConfig({
     admin: {
       autoLogin:
@@ -79,22 +60,13 @@ export function createPayloadConfig({ baseDir }: CreatePayloadConfigOptions) {
       tablesFilter: ["!user", "!session", "!account", "!verification"],
     }),
     editor: lexicalEditor(),
-    plugins: cloudinaryConfig
-      ? [
-          cloudStoragePlugin({
-            collections: {
-              media: {
-                adapter: cloudinaryAdapter({
-                  config: cloudinaryConfig,
-                  folder: "starter",
-                }),
-                disableLocalStorage: true,
-                disablePayloadAccessControl: true,
-              },
-            },
-          }),
-        ]
-      : [],
+    plugins: [
+      vercelBlobStorage({
+        collections: { media: true },
+        enabled: !isDev,
+        token: blobEnv.BLOB_READ_WRITE_TOKEN,
+      }),
+    ],
     secret: payloadEnv.PAYLOAD_SECRET,
     typescript: {
       outputFile: path.resolve(dirname, "types", "payload-types.ts"),

@@ -8,6 +8,7 @@ catalog:
   '@payloadcms/db-postgres': ^3.85.0
   '@payloadcms/plugin-seo': ^3.85.0
   '@payloadcms/richtext-lexical': 3.85.0
+  '@payloadcms/storage-vercel-blob': 3.85.0
   '@remixicon/react': ^4.9.0
   '@sentry/nextjs': ^10.53.1
   '@storybook/addon-designs': ^11.1.3

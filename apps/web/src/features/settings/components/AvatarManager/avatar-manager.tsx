@@ -1,7 +1,6 @@
 "use client"
 
 import { RiUploadLine } from "@remixicon/react"
-import { transformCloudinaryAvatar } from "@repo/chrome/utils/transformCloudinary"
 import { Avatar } from "@repo/ui/components/Avatar"
 import { Button } from "@repo/ui/components/Button"
 import { Dialog } from "@repo/ui/components/Dialog"
@@ -138,7 +137,6 @@ const AvatarManagerInner = ({ avatarUrl, email }: AvatarManagerProps) => {
         initials={buildInitial(email)}
         size="lg"
         src={avatarUrl}
-        transformSrc={transformCloudinaryAvatar}
       />
 
       <div className="flex flex-col gap-2">

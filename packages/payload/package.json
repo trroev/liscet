@@ -28,15 +28,14 @@
   "dependencies": {
     "@better-fetch/fetch": "catalog:",
     "@payloadcms/db-postgres": "catalog:",
-    "@payloadcms/plugin-cloud-storage": "^3.85.0",
     "@payloadcms/plugin-seo": "catalog:",
     "@payloadcms/richtext-lexical": "catalog:",
+    "@payloadcms/storage-vercel-blob": "catalog:",
     "@repo/env": "workspace:*",
     "@repo/logger": "workspace:*",
     "@repo/observability": "workspace:*",
     "@repo/rules-engine": "workspace:*",
     "@repo/ui": "workspace:*",
-    "cloudinary": "^2.10.0",
     "lexical": "0.41.0",
     "ts-pattern": "catalog:"
   },

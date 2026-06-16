@@ -14,7 +14,7 @@ describe("Avatar", () => {
       <Avatar
         alt="Trevor"
         initials="TM"
-        src="https://res.cloudinary.com/demo/image/upload/sample.jpg"
+        src="https://example.public.blob.vercel-storage.com/sample.jpg"
       />
     )
     expect(screen.getByText("TM")).toBeInTheDocument()
