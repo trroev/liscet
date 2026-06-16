@@ -1,7 +1,13 @@
+import { Img } from "@react-email/components"
 import { render } from "@react-email/render"
 import { BaseLayout } from "@repo/emails/layouts/BaseLayout"
 import { preview } from "@repo/storybook-config/preview"
 import { type ReactElement, useEffect, useState } from "react"
+
+// Self-contained wordmark so the logo slot renders without a network fetch in
+// the Storybook iframe. Real emails point `logo` at a hosted image.
+const logoSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="120" height="32" viewBox="0 0 120 32"><rect width="32" height="32" rx="8" fill="#2258e5"/><text x="16" y="22" font-family="Arial, sans-serif" font-size="18" font-weight="700" fill="#ffffff" text-anchor="middle">L</text><text x="42" y="22" font-family="Arial, sans-serif" font-size="18" font-weight="700" fill="#2258e5">Liscet</text></svg>`
+const logoDataUri = `data:image/svg+xml,${encodeURIComponent(logoSvg)}`
 
 const frameStyle = {
   backgroundColor: "#ffffff",
@@ -45,18 +51,28 @@ const EmailFrame = ({ email }: { email: ReactElement }): ReactElement => {
 
 type BaseLayoutPreviewProps = {
   readonly heading: string
+  readonly logoUrl?: string
   readonly previewText: string
   readonly unsubscribeUrl?: string
 }
 
 const BaseLayoutPreview = ({
   heading,
+  logoUrl,
   previewText,
   unsubscribeUrl,
 }: BaseLayoutPreviewProps): ReactElement => (
   <EmailFrame
     email={
-      <BaseLayout previewText={previewText} unsubscribeUrl={unsubscribeUrl}>
+      <BaseLayout
+        logo={
+          logoUrl ? (
+            <Img alt="Liscet" height={32} src={logoUrl} width={120} />
+          ) : undefined
+        }
+        previewText={previewText}
+        unsubscribeUrl={unsubscribeUrl}
+      >
         <h1 style={headingStyle}>{heading}</h1>
         <p style={bodyStyle}>
           Body content slots in here. The wordmark header and the
@@ -85,5 +101,11 @@ export const CustomUnsubscribe = meta.story({
     heading: "Renewal reminder",
     previewText: "A reminder about your upcoming renewal",
     unsubscribeUrl: "https://liscet.com/u/abc123/unsubscribe",
+  },
+})
+
+export const WithLogo = meta.story({
+  args: {
+    logoUrl: logoDataUri,
   },
 })
