@@ -1,11 +1,15 @@
 import type { License, User } from "@repo/payload/payload-types"
+import type { ProgressSummary } from "@repo/rules-engine/types/ProgressSummary"
 import type { Payload } from "payload"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 
-const { captureException, sendEmail } = vi.hoisted(() => ({
-  captureException: vi.fn(),
-  sendEmail: vi.fn(),
-}))
+const { captureException, sendEmail, summarizeLicenseFromRows } = vi.hoisted(
+  () => ({
+    captureException: vi.fn(),
+    sendEmail: vi.fn(),
+    summarizeLicenseFromRows: vi.fn(),
+  })
+)
 
 vi.mock("server-only", () => ({}))
 
@@ -14,6 +18,17 @@ vi.mock("@repo/emails/send", () => ({ sendEmail }))
 vi.mock("@repo/emails/templates/RenewalReminder", () => ({
   RenewalReminder: () => null,
   renewalSubject: (days: number) => `Your license expires in ${days} days`,
+}))
+
+vi.mock("@repo/emails/templates/CategoryShortfall", () => ({
+  CategoryShortfallEmail: () => null,
+  categoryShortfallSubject: () => "Some required CE categories are still short",
+}))
+
+vi.mock("@repo/payload/evaluation", () => ({ summarizeLicenseFromRows }))
+
+vi.mock("@repo/payload/queries/practitioner-data", () => ({
+  practitionerData: () => ({ creditsForLicense: async () => [] }),
 }))
 
 vi.mock("@sentry/nextjs", () => ({ captureException }))
@@ -32,6 +47,7 @@ import { dispatchRenewalNotifications } from "./dispatch"
 
 const NOW = new Date("2026-06-15T13:00:00Z")
 const EXPIRES_IN_90D = "2026-09-13T12:00:00Z"
+const EXPIRES_IN_45D = "2026-07-30T12:00:00Z"
 const EXPIRES_IN_200D = "2027-01-01T12:00:00Z"
 
 const practitioner = (overrides: Partial<User> = {}): User =>
@@ -59,6 +75,10 @@ const license = (overrides: Partial<License> = {}): License =>
     updatedAt: "2025-01-01T00:00:00Z",
     ...overrides,
   }) as License
+
+const summaryWith = (
+  categoryProgress: ProgressSummary["categoryProgress"]
+): ProgressSummary => ({ categoryProgress }) as ProgressSummary
 
 type FindResult = {
   readonly docs: ReadonlyArray<unknown>
@@ -116,11 +136,59 @@ const fakePayload = ({
   return { create, find } as unknown as Payload
 }
 
+// Resolves notification-log idempotency by notification type, so a test can put
+// the renewal reminder out of the way (already logged) and isolate the
+// secondary shortfall warning.
+const shortfallPayload = ({
+  create = vi.fn(),
+  licensePages,
+  shortfallLogged = false,
+}: {
+  create?: ReturnType<typeof vi.fn>
+  licensePages: ReadonlyArray<FindResult>
+  shortfallLogged?: boolean
+}): Payload => {
+  const find = vi.fn(
+    ({
+      collection,
+      page: pageNumber,
+      where,
+    }: {
+      collection: string
+      page: number
+      where: {
+        and?: ReadonlyArray<{ notificationType?: { equals?: string } }>
+      }
+    }) => {
+      if (collection === "licenses") {
+        return Promise.resolve(licensePages[pageNumber - 1] ?? page([]))
+      }
+      if (collection === "course-credits") {
+        return Promise.resolve(page([]))
+      }
+
+      const type = where.and?.find((clause) => clause.notificationType)
+        ?.notificationType?.equals
+      if (type === "category-shortfall") {
+        return Promise.resolve(page(shortfallLogged ? [{ id: "log-1" }] : []))
+      }
+
+      // Renewal reminders are treated as already sent so these tests exercise
+      // only the shortfall path.
+      return Promise.resolve(page([{ id: "renewal-log" }]))
+    }
+  )
+
+  return { create, find } as unknown as Payload
+}
+
 describe("dispatchRenewalNotifications", () => {
   beforeEach(() => {
     captureException.mockReset()
     sendEmail.mockReset()
     sendEmail.mockResolvedValue({ data: { id: "email-default" }, error: null })
+    summarizeLicenseFromRows.mockReset()
+    summarizeLicenseFromRows.mockReturnValue(null)
   })
 
   it("sends and logs a due reminder that has not been sent", async () => {
@@ -129,7 +197,7 @@ describe("dispatchRenewalNotifications", () => {
 
     const summary = await dispatchRenewalNotifications({ now: NOW, payload })
 
-    expect(summary).toEqual({ failed: 0, scanned: 1, sent: 1, skipped: 0 })
+    expect(summary).toEqual({ failed: 0, scanned: 1, sent: 1, skipped: 1 })
     expect(sendEmail).toHaveBeenCalledOnce()
     expect(create).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -153,7 +221,7 @@ describe("dispatchRenewalNotifications", () => {
 
     const summary = await dispatchRenewalNotifications({ now: NOW, payload })
 
-    expect(summary).toEqual({ failed: 0, scanned: 1, sent: 0, skipped: 1 })
+    expect(summary).toEqual({ failed: 0, scanned: 1, sent: 0, skipped: 2 })
     expect(sendEmail).not.toHaveBeenCalled()
     expect(create).not.toHaveBeenCalled()
   })
@@ -165,7 +233,7 @@ describe("dispatchRenewalNotifications", () => {
 
     const summary = await dispatchRenewalNotifications({ now: NOW, payload })
 
-    expect(summary).toEqual({ failed: 0, scanned: 1, sent: 0, skipped: 1 })
+    expect(summary).toEqual({ failed: 0, scanned: 1, sent: 0, skipped: 2 })
     expect(sendEmail).not.toHaveBeenCalled()
   })
 
@@ -182,7 +250,7 @@ describe("dispatchRenewalNotifications", () => {
 
     const summary = await dispatchRenewalNotifications({ now: NOW, payload })
 
-    expect(summary).toEqual({ failed: 0, scanned: 1, sent: 0, skipped: 1 })
+    expect(summary).toEqual({ failed: 0, scanned: 1, sent: 0, skipped: 2 })
     expect(sendEmail).not.toHaveBeenCalled()
   })
 
@@ -196,7 +264,7 @@ describe("dispatchRenewalNotifications", () => {
 
     const summary = await dispatchRenewalNotifications({ now: NOW, payload })
 
-    expect(summary).toEqual({ failed: 0, scanned: 2, sent: 2, skipped: 0 })
+    expect(summary).toEqual({ failed: 0, scanned: 2, sent: 2, skipped: 2 })
     expect(sendEmail).toHaveBeenCalledTimes(2)
   })
 
@@ -213,7 +281,7 @@ describe("dispatchRenewalNotifications", () => {
 
     const summary = await dispatchRenewalNotifications({ now: NOW, payload })
 
-    expect(summary).toEqual({ failed: 1, scanned: 2, sent: 1, skipped: 0 })
+    expect(summary).toEqual({ failed: 1, scanned: 2, sent: 1, skipped: 2 })
     expect(captureException).toHaveBeenCalledOnce()
   })
 
@@ -227,8 +295,99 @@ describe("dispatchRenewalNotifications", () => {
 
     const summary = await dispatchRenewalNotifications({ now: NOW, payload })
 
-    expect(summary).toEqual({ failed: 1, scanned: 1, sent: 0, skipped: 0 })
+    expect(summary).toEqual({ failed: 1, scanned: 1, sent: 0, skipped: 1 })
     expect(create).not.toHaveBeenCalled()
     expect(captureException).toHaveBeenCalledOnce()
+  })
+
+  it("sends and logs a category shortfall inside the renewal window", async () => {
+    summarizeLicenseFromRows.mockReturnValue(
+      summaryWith([
+        { category: "law-and-ethics", credited: 2, required: 6 },
+        { category: "general", credited: 20, required: 20 },
+      ])
+    )
+    const create = vi.fn()
+    const payload = shortfallPayload({
+      create,
+      licensePages: [page([license({ expiresAt: EXPIRES_IN_45D })])],
+    })
+
+    const summary = await dispatchRenewalNotifications({ now: NOW, payload })
+
+    expect(summary).toEqual({ failed: 0, scanned: 1, sent: 1, skipped: 1 })
+    expect(sendEmail).toHaveBeenCalledOnce()
+    expect(create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        collection: "notification-log",
+        data: expect.objectContaining({
+          license: "lic-1",
+          notificationType: "category-shortfall",
+          practitioner: "user-1",
+        }),
+      })
+    )
+  })
+
+  it("does not send a shortfall when every category is met", async () => {
+    summarizeLicenseFromRows.mockReturnValue(
+      summaryWith([{ category: "general", credited: 20, required: 20 }])
+    )
+    const create = vi.fn()
+    const payload = shortfallPayload({
+      create,
+      licensePages: [page([license({ expiresAt: EXPIRES_IN_45D })])],
+    })
+
+    const summary = await dispatchRenewalNotifications({ now: NOW, payload })
+
+    expect(summary).toEqual({ failed: 0, scanned: 1, sent: 0, skipped: 2 })
+    expect(sendEmail).not.toHaveBeenCalled()
+    expect(create).not.toHaveBeenCalled()
+  })
+
+  it("does not repeat a shortfall already logged for the day", async () => {
+    summarizeLicenseFromRows.mockReturnValue(
+      summaryWith([{ category: "law-and-ethics", credited: 2, required: 6 }])
+    )
+    const create = vi.fn()
+    const payload = shortfallPayload({
+      create,
+      licensePages: [page([license({ expiresAt: EXPIRES_IN_45D })])],
+      shortfallLogged: true,
+    })
+
+    const summary = await dispatchRenewalNotifications({ now: NOW, payload })
+
+    expect(summary).toEqual({ failed: 0, scanned: 1, sent: 0, skipped: 2 })
+    expect(sendEmail).not.toHaveBeenCalled()
+    expect(create).not.toHaveBeenCalled()
+  })
+
+  it("does not send a shortfall outside the 60-day window", async () => {
+    summarizeLicenseFromRows.mockReturnValue(
+      summaryWith([{ category: "law-and-ethics", credited: 2, required: 6 }])
+    )
+    const payload = shortfallPayload({
+      licensePages: [page([license({ expiresAt: EXPIRES_IN_90D })])],
+    })
+
+    const summary = await dispatchRenewalNotifications({ now: NOW, payload })
+
+    expect(summary).toEqual({ failed: 0, scanned: 1, sent: 0, skipped: 2 })
+    expect(sendEmail).not.toHaveBeenCalled()
+    expect(summarizeLicenseFromRows).not.toHaveBeenCalled()
+  })
+
+  it("skips the shortfall when no rule set ships for the license", async () => {
+    summarizeLicenseFromRows.mockReturnValue(null)
+    const payload = shortfallPayload({
+      licensePages: [page([license({ expiresAt: EXPIRES_IN_45D })])],
+    })
+
+    const summary = await dispatchRenewalNotifications({ now: NOW, payload })
+
+    expect(summary).toEqual({ failed: 0, scanned: 1, sent: 0, skipped: 2 })
+    expect(sendEmail).not.toHaveBeenCalled()
   })
 })
