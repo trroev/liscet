@@ -37,7 +37,8 @@
     "@repo/rules-engine": "workspace:*",
     "@repo/ui": "workspace:*",
     "lexical": "0.41.0",
-    "ts-pattern": "catalog:"
+    "ts-pattern": "catalog:",
+    "zod": "catalog:"
   },
   "peerDependencies": {
     "next": "catalog:peers",
