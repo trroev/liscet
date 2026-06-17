@@ -1,5 +1,6 @@
 import "server-only"
 
+import { createLogger } from "@repo/logger"
 import type { User } from "@repo/payload/payload-types"
 import type { HeaderAuth, SignedInAuth } from "@repo/types/HeaderAuth"
 import { headers } from "next/headers"
@@ -8,6 +9,8 @@ import { signOutAction } from "~/features/auth/actions/sign-out"
 import { auth } from "~/features/auth/auth.server"
 import { buildInitials } from "~/lib/build-initials"
 import { getPayloadUserByBetterAuthId } from "~/lib/queries/payload-user-by-better-auth-id"
+
+const log = createLogger({ name: "lib.header-auth" })
 
 /**
  * Resolves the avatar URL from a Payload `users.avatar` relationship field,
@@ -46,6 +49,15 @@ export const buildSignedInAuth = ({
  * Resolves `HeaderAuth` for the public chrome (marketing and legal shells):
  * anonymous when no session exists, otherwise signed-in using the session's
  * display name and the Payload user's avatar.
+ *
+ * Contract for "session present, Payload user null": the viewer is treated as
+ * `signed-in`. A valid better-auth session *is* an authenticated identity; the
+ * Payload user only supplies the avatar, which degrades to initials when
+ * absent. The sync hook (`auth.server.ts`) is awaited inside the sign-up flow,
+ * so a missing Payload user is an invariant violation (the hook threw and was
+ * swallowed to Sentry, or the user was unsynced/soft-deleted) rather than a
+ * routine timing window — we surface it as a warning instead of silently
+ * downgrading the chrome to `anonymous` and lying about authentication state.
  */
 export const resolveHeaderAuth = async (): Promise<HeaderAuth> => {
   const session = await auth.api.getSession({ headers: await headers() })
@@ -53,8 +65,22 @@ export const resolveHeaderAuth = async (): Promise<HeaderAuth> => {
     return { status: "anonymous" }
   }
   const payloadUser = await getPayloadUserByBetterAuthId(session.user.id)
-  return buildSignedInAuth({
-    displayName: session.user.name ?? session.user.email,
-    avatar: payloadUser?.avatar,
-  })
+  return match(payloadUser)
+    .with(P.nullish, () => {
+      log
+        .withMetadata({ betterAuthId: session.user.id })
+        .warn(
+          "better-auth session has no matching Payload user; rendering signed-in with a degraded avatar"
+        )
+      return buildSignedInAuth({
+        displayName: session.user.name ?? session.user.email,
+        avatar: null,
+      })
+    })
+    .otherwise((user) =>
+      buildSignedInAuth({
+        displayName: session.user.name ?? session.user.email,
+        avatar: user.avatar,
+      })
+    )
 }
