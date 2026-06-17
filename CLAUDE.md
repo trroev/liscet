@@ -66,6 +66,15 @@ Two gates keep the convention honest:
 
 **This check is core to the starter, not optional in a fork.** It is the only thing that prevents per-package version drift on shared deps from silently passing CI; deleting it gives up the guarantee `catalog:` references exist to provide.
 
+### Secrets & env vars (dotenvx build-time vs Vercel runtime)
+Env values are managed with **dotenvx**: encrypted, git-committed `apps/web/.env.production` / `.env.development`, decrypted via `DOTENV_PRIVATE_KEY` (the gitignored `.env.keys` symlink). `dotenvx run` only injects decrypted values into the process it wraps — which on Vercel is **only the build command** (`pnpm migrate` + `next build`, both wrapped via the root `migrate` / web `with-env` scripts). Vercel does **not** run the app's `start` script for App-Router serverless/edge functions, so at **runtime** `process.env.*` is whatever Vercel injects, not the dotenvx-decrypted file. `@repo/env/*` reads `process.env` directly at module load (no `dotenvx.get()`), so:
+
+- **Runtime server secrets** (`DATABASE_URL`, `PAYLOAD_SECRET`, `BETTER_AUTH_SECRET`/`URL`, `BLOB_READ_WRITE_TOKEN`, `RESEND_*`, `CRON_SECRET`, `REVALIDATION_SECRET`, `VIRUS_SCAN_*`) → set as **native Vercel env vars** (Production + Preview) **and** keep in the encrypted `.env` files for local dev, CI, and the build-time migrate step.
+- **Build-only / inlined vars** (`NEXT_PUBLIC_*` baked into the bundle at build; `SENTRY_AUTH_TOKEN`/`ORG`/`PROJECT` for source-map upload) → the encrypted `.env` files are sufficient; no Vercel runtime entry needed.
+- Vercel itself stores only `DOTENV_PRIVATE_KEY_PRODUCTION` (Production) / `DOTENV_PRIVATE_KEY` (Preview) to decrypt the build, plus the runtime secrets above. `@dotenvx/dotenvx` is a runtime `dependency` (not a devDependency) so it is never pruned out of the build environment.
+
+Any env var read during `next build` (which includes every `@repo/env/*`-validated var) **must** also be listed in `turbo.json` `globalEnv`, so Turbo keys its build cache on it — otherwise a value change won't bust the cache and a stale build (with stale inlined `NEXT_PUBLIC_*`) can be served. Keep `globalEnv` in sync with the `@repo/env` surface.
+
 ### Logging
 `@repo/logger` is the only sanctioned logging primitive — `console.*` is banned by Biome's `noConsole` rule. Import the shared singleton or create a named sub-logger:
 
