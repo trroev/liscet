@@ -4,35 +4,23 @@ import "server-only"
 
 import type { ActionResult } from "@repo/types/ActionResult"
 import { match, P } from "ts-pattern"
-import { z } from "zod"
+import type { z } from "zod"
 import { authedAction } from "~/lib/authed-action"
+import { fileIntake } from "~/lib/file-intake"
 import { createMediaAsset, deleteMediaAsset } from "~/lib/queries/media"
 import { updateUserAvatar } from "../api/update-user-avatar"
 
-const MAX_AVATAR_BYTES = 5 * 1024 * 1024
-
-const ALLOWED_AVATAR_MIME_TYPES = [
+const AVATAR_MIME_TYPES = [
   "image/jpeg",
   "image/png",
   "image/webp",
 ] as const satisfies ReadonlyArray<string>
 
-type AllowedAvatarMimeType = (typeof ALLOWED_AVATAR_MIME_TYPES)[number]
-
-const isAllowedMimeType = (value: string): value is AllowedAvatarMimeType =>
-  (ALLOWED_AVATAR_MIME_TYPES as ReadonlyArray<string>).includes(value)
-
-const avatarFileSchema = z
-  .instanceof(File, { message: "Provide an image file under `avatar`." })
-  .refine((file) => file.size > 0, {
-    message: "Provide an image file under `avatar`.",
-  })
-  .refine((file) => file.size <= MAX_AVATAR_BYTES, {
-    message: "Avatar must be under 5 MB.",
-  })
-  .refine((file) => isAllowedMimeType(file.type), {
-    message: "Avatar must be a JPEG, PNG, or WebP image.",
-  })
+const avatarFileSchema = fileIntake({
+  maxBytes: 5 * 1024 * 1024,
+  mimeTypes: AVATAR_MIME_TYPES,
+  label: "avatar",
+})
 
 type AvatarFile = z.infer<typeof avatarFileSchema>
 

@@ -3,38 +3,24 @@
 import "server-only"
 
 import { scanUploadedFile } from "@repo/payload/hooks/virusScan"
-import { z } from "zod"
 import { authedAction } from "~/lib/authed-action"
+import { fileIntake } from "~/lib/file-intake"
 import { uploadCertificateBlob } from "../lib/certificate-blob"
 import { logCourseSchema } from "../lib/schema"
 import type { LogCourseResult } from "../lib/types"
 
-const MAX_CERTIFICATE_BYTES = 10 * 1024 * 1024
-
-// Allowlist is defense-in-depth alongside the virus scan run before upload.
-const ALLOWED_CERTIFICATE_MIME_TYPES = [
+const CERTIFICATE_MIME_TYPES = [
   "application/pdf",
   "image/jpeg",
   "image/png",
   "image/webp",
 ] as const satisfies ReadonlyArray<string>
 
-type AllowedCertificateMimeType =
-  (typeof ALLOWED_CERTIFICATE_MIME_TYPES)[number]
-
-const isAllowedMimeType = (
-  value: string
-): value is AllowedCertificateMimeType =>
-  (ALLOWED_CERTIFICATE_MIME_TYPES as ReadonlyArray<string>).includes(value)
-
-const certificateFileSchema = z
-  .instanceof(File, { message: "Upload a PDF or image certificate." })
-  .refine((file) => file.size <= MAX_CERTIFICATE_BYTES, {
-    message: "Certificate must be under 10 MB.",
-  })
-  .refine((file) => isAllowedMimeType(file.type), {
-    message: "Certificate must be a PDF, JPEG, PNG, or WebP file.",
-  })
+const certificateFileSchema = fileIntake({
+  maxBytes: 10 * 1024 * 1024,
+  mimeTypes: CERTIFICATE_MIME_TYPES,
+  label: "certificate",
+})
 
 export const logCourse = authedAction<FormData, LogCourseResult>(
   async ({ user, payload, input: formData }) => {
