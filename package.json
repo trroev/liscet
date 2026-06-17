@@ -21,7 +21,7 @@
     "seed": "pnpm --filter web run seed",
     "storybook": "turbo run storybook",
     "lint:fix": "pnpm exec ultracite fix",
-    "migrate": "dotenvx run --convention=nextjs -- node scripts/migrate-deploy.mjs",
+    "migrate": "cd apps/web && dotenvx run --convention=nextjs -- node ../../scripts/migrate-deploy.mjs",
     "preinstall": "only-allow pnpm",
     "test": "turbo run test",
     "typecheck": "turbo run typecheck",
