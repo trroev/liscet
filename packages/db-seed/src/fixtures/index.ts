@@ -1,4 +1,4 @@
-import type { SeedPractitioner } from "@repo/db-seed/types"
+import type { SeedPage, SeedPractitioner } from "@repo/db-seed/types"
 
 const SEED_PASSWORD = "seed-password-not-for-prod-9c2f"
 
@@ -175,3 +175,135 @@ export const SEED_PRACTITIONERS = [
     ],
   },
 ] as const satisfies ReadonlyArray<SeedPractitioner>
+
+const CONTACT_EMAIL = "hello@liscet.com"
+
+type LexicalNode = {
+  type: string
+  version: number
+  [key: string]: unknown
+}
+
+const textNode = (text: string): LexicalNode => ({
+  detail: 0,
+  format: 0,
+  mode: "normal",
+  style: "",
+  text,
+  type: "text",
+  version: 1,
+})
+
+const linkNode = ({
+  url,
+  text,
+}: {
+  url: string
+  text: string
+}): LexicalNode => ({
+  children: [textNode(text)],
+  direction: "ltr",
+  fields: { linkType: "custom", newTab: false, url },
+  format: "",
+  indent: 0,
+  type: "link",
+  version: 3,
+})
+
+const paragraphNode = (children: ReadonlyArray<LexicalNode>): LexicalNode => ({
+  children: [...children],
+  direction: "ltr",
+  format: "",
+  indent: 0,
+  textFormat: 0,
+  type: "paragraph",
+  version: 1,
+})
+
+const headingNode = ({
+  tag,
+  text,
+}: {
+  tag: string
+  text: string
+}): LexicalNode => ({
+  children: [textNode(text)],
+  direction: "ltr",
+  format: "",
+  indent: 0,
+  tag,
+  type: "heading",
+  version: 1,
+})
+
+const richTextBody = (
+  children: ReadonlyArray<LexicalNode>
+): SeedPage["body"] => ({
+  root: {
+    children: [...children],
+    direction: "ltr",
+    format: "",
+    indent: 0,
+    type: "root",
+    version: 1,
+  },
+})
+
+export const SEED_PAGES: ReadonlyArray<SeedPage> = [
+  {
+    slug: "about",
+    title: "About Liscet",
+    body: richTextBody([
+      paragraphNode([
+        textNode(
+          "Renewing a professional license should be the easy part of your career. Liscet keeps every license, renewal date, and continuing-education requirement in one place, so you always know exactly where you stand."
+        ),
+      ]),
+      paragraphNode([
+        textNode(
+          "We built Liscet for practitioners who juggle credentials across states and license types — and who would rather spend their time on their work than on spreadsheets."
+        ),
+      ]),
+    ]),
+    meta: {
+      title: "About",
+      description:
+        "Liscet is a license and continuing-education tracker built to take the guesswork out of staying renewed.",
+    },
+  },
+  {
+    slug: "pricing",
+    title: "Pricing",
+    body: richTextBody([
+      headingNode({ tag: "h2", text: "Liscet is free in v1." }),
+      paragraphNode([
+        textNode(
+          "Every feature is available at no cost while we are in version 1. Track as many licenses and continuing-education credits as you need — there is nothing to pay and no card to enter."
+        ),
+      ]),
+    ]),
+    meta: {
+      title: "Pricing",
+      description:
+        "Liscet is completely free while in version 1 — track your licenses and continuing-education credits at no cost.",
+    },
+  },
+  {
+    slug: "contact",
+    title: "Contact",
+    body: richTextBody([
+      paragraphNode([
+        textNode(
+          "Questions, feedback, or trouble with your account? Email us and we will get back to you."
+        ),
+      ]),
+      paragraphNode([
+        linkNode({ url: `mailto:${CONTACT_EMAIL}`, text: CONTACT_EMAIL }),
+      ]),
+    ]),
+    meta: {
+      title: "Contact",
+      description: `Get in touch with the Liscet team at ${CONTACT_EMAIL}.`,
+    },
+  },
+]

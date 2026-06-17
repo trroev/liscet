@@ -1,6 +1,6 @@
 import type { SeedPractitioner } from "@repo/db-seed/types"
 import { describe, expect, it } from "vitest"
-import { SEED_PRACTITIONERS } from "./index"
+import { SEED_PAGES, SEED_PRACTITIONERS } from "./index"
 
 // `as const satisfies` narrows away optional keys on entries that lack them,
 // so the runtime asserts below need to walk the array under the wider
@@ -50,6 +50,23 @@ describe("SEED_PRACTITIONERS", () => {
       for (const c of p.courses) {
         expect(c.hours).toBeGreaterThanOrEqual(0.25)
       }
+    }
+  })
+})
+
+describe("SEED_PAGES", () => {
+  it("backs the three literal marketing routes by slug", () => {
+    const slugs = SEED_PAGES.map((page) => page.slug)
+    expect(slugs).toEqual(["about", "pricing", "contact"])
+    expect(new Set(slugs).size).toBe(slugs.length)
+  })
+
+  it("gives every page a title, SEO meta, and a non-empty rich-text body", () => {
+    for (const page of SEED_PAGES) {
+      expect(page.title.length).toBeGreaterThan(0)
+      expect(page.meta?.title.length).toBeGreaterThan(0)
+      expect(page.meta?.description.length).toBeGreaterThan(0)
+      expect(page.body.root.children.length).toBeGreaterThan(0)
     }
   })
 })

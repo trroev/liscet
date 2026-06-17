@@ -1,36 +1,14 @@
 import { isAdmin } from "@repo/payload/access/isAdmin"
-import { isReservedSlug } from "@repo/payload/fields/reservedSlugs"
+import {
+  createSlugValidator,
+  isReservedUserSlug,
+} from "@repo/payload/fields/reservedSlugs"
 import { cascadeDeleteUser } from "@repo/payload/hooks/cascadeDeleteUser"
-import type {
-  CollectionConfig,
-  FieldAccess,
-  TextFieldSingleValidation,
-} from "payload"
+import type { CollectionConfig, FieldAccess } from "payload"
 
 const isAdminField: FieldAccess = ({ req: { user } }) => Boolean(user)
 
-const SLUG_FORMAT_RE = /^[a-z0-9]+(?:-[a-z0-9]+)*$/
-const SLUG_MIN_LENGTH = 2
-const SLUG_MAX_LENGTH = 40
-
-const validateUserSlug: TextFieldSingleValidation = (value): string | true => {
-  if (value === undefined || value === null || value === "") {
-    return true
-  }
-  if (typeof value !== "string") {
-    return "Slug must be a string."
-  }
-  if (value.length < SLUG_MIN_LENGTH || value.length > SLUG_MAX_LENGTH) {
-    return `Slug must be ${SLUG_MIN_LENGTH}-${SLUG_MAX_LENGTH} characters.`
-  }
-  if (!SLUG_FORMAT_RE.test(value)) {
-    return "Slug must be lowercase letters, numbers, and single hyphens only."
-  }
-  if (isReservedSlug(value)) {
-    return "That slug is reserved. Please choose another."
-  }
-  return true
-}
+const validateUserSlug = createSlugValidator({ isReserved: isReservedUserSlug })
 
 export const Users: CollectionConfig = {
   access: {

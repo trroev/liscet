@@ -1,26 +1,31 @@
+import { RichText } from "@repo/payload/components/RichText"
 import type { Metadata } from "next"
+import { notFound } from "next/navigation"
 import type React from "react"
 import { MarketingPage } from "~/features/marketing/components/MarketingPage"
+import { getPublishedPage } from "~/lib/queries/pages"
 
-export function generateMetadata(): Metadata {
+const SLUG = "pricing"
+
+export async function generateMetadata(): Promise<Metadata> {
+  const page = await getPublishedPage({ slug: SLUG })
+  if (page === undefined) {
+    return {}
+  }
   return {
-    title: "Pricing",
-    description:
-      "Liscet is completely free while in version 1 — track your licenses and continuing-education credits at no cost.",
+    title: page.meta?.title ?? page.title,
+    description: page.meta?.description ?? undefined,
   }
 }
 
-export default function PricingPage(): React.JSX.Element {
+export default async function PricingPage(): Promise<React.JSX.Element> {
+  const page = await getPublishedPage({ slug: SLUG })
+  if (page === undefined) {
+    notFound()
+  }
   return (
-    <MarketingPage title="Pricing">
-      <p className="font-display text-heading-md text-text-primary">
-        Liscet is free in v1.
-      </p>
-      <p>
-        Every feature is available at no cost while we are in version 1. Track
-        as many licenses and continuing-education credits as you need — there is
-        nothing to pay and no card to enter.
-      </p>
+    <MarketingPage title={page.title}>
+      <RichText data={page.body} />
     </MarketingPage>
   )
 }

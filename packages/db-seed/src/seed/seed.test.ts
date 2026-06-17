@@ -1,4 +1,4 @@
-import { SEED_PRACTITIONERS } from "@repo/db-seed/fixtures"
+import { SEED_PAGES, SEED_PRACTITIONERS } from "@repo/db-seed/fixtures"
 import type { SeedAuth } from "@repo/db-seed/types"
 import type { Payload } from "payload"
 import { afterEach, describe, expect, it, vi } from "vitest"
@@ -21,9 +21,13 @@ const buildPayload = ({
   store.set("users", [])
   store.set("licenses", [])
   store.set("courses", [])
+  store.set("pages", [])
 
   if (!startEmpty) {
     // Seed the store with existing matching docs to exercise the skip branch.
+    for (const page of SEED_PAGES) {
+      store.get("pages")?.push({ id: `page-${page.slug}`, slug: page.slug })
+    }
     for (const practitioner of SEED_PRACTITIONERS) {
       const userId = `user-${practitioner.email}`
       store.get("users")?.push({
@@ -151,6 +155,8 @@ describe("seed", () => {
       SEED_PRACTITIONERS.reduce((sum, p) => sum + p.courses.length, 0)
     )
     expect(summary.coursesSkipped).toBe(0)
+    expect(summary.pagesCreated).toBe(SEED_PAGES.length)
+    expect(summary.pagesSkipped).toBe(0)
     expect(auth.api.signUpEmail).toHaveBeenCalledTimes(
       SEED_PRACTITIONERS.length
     )
@@ -172,6 +178,8 @@ describe("seed", () => {
     expect(second.coursesSkipped).toBe(
       SEED_PRACTITIONERS.reduce((sum, p) => sum + p.courses.length, 0)
     )
+    expect(second.pagesCreated).toBe(0)
+    expect(second.pagesSkipped).toBe(SEED_PAGES.length)
     expect(auth.api.signUpEmail).not.toHaveBeenCalled()
   })
 

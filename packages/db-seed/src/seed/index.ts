@@ -1,9 +1,10 @@
 import { findOrCreate } from "@repo/db-seed/findOrCreate"
-import { SEED_PRACTITIONERS } from "@repo/db-seed/fixtures"
+import { SEED_PAGES, SEED_PRACTITIONERS } from "@repo/db-seed/fixtures"
 import type {
   SeedAuth,
   SeedCourse,
   SeedLicense,
+  SeedPage,
   SeedPractitioner,
   SeedSummary,
 } from "@repo/db-seed/types"
@@ -161,6 +162,30 @@ async function ensureCourse({
   return { created: result.created }
 }
 
+async function ensurePage({
+  payload,
+  page,
+}: {
+  readonly payload: Payload
+  readonly page: SeedPage
+}): Promise<{ readonly created: boolean }> {
+  const result = await findOrCreate({
+    payload,
+    collection: "pages",
+    where: { slug: { equals: page.slug } },
+    data: {
+      title: page.title,
+      slug: page.slug,
+      // Keep the explicit slug; do not regenerate it from the title.
+      generateSlug: false,
+      body: page.body,
+      _status: "published",
+      ...(page.meta === undefined ? {} : { meta: page.meta }),
+    },
+  })
+  return { created: result.created }
+}
+
 export async function seed({ payload, auth }: SeedArgs): Promise<SeedSummary> {
   assertNotProduction()
 
@@ -171,6 +196,8 @@ export async function seed({ payload, auth }: SeedArgs): Promise<SeedSummary> {
     licensesSkipped: 0,
     coursesCreated: 0,
     coursesSkipped: 0,
+    pagesCreated: 0,
+    pagesSkipped: 0,
   }
 
   for (const practitioner of SEED_PRACTITIONERS) {
@@ -208,6 +235,18 @@ export async function seed({ payload, auth }: SeedArgs): Promise<SeedSummary> {
     log
       .withMetadata({ email: practitioner.email, userId, created })
       .info("seeded practitioner")
+  }
+
+  for (const page of SEED_PAGES) {
+    const pageResult = await ensurePage({ payload, page })
+    if (pageResult.created) {
+      summary.pagesCreated += 1
+    } else {
+      summary.pagesSkipped += 1
+    }
+    log
+      .withMetadata({ slug: page.slug, created: pageResult.created })
+      .info("seeded page")
   }
 
   return summary

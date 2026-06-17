@@ -13,6 +13,7 @@ import { Courses } from "@repo/payload/collections/Courses"
 import { Licenses } from "@repo/payload/collections/Licenses"
 import { Media } from "@repo/payload/collections/Media"
 import { NotificationLog } from "@repo/payload/collections/NotificationLog"
+import { Pages } from "@repo/payload/collections/Pages"
 import { Users } from "@repo/payload/collections/Users"
 import { Homepage } from "@repo/payload/globals/Homepage"
 import { buildConfig, type Field } from "payload"
@@ -88,6 +89,7 @@ export function createPayloadConfig({ baseDir }: CreatePayloadConfigOptions) {
       Licenses,
       Media,
       NotificationLog,
+      Pages,
       Users,
     ],
     db: postgresAdapter({
@@ -105,6 +107,7 @@ export function createPayloadConfig({ baseDir }: CreatePayloadConfigOptions) {
         token: blobEnv.BLOB_READ_WRITE_TOKEN,
       }),
       seoPlugin({
+        collections: [Pages.slug],
         fields: ({ defaultFields }) => [
           ...defaultFields.map(withSeoDefault),
           keywordsField,

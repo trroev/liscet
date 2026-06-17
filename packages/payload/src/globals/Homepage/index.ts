@@ -1,6 +1,6 @@
 import { everyone } from "@repo/payload/access/everyone"
 import { isAdmin } from "@repo/payload/access/isAdmin"
-import { revalidateHomepage } from "@repo/payload/hooks/revalidateHomepage"
+import { revalidatePage } from "@repo/payload/hooks/revalidatePage"
 import type { GlobalConfig } from "payload"
 
 const HERO_DEFAULTS = {
@@ -103,7 +103,7 @@ export const Homepage: GlobalConfig = {
     },
   ],
   hooks: {
-    afterChange: [revalidateHomepage],
+    afterChange: [revalidatePage({ resolvePaths: () => ["/"] })],
   },
   label: "Homepage",
   slug: "homepage",

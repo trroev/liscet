@@ -5,4 +5,6 @@ export type SeedSummary = {
   readonly licensesSkipped: number
   readonly coursesCreated: number
   readonly coursesSkipped: number
+  readonly pagesCreated: number
+  readonly pagesSkipped: number
 }
