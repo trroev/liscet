@@ -2,6 +2,12 @@
 import * as Sentry from "@sentry/nextjs"
 
 export function captureException(exception: unknown): string {
+  // Under `payload run` (raw Node ESM, not the Next runtime) the Sentry SDK is
+  // never initialized, so its methods are absent. Telemetry is fire-and-forget:
+  // no-op rather than crash the operation being instrumented.
+  if (typeof Sentry.captureException !== "function") {
+    return ""
+  }
   return Sentry.captureException(exception)
 }
 
@@ -34,10 +40,10 @@ export function scopeSentry({
   practitionerId,
   license,
 }: ScopeSentryArgs): void {
-  if (practitionerId !== undefined) {
+  if (practitionerId !== undefined && typeof Sentry.setUser === "function") {
     Sentry.setUser(practitionerId === null ? null : { id: practitionerId })
   }
-  if (license !== undefined) {
+  if (license !== undefined && typeof Sentry.setContext === "function") {
     Sentry.setContext(
       "license",
       license === null

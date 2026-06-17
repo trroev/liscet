@@ -8,6 +8,8 @@
     ".": "./src/index.ts"
   },
   "scripts": {
+    "coverage": "vitest run --coverage",
+    "test": "vitest run",
     "typecheck": "tsc --noEmit",
     "clean": "rm -rf .turbo .next dist storybook-static coverage *.tsbuildinfo test-results playwright-report"
   },
@@ -16,6 +18,8 @@
   },
   "devDependencies": {
     "@repo/tsconfig": "workspace:*",
-    "typescript": "catalog:"
+    "@vitest/coverage-v8": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
   }
 }
