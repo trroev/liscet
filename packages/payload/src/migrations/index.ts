@@ -12,6 +12,7 @@ import * as migration_20260611_195545_course_credit_dimensions from './20260611_
 import * as migration_20260612_191556_deleted_at_on_users from './20260612_191556_deleted_at_on_users';
 import * as migration_20260616_141229_co_telehealth_notification_types from './20260616_141229_co_telehealth_notification_types';
 import * as migration_20260616_194400_blob_pathname_on_media from './20260616_194400_blob_pathname_on_media';
+import * as migration_20260617_141532_homepage_global from './20260617_141532_homepage_global';
 
 export const migrations = [
   {
@@ -82,6 +83,11 @@ export const migrations = [
   {
     up: migration_20260616_194400_blob_pathname_on_media.up,
     down: migration_20260616_194400_blob_pathname_on_media.down,
-    name: '20260616_194400_blob_pathname_on_media'
+    name: '20260616_194400_blob_pathname_on_media',
+  },
+  {
+    up: migration_20260617_141532_homepage_global.up,
+    down: migration_20260617_141532_homepage_global.down,
+    name: '20260617_141532_homepage_global'
   },
 ];
