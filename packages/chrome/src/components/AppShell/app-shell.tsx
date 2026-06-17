@@ -4,18 +4,20 @@ import type React from "react"
 import { MobileAuth } from "../MobileAuth"
 import { UserMenu } from "../UserMenu"
 import { SiteFooter } from "./site-footer"
-import { SiteHeader } from "./site-header.client"
+import { type MarketingNavLink, SiteHeader } from "./site-header.client"
 
 export type AppShellProps = {
   auth: HeaderAuth
   children: React.ReactNode
   themeToggleSlot?: React.ReactNode
+  navLinks?: ReadonlyArray<MarketingNavLink>
 }
 
 export const AppShell = ({
   auth,
   children,
   themeToggleSlot,
+  navLinks,
 }: AppShellProps) => {
   const desktopAuth =
     auth.status === "signed-in" ? (
@@ -34,6 +36,7 @@ export const AppShell = ({
       <SiteHeader
         authSlot={desktopAuth}
         mobileAuthSlot={<MobileAuth auth={auth} />}
+        navLinks={navLinks}
         themeToggleSlot={themeToggleSlot}
       />
       <main className="flex-1">{children}</main>

@@ -9,10 +9,16 @@ import { useEffect, useState } from "react"
 import { match, P } from "ts-pattern"
 import { MobileNav } from "../MobileNav"
 
+export type MarketingNavLink = {
+  href: string
+  label: string
+}
+
 export type SiteHeaderProps = {
   authSlot: React.ReactNode
   mobileAuthSlot: React.ReactNode
   themeToggleSlot?: React.ReactNode
+  navLinks?: ReadonlyArray<MarketingNavLink>
   className?: string
 }
 
@@ -20,6 +26,7 @@ export const SiteHeader = ({
   authSlot,
   mobileAuthSlot,
   themeToggleSlot,
+  navLinks = [],
   className,
 }: SiteHeaderProps) => {
   const [isScrolled, setIsScrolled] = useState(false)
@@ -71,13 +78,30 @@ export const SiteHeader = ({
           Liscet
         </Link>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-6">
           <NavigationMenu.Root
             aria-label="Site navigation"
             onValueChange={(value) => setNavValue(value)}
             value={navValue}
           >
-            <MobileNav authSlot={mobileAuthSlot} isOpen={isMobileNavOpen} />
+            <NavigationMenu.List className="hidden gap-6 md:flex">
+              {navLinks.map((link) => (
+                <NavigationMenu.Item key={link.href}>
+                  <NavigationMenu.Link
+                    className="text-body text-text-secondary hover:text-text-primary"
+                    render={<Link href={link.href} />}
+                  >
+                    {link.label}
+                  </NavigationMenu.Link>
+                </NavigationMenu.Item>
+              ))}
+            </NavigationMenu.List>
+
+            <MobileNav
+              authSlot={mobileAuthSlot}
+              isOpen={isMobileNavOpen}
+              navLinks={navLinks}
+            />
           </NavigationMenu.Root>
 
           <div className="hidden md:flex md:items-center md:gap-2">

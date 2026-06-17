@@ -1,14 +1,22 @@
 import { RiCloseLine, RiMenuLine } from "@remixicon/react"
 import { NavigationMenu } from "@repo/ui/components/NavigationMenu"
+import { Separator } from "@repo/ui/components/Separator"
 import { cn } from "@repo/ui/utils/cn"
+import Link from "next/link"
 import type React from "react"
+import type { MarketingNavLink } from "../AppShell/site-header.client"
 
 export type MobileNavProps = {
   isOpen: boolean
   authSlot: React.ReactNode
+  navLinks?: ReadonlyArray<MarketingNavLink>
 }
 
-export const MobileNav = ({ isOpen, authSlot }: MobileNavProps) => (
+export const MobileNav = ({
+  isOpen,
+  authSlot,
+  navLinks = [],
+}: MobileNavProps) => (
   <NavigationMenu.List className="flex md:hidden">
     <NavigationMenu.Item value="mobile">
       <NavigationMenu.Trigger
@@ -39,7 +47,21 @@ export const MobileNav = ({ isOpen, authSlot }: MobileNavProps) => (
               "data-ending-style:duration-150 data-ending-style:ease-in"
             )}
           >
-            <ul className="flex flex-col space-y-4">{authSlot}</ul>
+            <ul className="flex flex-col space-y-4">
+              {navLinks.map((link) => (
+                <NavigationMenu.Item key={link.href}>
+                  <NavigationMenu.Link
+                    className="text-heading-md text-text-primary hover:text-text-secondary"
+                    closeOnClick
+                    render={<Link href={link.href} />}
+                  >
+                    {link.label}
+                  </NavigationMenu.Link>
+                </NavigationMenu.Item>
+              ))}
+              {navLinks.length > 0 ? <Separator /> : null}
+              {authSlot}
+            </ul>
           </NavigationMenu.Popup>
         </NavigationMenu.Positioner>
       </NavigationMenu.Portal>
