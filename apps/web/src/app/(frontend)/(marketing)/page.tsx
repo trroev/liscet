@@ -2,11 +2,13 @@ import { env } from "@repo/env/app"
 import type { Metadata } from "next"
 import { getPayload } from "payload"
 import type React from "react"
+import type { SoftwareApplication, WithContext } from "schema-dts"
 import {
   type Feature,
   FeatureList,
 } from "~/features/marketing/components/FeatureList"
 import { HeroSection } from "~/features/marketing/components/HeroSection"
+import { StructuredData } from "~/features/marketing/components/StructuredData"
 import config from "~/payload.config"
 
 const getHomepage = async () => {
@@ -40,7 +42,7 @@ export default async function HomePage(): Promise<React.JSX.Element> {
     })
   )
 
-  const softwareApplicationJsonLd = {
+  const softwareApplicationJsonLd: WithContext<SoftwareApplication> = {
     "@context": "https://schema.org",
     "@type": "SoftwareApplication",
     name: "Liscet",
@@ -57,13 +59,7 @@ export default async function HomePage(): Promise<React.JSX.Element> {
 
   return (
     <>
-      <script
-        // biome-ignore lint/security/noDangerouslySetInnerHtml: JSON-LD structured data is serialized from a trusted, CMS-managed object
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify(softwareApplicationJsonLd),
-        }}
-        type="application/ld+json"
-      />
+      <StructuredData<SoftwareApplication> item={softwareApplicationJsonLd} />
       <HeroSection
         ctaHref={homepage.hero.ctaHref}
         ctaLabel={homepage.hero.ctaLabel}
