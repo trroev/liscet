@@ -8,11 +8,9 @@ import {
   AppFrame,
   type AppFrameNavItem,
 } from "@repo/chrome/components/AppFrame"
-import type { SignedInAuth } from "@repo/types/HeaderAuth"
 import type React from "react"
-import { signOutAction } from "~/features/auth/actions/sign-out"
 import { ThemeToggle } from "~/features/settings/components/ThemeToggle"
-import { buildInitials } from "~/lib/build-initials"
+import { buildSignedInAuth } from "~/lib/header-auth"
 import { requireOnboardedViewer } from "~/lib/queries/require-onboarded-viewer"
 
 export default async function UserSlugLayout({
@@ -22,21 +20,10 @@ export default async function UserSlugLayout({
 }) {
   const { user, slug } = await requireOnboardedViewer()
 
-  const avatarUrl =
-    typeof user.avatar === "object" && user.avatar
-      ? (user.avatar.url ?? null)
-      : null
-  const displayName = user.displayName ?? user.email
-  const auth: SignedInAuth = {
-    status: "signed-in",
-    displayName,
-    initials: buildInitials(displayName),
-    avatarUrl,
-    onSignOut: async () => {
-      "use server"
-      await signOutAction()
-    },
-  }
+  const auth = buildSignedInAuth({
+    displayName: user.displayName ?? user.email,
+    avatar: user.avatar,
+  })
 
   const navItems: ReadonlyArray<AppFrameNavItem> = [
     {
