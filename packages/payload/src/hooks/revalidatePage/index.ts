@@ -1,4 +1,7 @@
+import { createLogger } from "@repo/logger"
 import { revalidatePath } from "next/cache"
+
+const log = createLogger({ name: "payload.revalidate-page" })
 
 type RevalidatePageArgs<TDoc> = {
   resolvePaths: (doc: TDoc) => Array<string>
@@ -10,12 +13,23 @@ type RevalidatePageArgs<TDoc> = {
  * `/`) and the `Pages` collection (revalidates `/{slug}` and the sitemap). The
  * returned `({ doc }) => doc` function is structurally compatible with both
  * `GlobalAfterChangeHook` and `CollectionAfterChangeHook`.
+ *
+ * Revalidation is fire-and-forget: `revalidatePath` throws when invoked outside
+ * a request scope (e.g. the seed CLI), so failures are logged but never bubble
+ * up to fail the underlying write.
  */
 export const revalidatePage =
   <TDoc>({ resolvePaths }: RevalidatePageArgs<TDoc>) =>
   ({ doc }: { doc: TDoc }): TDoc => {
     for (const path of resolvePaths(doc)) {
-      revalidatePath(path)
+      try {
+        revalidatePath(path)
+      } catch (error) {
+        log
+          .withError(error)
+          .withMetadata({ path })
+          .warn("path revalidation skipped")
+      }
     }
     return doc
   }

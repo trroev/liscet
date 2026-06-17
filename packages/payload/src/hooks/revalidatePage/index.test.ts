@@ -6,6 +6,12 @@ vi.mock("next/cache", () => ({
   revalidatePath: (...args: ReadonlyArray<unknown>) => revalidatePath(...args),
 }))
 
+vi.mock("@repo/logger", () => ({
+  createLogger: () => ({
+    withError: () => ({ withMetadata: () => ({ warn: vi.fn() }) }),
+  }),
+}))
+
 const { revalidatePage } = await import("./index")
 
 describe("revalidatePage", () => {
@@ -31,5 +37,19 @@ describe("revalidatePage", () => {
 
     expect(revalidatePath).toHaveBeenCalledWith("/")
     expect(result).toBe(doc)
+  })
+
+  it("never lets a revalidation error fail the write", () => {
+    revalidatePath.mockClear()
+    revalidatePath.mockImplementationOnce(() => {
+      throw new Error("static generation store missing in revalidatePath")
+    })
+    const doc = { slug: "about" }
+    const hook = revalidatePage<{ slug: string }>({
+      resolvePaths: () => ["/about"],
+    })
+
+    expect(() => hook({ doc })).not.toThrow()
+    expect(hook({ doc })).toBe(doc)
   })
 })
