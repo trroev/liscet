@@ -6,6 +6,7 @@ import { Field } from "@repo/ui/components/Field"
 import { Input } from "@repo/ui/components/Input"
 import { Select } from "@repo/ui/components/Select"
 import { useForm, useStore } from "@tanstack/react-form"
+import Link from "next/link"
 import { useEffect, useRef, useState } from "react"
 import { match } from "ts-pattern"
 import { z } from "zod"
@@ -437,7 +438,21 @@ export const OnboardingFormView = ({
 
         <p className="font-sans text-body-sm text-text-muted">
           Liscet helps you track CEUs. You are responsible for verifying
-          compliance with your state board.
+          compliance with your state board. By continuing, you agree to our{" "}
+          <Link
+            className="underline hover:text-text-primary"
+            href="/legal/terms"
+          >
+            Terms
+          </Link>{" "}
+          and{" "}
+          <Link
+            className="underline hover:text-text-primary"
+            href="/legal/privacy"
+          >
+            Privacy Policy
+          </Link>
+          .
         </p>
       </form>
     </section>
