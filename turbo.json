@@ -33,6 +33,8 @@
     "VIRUS_SCAN_URL"
   ],
   "globalPassThroughEnv": [
+    "DOTENV_PRIVATE_KEY",
+    "DOTENV_PRIVATE_KEY_PRODUCTION",
     "PAYLOAD_MIGRATING",
     "PORTLESS",
     "SKIP_ENV_VALIDATION"
