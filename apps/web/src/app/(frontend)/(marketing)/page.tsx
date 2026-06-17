@@ -44,13 +44,6 @@ export function generateMetadata(): Metadata {
     description: PAGE_DESCRIPTION,
     keywords: [...KEYWORDS],
     alternates: { canonical: url },
-    openGraph: {
-      type: "website",
-      url,
-      title: PAGE_TITLE,
-      description: PAGE_DESCRIPTION,
-      siteName: "Liscet",
-    },
   }
 }
 

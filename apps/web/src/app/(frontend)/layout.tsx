@@ -24,6 +24,13 @@ export const metadata: Metadata = {
   title: { template: "%s | Liscet", default: "Liscet" },
   description:
     "Track professional licenses and continuing-education credits toward renewal.",
+  openGraph: {
+    type: "website",
+    siteName: "Liscet",
+  },
+  twitter: {
+    card: "summary_large_image",
+  },
 }
 
 export default async function FrontendLayout({
