@@ -5,7 +5,10 @@
   "license": "MIT",
   "type": "module",
   "exports": {
-    ".": "./src/logger/node.ts"
+    ".": {
+      "browser": "./src/logger/browser.ts",
+      "default": "./src/logger/node.ts"
+    }
   },
   "scripts": {
     "coverage": "vitest run --coverage",

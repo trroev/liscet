@@ -1,16 +1,16 @@
 # `@repo/logger`
 
-Sanctioned logging primitive for the monorepo. Built on [LogLayer](https://loglayer.dev) with [pino](https://getpino.io) as the underlying transport — structured JSON in production, [pino-pretty](https://github.com/pinojs/pino-pretty) in development. Default secret redaction, and a `LOG_LEVEL`-driven level pulled from [`@repo/env/logger`](../env/README.md).
+Sanctioned logging primitive for the monorepo. Built on [LogLayer](https://loglayer.dev). The same `logger` / `createLogger` API resolves to a runtime-appropriate transport: on the server, [pino](https://getpino.io) — structured JSON in production, [pino-pretty](https://github.com/pinojs/pino-pretty) in development, with a `LOG_LEVEL` pulled from [`@repo/env/logger`](../env/README.md); in the browser, a `ConsoleTransport`. Default secret redaction applies in both.
 
 `console.*` is banned across the repo by Biome's `noConsole` rule; this package is the replacement.
 
-**Layer position:** foundation. No imports from `ui`, `chrome`, `payload`, or `auth`. Node-only by design — see [docs/decisions/27-logger.md](../../docs/decisions/27-logger.md) for the rationale.
+**Layer position:** foundation. No imports from `ui`, `chrome`, `payload`, or `auth`. Isomorphic: the package's `.` export carries a `browser` condition (`src/logger/browser.ts`) and a server `default` (`src/logger/node.ts`), so the same import is safe in client and server code. The browser build never imports pino or `@repo/env`, which would otherwise throw when a server-side env var is read on the client.
 
 ## Exports
 
 | Subpath | Owns |
 |---|---|
-| `@repo/logger` | `logger` (shared singleton), `createLogger(options)` |
+| `@repo/logger` | `logger` (shared singleton), `createLogger(options)` — server (`default`) and browser builds expose the identical surface |
 
 ## Usage
 
@@ -36,7 +36,7 @@ Defaults redact `password`, `token`, `authorization`, `cookie`, `set-cookie`, `s
 
 ## Level
 
-Read from `LOG_LEVEL` via [`@repo/env/logger`](../env/README.md). Defaults: `info` in production, `debug` everywhere else.
+On the server, read from `LOG_LEVEL` via [`@repo/env/logger`](../env/README.md). The browser build can't read server env, so it derives the level from `process.env.NODE_ENV` instead. Defaults are the same in both: `info` in production, `debug` everywhere else.
 
 ## Decision log
 
