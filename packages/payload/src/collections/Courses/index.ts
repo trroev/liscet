@@ -1,4 +1,5 @@
 import { isAdmin } from "@repo/payload/access/isAdmin"
+import { cascadeDeleteCourseCreditsOnCourseDelete } from "@repo/payload/hooks/cascadeDeleteCourseCredits"
 import { evaluateCourseCreditsOnCourseChange } from "@repo/payload/hooks/evaluateCourseCredits"
 import type { CollectionConfig } from "payload"
 
@@ -87,6 +88,7 @@ export const Courses: CollectionConfig = {
   ],
   hooks: {
     afterChange: [evaluateCourseCreditsOnCourseChange],
+    beforeDelete: [cascadeDeleteCourseCreditsOnCourseDelete],
   },
   indexes: [{ fields: ["practitioner", "completedAt"] }],
   labels: {

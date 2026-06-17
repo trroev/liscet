@@ -1,5 +1,6 @@
 import { isAdmin } from "@repo/payload/access/isAdmin"
 import { LICENSE_STATES } from "@repo/payload/fields/licenseStates"
+import { cascadeDeleteCourseCreditsOnLicenseDelete } from "@repo/payload/hooks/cascadeDeleteCourseCredits"
 import { evaluateCourseCreditsOnLicenseChange } from "@repo/payload/hooks/evaluateCourseCredits"
 import type { CollectionConfig } from "payload"
 import { validateCoTelehealthRegistration } from "./validate-co-telehealth-registration"
@@ -129,6 +130,7 @@ export const Licenses: CollectionConfig = {
   ],
   hooks: {
     afterChange: [evaluateCourseCreditsOnLicenseChange],
+    beforeDelete: [cascadeDeleteCourseCreditsOnLicenseDelete],
   },
   indexes: [{ fields: ["practitioner", "state", "licenseType"] }],
   labels: {
