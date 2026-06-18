@@ -25,7 +25,7 @@ export const requestDataExport = authedAction<void, RequestDataExportResult>(
         access: "private",
         addRandomSuffix: true,
         contentType: "application/json",
-        token: blobEnv.BLOB_READ_WRITE_TOKEN,
+        token: blobEnv.BLOB_PRIVATE_READ_WRITE_TOKEN,
       }
     )
 

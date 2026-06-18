@@ -13,7 +13,7 @@ export async function GET(request: Request): Promise<Response> {
 
   const blob = await get(payload.pathname, {
     access: "private",
-    token: env.BLOB_READ_WRITE_TOKEN,
+    token: env.BLOB_PRIVATE_READ_WRITE_TOKEN,
   })
   if (!blob || blob.statusCode !== 200) {
     return new Response("Export not found.", { status: 404 })

@@ -7,9 +7,10 @@ import { issueSignedToken, presignUrl, put } from "@vercel/blob"
  * Uploads certificate bytes as a PRIVATE Vercel Blob. Private blobs are not
  * reachable via their raw URL — they can only be read through a short-lived
  * presigned URL (see {@link presignCertificateUrl}). The Payload storage adapter
- * cannot write private blobs (it is public-only), so certificates are uploaded
- * through the `@vercel/blob` SDK directly and the returned pathname is stored on
- * the media doc.
+ * cannot write private blobs (it is public-only) and targets the public Blob
+ * store, so certificates are uploaded through the `@vercel/blob` SDK directly
+ * against the private store (`BLOB_PRIVATE_READ_WRITE_TOKEN`) and the returned
+ * pathname is stored on the media doc.
  */
 export const uploadCertificateBlob = async ({
   buffer,
@@ -24,14 +25,14 @@ export const uploadCertificateBlob = async ({
     access: "private",
     addRandomSuffix: true,
     contentType,
-    token: env.BLOB_READ_WRITE_TOKEN,
+    token: env.BLOB_PRIVATE_READ_WRITE_TOKEN,
   })
   return { pathname }
 }
 
 /**
  * Mints a short-lived presigned GET URL for a private certificate blob, signed
- * with `BLOB_READ_WRITE_TOKEN`. The URL expires after
+ * with `BLOB_PRIVATE_READ_WRITE_TOKEN`. The URL expires after
  * `BLOB_SIGNED_URL_TTL_SECONDS` (default 300s).
  */
 export const presignCertificateUrl = async ({
@@ -43,7 +44,7 @@ export const presignCertificateUrl = async ({
   const signedToken = await issueSignedToken({
     operations: ["get"],
     pathname,
-    token: env.BLOB_READ_WRITE_TOKEN,
+    token: env.BLOB_PRIVATE_READ_WRITE_TOKEN,
     validUntil,
   })
   const { presignedUrl } = await presignUrl(signedToken, {

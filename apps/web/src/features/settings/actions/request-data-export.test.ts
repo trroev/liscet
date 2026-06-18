@@ -38,7 +38,7 @@ vi.mock("@repo/env/auth", () => ({
 }))
 
 vi.mock("@repo/env/blob", () => ({
-  env: { BLOB_READ_WRITE_TOKEN: "blob-token" },
+  env: { BLOB_PRIVATE_READ_WRITE_TOKEN: "private-blob-token" },
 }))
 
 describe("requestDataExport", () => {
@@ -105,7 +105,7 @@ describe("requestDataExport", () => {
       access: "private",
       addRandomSuffix: true,
       contentType: "application/json",
-      token: "blob-token",
+      token: "private-blob-token",
     })
 
     expect(sendEmail).toHaveBeenCalledTimes(1)
