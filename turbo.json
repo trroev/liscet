@@ -33,6 +33,8 @@
     "VIRUS_SCAN_URL"
   ],
   "globalPassThroughEnv": [
+    "BLOB_STORE_ID",
+    "BLOB_WEBHOOK_PUBLIC_KEY",
     "DOTENV_PRIVATE_KEY",
     "DOTENV_PRIVATE_KEY_PRODUCTION",
     "PAYLOAD_MIGRATING",
