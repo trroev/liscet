@@ -80,16 +80,16 @@ const clamavRestScanner: Scanner = async ({ data, filename, mimetype }) => {
 
 /**
  * Scans an uploaded file, applying the configuration gate: when no
- * `VIRUS_SCAN_URL` is set, production fails closed (throws) while dev/test logs
- * and treats the file as clean so local uploads still work. Shared by the Media
- * `beforeChange` hook and the certificate upload action — both upload paths run
- * the same gate. Throws on provider error/timeout so callers fail closed.
+ * `VIRUS_SCAN_URL` is set the gate is inert — every environment logs a warning
+ * and treats the file as clean so uploads are not blocked before a scanner is
+ * provisioned (#64). The MIME/size allowlist on the `media` collection is the
+ * baseline upload control until then. Shared by the Media `beforeChange` hook
+ * and the certificate upload action — both upload paths run the same gate. Once
+ * a scanner is configured it throws on provider error/timeout so callers fail
+ * closed.
  */
 export const scanUploadedFile: Scanner = (args) => {
   if (!env.VIRUS_SCAN_URL) {
-    if (process.env.NODE_ENV === "production") {
-      throw new Error("virus scan is not configured")
-    }
     log.warn("virus scan skipped — VIRUS_SCAN_URL is not set")
     return Promise.resolve({ clean: true })
   }

@@ -37,5 +37,6 @@ export const Media: CollectionConfig = {
     bulkUpload: false,
     filesRequiredOnCreate: false,
     focalPoint: true,
+    mimeTypes: ["application/pdf", "image/jpeg", "image/png", "image/webp"],
   },
 }

@@ -121,5 +121,9 @@ export function createPayloadConfig({ baseDir }: CreatePayloadConfigOptions) {
     typescript: {
       outputFile: path.resolve(dirname, "types", "payload-types.ts"),
     },
+    upload: {
+      abortOnLimit: true,
+      limits: { fileSize: 10 * 1024 * 1024 },
+    },
   })
 }
