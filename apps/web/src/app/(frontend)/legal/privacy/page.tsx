@@ -1,7 +1,7 @@
-import { env } from "@repo/env/app"
 import type { Metadata } from "next"
 import type React from "react"
-import { TermlyEmbed } from "~/features/legal/components/TermlyEmbed"
+import { LegalDocument } from "~/features/legal/components/LegalDocument"
+import { privacyPolicyHtml } from "~/features/legal/content/privacy-policy"
 import { MarketingPage } from "~/features/marketing/components/MarketingPage"
 
 export function generateMetadata(): Metadata {
@@ -14,7 +14,7 @@ export function generateMetadata(): Metadata {
 export default function PrivacyPage(): React.JSX.Element {
   return (
     <MarketingPage title="Privacy Policy">
-      <TermlyEmbed dataId={env.NEXT_PUBLIC_TERMLY_PRIVACY_ID} />
+      <LegalDocument html={privacyPolicyHtml} />
     </MarketingPage>
   )
 }

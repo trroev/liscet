@@ -4,3 +4,33 @@ body[data-focus-mode="true"] > header,
 body[data-focus-mode="true"] > footer {
   display: none;
 }
+
+/* Rebrand Termly's static policy export: keep its size hierarchy, swap font + colors to brand tokens.
+   Use --semantic-* (real :root/[data-theme=dark] properties) rather than the @theme-inline --color-* re-exports. */
+.legal-document,
+.legal-document * {
+  font-family: var(--font-sans) !important;
+  color: var(--semantic-text-primary) !important;
+  background-color: transparent !important;
+}
+
+.legal-document [data-custom-class="subtitle"],
+.legal-document [data-custom-class="subtitle"] * {
+  color: var(--semantic-text-secondary) !important;
+}
+
+.legal-document a,
+.legal-document a:link,
+.legal-document a:visited,
+.legal-document a *,
+.legal-document [data-custom-class="link"],
+.legal-document [data-custom-class="link"] * {
+  color: var(--semantic-accent) !important;
+}
+
+/* Termly hard-codes "1px solid black" table borders inline — invisible on dark bg. */
+.legal-document table,
+.legal-document th,
+.legal-document td {
+  border-color: var(--semantic-border) !important;
+}
