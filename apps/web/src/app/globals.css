@@ -9,6 +9,8 @@ body[data-focus-mode="true"] > footer {
    Use --semantic-* (real :root/[data-theme=dark] properties) rather than the @theme-inline --color-* re-exports. */
 .legal-document,
 .legal-document * {
+  max-width: 65ch;
+  margin: 0 auto;
   font-family: var(--font-sans) !important;
   color: var(--semantic-text-primary) !important;
   background-color: transparent !important;

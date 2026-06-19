@@ -23,8 +23,6 @@ const env = createEnv({
     NEXT_PUBLIC_SENTRY_DSN: z.url().optional(),
     NEXT_PUBLIC_POSTHOG_KEY: z.string().optional(),
     NEXT_PUBLIC_POSTHOG_HOST: z.url().default("https://us.i.posthog.com"),
-    NEXT_PUBLIC_TERMLY_TERMS_ID: z.string().optional(),
-    NEXT_PUBLIC_TERMLY_PRIVACY_ID: z.string().optional(),
   },
   shared: {
     NODE_ENV: nodeEnvSchema,
@@ -33,8 +31,6 @@ const env = createEnv({
     NEXT_PUBLIC_SENTRY_DSN: process.env.NEXT_PUBLIC_SENTRY_DSN,
     NEXT_PUBLIC_POSTHOG_KEY: process.env.NEXT_PUBLIC_POSTHOG_KEY,
     NEXT_PUBLIC_POSTHOG_HOST: process.env.NEXT_PUBLIC_POSTHOG_HOST,
-    NEXT_PUBLIC_TERMLY_TERMS_ID: process.env.NEXT_PUBLIC_TERMLY_TERMS_ID,
-    NEXT_PUBLIC_TERMLY_PRIVACY_ID: process.env.NEXT_PUBLIC_TERMLY_PRIVACY_ID,
     NODE_ENV: process.env.NODE_ENV,
   },
 })
