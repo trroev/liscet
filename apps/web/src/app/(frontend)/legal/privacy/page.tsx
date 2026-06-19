@@ -1,7 +1,7 @@
 import type { Metadata } from "next"
 import type React from "react"
 import { LegalDocument } from "~/features/legal/components/LegalDocument"
-import { privacyPolicyHtml } from "~/features/legal/content/privacy-policy"
+import { PRIVACY_POLICY_HTML } from "~/features/legal/content/privacy-policy"
 import { MarketingPage } from "~/features/marketing/components/MarketingPage"
 
 export function generateMetadata(): Metadata {
@@ -14,7 +14,7 @@ export function generateMetadata(): Metadata {
 export default function PrivacyPage(): React.JSX.Element {
   return (
     <MarketingPage title="Privacy Policy">
-      <LegalDocument html={privacyPolicyHtml} />
+      <LegalDocument html={PRIVACY_POLICY_HTML} />
     </MarketingPage>
   )
 }
