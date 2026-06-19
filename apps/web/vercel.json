@@ -1,5 +1,5 @@
 {
-  "buildCommand": "cd ../.. && pnpm migrate && pnpm turbo run build --filter=web",
+  "buildCommand": "cd ../.. && pnpm migrate && if [ \"$VERCEL_ENV\" = preview ]; then pnpm seed; fi && pnpm turbo run build --filter=web",
   "crons": [
     {
       "path": "/api/cron/notifications",

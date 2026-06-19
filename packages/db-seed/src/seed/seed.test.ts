@@ -131,6 +131,7 @@ describe("seed", () => {
   })
 
   it("hard-aborts with a clear error when NODE_ENV is production", async () => {
+    vi.stubEnv("VERCEL_ENV", "")
     vi.stubEnv("NODE_ENV", "production")
     const { payload } = buildPayload()
     const auth = buildAuth({ payload })

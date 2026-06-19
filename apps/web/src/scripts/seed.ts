@@ -1,14 +1,11 @@
 import config from "@payload-config"
 import { createAuth } from "@repo/auth"
+import { assertSeedable } from "@repo/db-seed/assertSeedable"
 import { seed } from "@repo/db-seed/seed"
 import { createLogger } from "@repo/logger"
 import { getPayload } from "payload"
 
-if (process.env.NODE_ENV === "production") {
-  throw new Error(
-    "db-seed must not run in production — refusing to execute against a production database."
-  )
-}
+assertSeedable()
 
 const log = createLogger({ name: "scripts.seed" })
 

@@ -1,3 +1,4 @@
+import { assertSeedable } from "@repo/db-seed/assertSeedable"
 import { findOrCreate } from "@repo/db-seed/findOrCreate"
 import { SEED_PAGES, SEED_PRACTITIONERS } from "@repo/db-seed/fixtures"
 import type {
@@ -16,14 +17,6 @@ const log = createLogger({ name: "db-seed" })
 type SeedArgs = {
   readonly payload: Payload
   readonly auth: SeedAuth
-}
-
-function assertNotProduction(): void {
-  if (process.env.NODE_ENV === "production") {
-    throw new Error(
-      "db-seed must not run in production — refusing to execute against a production database."
-    )
-  }
 }
 
 type EnsurePractitionerResult = {
@@ -187,7 +180,7 @@ async function ensurePage({
 }
 
 export async function seed({ payload, auth }: SeedArgs): Promise<SeedSummary> {
-  assertNotProduction()
+  assertSeedable()
 
   const summary = {
     practitionersCreated: 0,
