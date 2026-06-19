@@ -225,4 +225,4 @@ The app deploys as a single Vercel project. Payload's embedded architecture mean
 turbo run build --filter=web
 ```
 
-See `apps/web/vercel.json` for the build command Vercel uses. That file also sets `ignoreCommand` to `npx turbo-ignore web`, so Vercel skips the build whenever a push doesn't touch `web` or anything in its dependency graph — no dashboard configuration required. `turbo-ignore` is pinned as a root devDependency for deterministic builds.
+See `apps/web/vercel.json` for the build command Vercel uses. Build skipping is handled by Vercel's native [Skip unaffected projects](https://vercel.com/docs/monorepos#skipping-unaffected-projects) feature (on by default for GitHub-connected pnpm-workspace monorepos), so Vercel skips the build whenever a push doesn't touch `web` or anything in its dependency graph. Unlike a custom `ignoreCommand`, native skipping does not occupy a concurrent build slot. The graph is derived from each package's `package.json` dependencies, so a new `web` dependency must be declared there to be tracked.

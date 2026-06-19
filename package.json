@@ -37,7 +37,6 @@
     "only-allow": "^1.2.1",
     "portless": "catalog:",
     "turbo": "^2.9.6",
-    "turbo-ignore": "^2.9.15",
     "typescript": "catalog:",
     "ultracite": "^7.6.2",
     "vitest": "catalog:",

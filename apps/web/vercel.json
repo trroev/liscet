@@ -5,6 +5,5 @@
       "path": "/api/cron/notifications",
       "schedule": "0 13 * * *"
     }
-  ],
-  "ignoreCommand": "cd ../.. && npx turbo-ignore web"
+  ]
 }

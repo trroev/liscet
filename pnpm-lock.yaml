@@ -175,9 +175,6 @@ importers:
       turbo:
         specifier: ^2.9.6
         version: 2.9.6
-      turbo-ignore:
-        specifier: ^2.9.15
-        version: 2.9.15
       typescript:
         specifier: 'catalog:'
         version: 6.0.3
@@ -7022,10 +7019,6 @@ packages:
     engines: {node: '>=18.0.0'}
     hasBin: true
 
-  turbo-ignore@2.9.15:
-    resolution: {integrity: sha512-Ieoxa2tNPJmEk27qhNuVRsGGOfsizj2TAg2DYnROgaYlD+LcV59P6XvU+tdrAlrktlU1OeIdYak5WkbICbT7CQ==}
-    hasBin: true
-
   turbo@2.9.6:
     resolution: {integrity: sha512-+v2QJey7ZUeUiuigkU+uFfklvNUyPI2VO2vBpMYJA+a1hKFLFiKtUYlRHdb3P9CrAvMzi0upbjI4WT+zKtqkBg==}
     hasBin: true
@@ -13399,10 +13392,6 @@ snapshots:
       get-tsconfig: 4.8.1
     optionalDependencies:
       fsevents: 2.3.3
-
-  turbo-ignore@2.9.15:
-    dependencies:
-      json5: 2.2.3
 
   turbo@2.9.6:
     optionalDependencies:
