@@ -3,10 +3,13 @@ import type { RuleSet } from "@repo/rules-engine/types/RuleSet"
 import { describe, expect, it } from "vitest"
 import { evaluateCourse } from "./index"
 
-const RENEWAL_CYCLE_START = new Date("2025-01-01T00:00:00.000Z")
 const EVALUATED_AT = new Date("2026-01-01T00:00:00.000Z")
 
-const license = { id: "license-1", renewalCycleStart: RENEWAL_CYCLE_START }
+const license = {
+  id: "license-1",
+  expiresAt: new Date("2027-01-01T00:00:00.000Z"),
+  renewalCycleMonths: 24,
+}
 
 const ruleSet: RuleSet = {
   state: "CA",
@@ -141,6 +144,46 @@ describe("evaluateCourse", () => {
     })
 
     expect(result?.creditedHours).toBe(10)
+  })
+
+  it("derives the cycle start in UTC at a month boundary (no local-time drift)", () => {
+    // expiresAt Mar 31 − 1 month clamps to Feb 28 in UTC. The old local-time
+    // setMonth math overflowed Feb 31 into early March, which would have placed
+    // this Mar 1 course in the *prior* cycle and capped it. UTC keeps it current.
+    const cappedRuleSet: RuleSet = { ...ruleSet, carryOverMaxHours: 4 }
+    const result = evaluateCourse({
+      course: buildCourse({
+        completedAt: new Date("2026-03-01T00:00:00.000Z"),
+        hours: 10,
+      }),
+      license: {
+        id: "license-1",
+        expiresAt: new Date("2026-03-31T12:00:00.000Z"),
+        renewalCycleMonths: 1,
+      },
+      ruleSet: cappedRuleSet,
+      evaluatedAt: EVALUATED_AT,
+    })
+
+    expect(result?.creditedHours).toBe(10)
+  })
+
+  it("falls back to the rule set's cycle length when the license field is unset", () => {
+    const cappedRuleSet: RuleSet = { ...ruleSet, carryOverMaxHours: 4 }
+    const result = evaluateCourse({
+      course: buildCourse({
+        completedAt: new Date("2024-12-31T00:00:00.000Z"),
+        hours: 10,
+      }),
+      license: {
+        id: "license-1",
+        expiresAt: new Date("2027-01-01T00:00:00.000Z"),
+      },
+      ruleSet: cappedRuleSet,
+      evaluatedAt: EVALUATED_AT,
+    })
+
+    expect(result?.creditedHours).toBe(4)
   })
 
   it("normalizes raw tags and drops unrecognized ones", () => {

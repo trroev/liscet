@@ -3,10 +3,13 @@ import type { EvaluatedCourse } from "@repo/rules-engine/types/EvaluatedCourse"
 import { describe, expect, it } from "vitest"
 import { ctLicswRuleSet } from "./index"
 
-const RENEWAL_CYCLE_START = new Date("2025-01-01T00:00:00.000Z")
 const EVALUATED_AT = new Date("2026-01-01T00:00:00.000Z")
 
-const license = { id: "license-1", renewalCycleStart: RENEWAL_CYCLE_START }
+const license = {
+  id: "license-1",
+  expiresAt: new Date("2026-01-01T00:00:00.000Z"),
+  renewalCycleMonths: 12,
+}
 
 const buildCourse = (
   overrides: Partial<EvaluatedCourse> = {}

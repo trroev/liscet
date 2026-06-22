@@ -9,10 +9,18 @@ import {
   APPROVING_BODIES,
   SUBJECT_CATEGORIES,
 } from "@repo/rules-engine/types/RuleSet"
+import { addMonths } from "@repo/rules-engine/utils/addMonths"
 
 type EvaluatedLicense = {
   readonly id: string
-  readonly renewalCycleStart: Date
+  /** License expiry; the renewal cycle ends here and is measured back from it. */
+  readonly expiresAt: Date
+  /**
+   * Cycle length in months. Falls back to the rule set's own
+   * `renewalCycleMonths` when unset — the rule set owns the authoritative
+   * length, not a global default.
+   */
+  readonly renewalCycleMonths?: number | null
 }
 
 type EvaluateCourseArgs = {
@@ -82,9 +90,14 @@ export function evaluateCourse({
     return null
   }
 
+  const renewalCycleStart = addMonths({
+    date: license.expiresAt,
+    months: -(license.renewalCycleMonths ?? ruleSet.renewalCycleMonths),
+  })
+
   // Courses completed before the cycle started are carried over from the prior
   // cycle and capped when the rule set sets a cap.
-  const isCarriedOver = course.completedAt < license.renewalCycleStart
+  const isCarriedOver = course.completedAt < renewalCycleStart
   const creditedHours =
     isCarriedOver && ruleSet.carryOverMaxHours !== null
       ? Math.min(course.hours, ruleSet.carryOverMaxHours)

@@ -2,7 +2,6 @@ import type { CreditToPersist } from "@repo/payload/hooks/evaluateCourseCredits/
 import type { Course, License } from "@repo/payload/payload-types"
 import { evaluateCourse } from "@repo/rules-engine/evaluators/evaluateCourse"
 import { RULE_SETS } from "@repo/rules-engine/rule-sets"
-import { deriveRenewalCycleStart } from "./derive-renewal-cycle-start"
 import { ruleSetKeyFor } from "./rule-set-key"
 import { toEvaluatedCourse } from "./to-evaluated-course"
 
@@ -32,7 +31,8 @@ export const creditCourseForLicense = ({
     evaluatedAt,
     license: {
       id: license.id,
-      renewalCycleStart: deriveRenewalCycleStart(license),
+      expiresAt: new Date(license.expiresAt),
+      renewalCycleMonths: license.renewalCycleMonths,
     },
     ruleSet: RULE_SETS[key],
   })
