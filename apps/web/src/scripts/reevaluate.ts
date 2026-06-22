@@ -1,11 +1,6 @@
 import config from "@payload-config"
 import { createLogger } from "@repo/logger"
-import { creditCourseForLicense } from "@repo/payload/evaluation"
-import {
-  type CreditToPersist,
-  reconcileCredits,
-} from "@repo/payload/hooks/evaluateCourseCredits/reconcile-credits"
-import { practitionerData } from "@repo/payload/queries/practitioner-data"
+import { recreditScope } from "@repo/payload/evaluation"
 import { RULE_SETS, type RuleSetKey } from "@repo/rules-engine/rule-sets"
 import { getPayload } from "payload"
 
@@ -19,9 +14,6 @@ type CliArgs = {
   readonly toVersion: number
   readonly dryRun: boolean
 }
-
-const refId = (ref: string | { id: string }): string =>
-  typeof ref === "string" ? ref : ref.id
 
 /**
  * Parse `--key=value` / `--flag` tokens. `payload run` forwards everything
@@ -100,25 +92,16 @@ async function reevaluate(args: CliArgs): Promise<void> {
     })
 
     for (const license of licenses.docs) {
-      const courses = await practitionerData({
-        payload,
-        practitionerId: refId(license.practitioner),
-      }).courses()
-      const credits = courses
-        .map((course) =>
-          creditCourseForLicense({ course, evaluatedAt, license })
-        )
-        .filter((credit): credit is CreditToPersist => credit !== null)
-      const summary = await reconcileCredits({
-        credits,
+      const summary = await recreditScope({
         dryRun: args.dryRun,
+        evaluatedAt,
         payload,
-        scope: { license: { equals: license.id } },
+        scope: { license, type: "license" },
       })
       totals.created += summary.created
       totals.updated += summary.updated
       totals.deleted += summary.deleted
-      totals.credits += credits.length
+      totals.credits += summary.created + summary.updated
       totals.licenses += 1
     }
 

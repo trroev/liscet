@@ -1,4 +1,5 @@
 export { creditCourseForLicense } from "./credit-course-for-license"
 export { DEFAULT_RENEWAL_CYCLE_MONTHS } from "./default-renewal-cycle"
+export { type RecreditScope, recreditScope } from "./recredit-scope"
 export { ruleSetKeyFor } from "./rule-set-key"
 export { summarizeLicenseFromRows } from "./summarize-license-from-rows"
