@@ -2,6 +2,7 @@
 
 import "server-only"
 
+import { slugTaken } from "@repo/payload/queries/practitioner-data"
 import { authedAction } from "~/lib/authed-action"
 import { formatSlug, isReservedSlug, validateSlugFormat } from "../lib/slug"
 import type { CheckSlugAvailabilityResult } from "../lib/types"
@@ -34,14 +35,7 @@ export const checkSlugAvailability = authedAction<
     }
   }
 
-  const existing = await payload.find({
-    collection: "users",
-    limit: 1,
-    overrideAccess: true,
-    where: { slug: { equals: slug } },
-  })
-
-  if (existing.totalDocs === 0) {
+  if (!(await slugTaken({ payload, slug }))) {
     return { status: "success", data: { available: true } }
   }
 

@@ -1,18 +1,21 @@
 import { beforeEach, describe, expect, it, vi } from "vitest"
 
 const getCurrentViewer = vi.fn()
-const findByID = vi.fn()
+const certificateFor = vi.fn()
+const practitionerData = vi.fn(() => ({ certificateFor }))
 const presignCertificateUrl = vi.fn()
 
 vi.mock("server-only", () => ({}))
 
 vi.mock("payload", () => ({
-  getPayload: vi.fn(async () => ({ findByID })),
+  getPayload: vi.fn(async () => ({})),
 }))
 
 vi.mock("~/payload.config", () => ({ default: {} }))
 
 vi.mock("~/lib/queries/current-viewer", () => ({ getCurrentViewer }))
+
+vi.mock("@repo/payload/queries/practitioner-data", () => ({ practitionerData }))
 
 vi.mock("../lib/certificate-blob", () => ({ presignCertificateUrl }))
 
@@ -27,7 +30,7 @@ describe("getCertificateUrl", () => {
   beforeEach(() => {
     vi.resetModules()
     getCurrentViewer.mockReset()
-    findByID.mockReset()
+    certificateFor.mockReset()
     presignCertificateUrl.mockReset()
   })
 
@@ -38,16 +41,25 @@ describe("getCertificateUrl", () => {
     const result = await getCertificateUrl("course-1")
 
     expect(result.status).toBe("error")
-    expect(findByID).not.toHaveBeenCalled()
+    expect(certificateFor).not.toHaveBeenCalled()
   })
 
-  it("rejects a course owned by another practitioner", async () => {
+  it("resolves the certificate as the signed-in practitioner", async () => {
     stubViewer("user-1")
-    findByID.mockResolvedValueOnce({
-      certificate: "media-1",
-      id: "course-1",
-      practitioner: "user-2",
-    })
+    certificateFor.mockResolvedValueOnce({ status: "not-found" })
+    const { getCertificateUrl } = await import("./get-certificate-url")
+
+    await getCertificateUrl("course-1")
+
+    expect(practitionerData).toHaveBeenCalledWith(
+      expect.objectContaining({ practitionerId: "user-1" })
+    )
+    expect(certificateFor).toHaveBeenCalledWith("course-1")
+  })
+
+  it("reports a not-found certificate without presigning", async () => {
+    stubViewer("user-1")
+    certificateFor.mockResolvedValueOnce({ status: "not-found" })
     const { getCertificateUrl } = await import("./get-certificate-url")
 
     const result = await getCertificateUrl("course-1")
@@ -59,13 +71,9 @@ describe("getCertificateUrl", () => {
     expect(presignCertificateUrl).not.toHaveBeenCalled()
   })
 
-  it("rejects a course with no certificate", async () => {
+  it("reports a course with no certificate", async () => {
     stubViewer("user-1")
-    findByID.mockResolvedValueOnce({
-      certificate: null,
-      id: "course-1",
-      practitioner: "user-1",
-    })
+    certificateFor.mockResolvedValueOnce({ status: "no-certificate" })
     const { getCertificateUrl } = await import("./get-certificate-url")
 
     const result = await getCertificateUrl("course-1")
@@ -74,40 +82,15 @@ describe("getCertificateUrl", () => {
       message: "This course has no certificate.",
       status: "error",
     })
-  })
-
-  it("rejects when the media read is denied by access control", async () => {
-    stubViewer("user-1")
-    findByID
-      .mockResolvedValueOnce({
-        certificate: "media-1",
-        id: "course-1",
-        practitioner: "user-1",
-      })
-      .mockResolvedValueOnce(null)
-    const { getCertificateUrl } = await import("./get-certificate-url")
-
-    const result = await getCertificateUrl("course-1")
-
-    expect(result).toMatchObject({
-      message: "Certificate not found.",
-      status: "error",
-    })
     expect(presignCertificateUrl).not.toHaveBeenCalled()
   })
 
-  it("returns a presigned URL for an owned course, reading media as the user", async () => {
+  it("presigns and returns a URL for a resolved certificate", async () => {
     stubViewer("user-1")
-    findByID
-      .mockResolvedValueOnce({
-        certificate: "media-1",
-        id: "course-1",
-        practitioner: "user-1",
-      })
-      .mockResolvedValueOnce({
-        blobPathname: "media/cert-abc.pdf",
-        id: "media-1",
-      })
+    certificateFor.mockResolvedValueOnce({
+      blobPathname: "media/cert-abc.pdf",
+      status: "ok",
+    })
     presignCertificateUrl.mockResolvedValueOnce(
       "https://store.blob.vercel-storage.com/media/cert-abc.pdf?signed=1"
     )
@@ -122,13 +105,5 @@ describe("getCertificateUrl", () => {
     expect(presignCertificateUrl).toHaveBeenCalledWith({
       pathname: "media/cert-abc.pdf",
     })
-    expect(findByID).toHaveBeenLastCalledWith(
-      expect.objectContaining({
-        collection: "media",
-        id: "media-1",
-        overrideAccess: false,
-        user: { id: "user-1" },
-      })
-    )
   })
 })

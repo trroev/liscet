@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest"
-import { practitionerData } from "./practitioner-data"
+import { practitionerData, slugTaken } from "./practitioner-data"
 
 const makePayload = () => {
   const find = vi.fn(() => Promise.resolve({ docs: [{ id: "doc-1" }] }))
@@ -98,5 +98,104 @@ describe("practitionerData", () => {
     const { accessor, find } = buildAccessor(req)
     await accessor.courses()
     expect(find).toHaveBeenCalledWith(expect.objectContaining({ req }))
+  })
+})
+
+const buildCertificateAccessor = ({
+  courseDocs,
+  media,
+}: {
+  courseDocs: Array<unknown>
+  media?: unknown
+}) => {
+  const find = vi.fn(() => Promise.resolve({ docs: courseDocs }))
+  const findByID = vi.fn(() => Promise.resolve(media ?? null))
+  const accessor = practitionerData({
+    payload: { find, findByID } as never,
+    practitionerId: "user-1",
+  })
+  return { accessor, find, findByID }
+}
+
+describe("practitionerData.certificateFor", () => {
+  it("scopes the course read to the requesting practitioner", async () => {
+    const { accessor, find } = buildCertificateAccessor({
+      courseDocs: [{ certificate: "media-1", id: "course-1" }],
+      media: { blobPathname: "certs/abc.pdf" },
+    })
+    await accessor.certificateFor("course-1")
+    expect(find).toHaveBeenCalledWith(
+      expect.objectContaining({
+        collection: "courses",
+        overrideAccess: true,
+        where: {
+          and: [
+            { id: { equals: "course-1" } },
+            { practitioner: { equals: "user-1" } },
+          ],
+        },
+      })
+    )
+  })
+
+  it("denies a non-owner: an unmatched scoped read is not-found", async () => {
+    const { accessor, findByID } = buildCertificateAccessor({ courseDocs: [] })
+    const result = await accessor.certificateFor("someone-elses-course")
+    expect(result).toEqual({ status: "not-found" })
+    expect(findByID).not.toHaveBeenCalled()
+  })
+
+  it("reports a course with no certificate", async () => {
+    const { accessor } = buildCertificateAccessor({
+      courseDocs: [{ certificate: null, id: "course-1" }],
+    })
+    const result = await accessor.certificateFor("course-1")
+    expect(result).toEqual({ status: "no-certificate" })
+  })
+
+  it("treats a missing blob pathname as not-found", async () => {
+    const { accessor } = buildCertificateAccessor({
+      courseDocs: [{ certificate: "media-1", id: "course-1" }],
+      media: { blobPathname: null },
+    })
+    const result = await accessor.certificateFor("course-1")
+    expect(result).toEqual({ status: "not-found" })
+  })
+
+  it("returns the blob pathname for an owned course's certificate", async () => {
+    const { accessor, findByID } = buildCertificateAccessor({
+      courseDocs: [{ certificate: { id: "media-1" }, id: "course-1" }],
+      media: { blobPathname: "certs/abc.pdf" },
+    })
+    const result = await accessor.certificateFor("course-1")
+    expect(result).toEqual({ blobPathname: "certs/abc.pdf", status: "ok" })
+    expect(findByID).toHaveBeenCalledWith(
+      expect.objectContaining({
+        collection: "media",
+        id: "media-1",
+        overrideAccess: true,
+      })
+    )
+  })
+})
+
+describe("slugTaken", () => {
+  it("is taken when a user already holds the slug", async () => {
+    const find = vi.fn(() => Promise.resolve({ totalDocs: 1 }))
+    const taken = await slugTaken({ payload: { find } as never, slug: "ada" })
+    expect(taken).toBe(true)
+    expect(find).toHaveBeenCalledWith(
+      expect.objectContaining({
+        collection: "users",
+        overrideAccess: true,
+        where: { slug: { equals: "ada" } },
+      })
+    )
+  })
+
+  it("is free when no user holds the slug", async () => {
+    const find = vi.fn(() => Promise.resolve({ totalDocs: 0 }))
+    const taken = await slugTaken({ payload: { find } as never, slug: "ada" })
+    expect(taken).toBe(false)
   })
 })

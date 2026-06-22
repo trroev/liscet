@@ -1,5 +1,6 @@
 import "server-only"
 
+import { slugTaken } from "@repo/payload/queries/practitioner-data"
 import type { Payload } from "payload"
 import { isReservedSlug, validateSlugFormat } from "../lib/slug"
 
@@ -17,19 +18,6 @@ const randomSuffix = (): string => {
   return result
 }
 
-const isSlugTaken = async (
-  payload: Payload,
-  slug: string
-): Promise<boolean> => {
-  const result = await payload.find({
-    collection: "users",
-    limit: 1,
-    overrideAccess: true,
-    where: { slug: { equals: slug } },
-  })
-  return result.totalDocs > 0
-}
-
 const isCandidateUsable = (candidate: string): boolean =>
   validateSlugFormat(candidate) === null && !isReservedSlug(candidate)
 
@@ -45,8 +33,7 @@ export const suggestAvailableSlug = async ({
     if (!isCandidateUsable(candidate)) {
       continue
     }
-    const taken = await isSlugTaken(payload, candidate)
-    if (!taken) {
+    if (!(await slugTaken({ payload, slug: candidate }))) {
       return candidate
     }
   }
