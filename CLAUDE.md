@@ -1,10 +1,12 @@
-# next-payload-starter — Claude Working Guide
+# liscet — Claude Working Guide
 
 ## Project Overview
 
-This is a Turborepo monorepo starter for content-driven web apps. It bundles the tooling, conventions, and architecture decisions used in production projects so a new repo can skip the first two weeks of setup. The `posts` collection and `/posts` routes are a skeletal example demonstrating the feature-folder layout — adapt or replace per project.
+Liscet is a continuing-education (CEU) credit tracker for licensed practitioners: it records licenses and their renewal cycles, logs courses with certificate PDFs, surfaces upcoming deadlines, and sends renewal reminders. It is **not** a substitute for verifying compliance with a practitioner's state board (see `/legal/disclaimer`).
 
-**Stack:** Next.js 16 (App Router) + PayloadCMS 3 (embedded) · MongoDB · better-auth · Tailwind v4 · Base UI · TanStack Form · Turborepo + pnpm workspaces · Biome · Vitest · Storybook
+This repo is a **product application**, not a starter — it was forked from the `next-payload-starter` template (`~/Developer/Personal/next-payload-starter`), which is where the reusable tooling, conventions, and architecture decisions are maintained. Changes meant to benefit every downstream project belong upstream in the starter; changes here are liscet-specific.
+
+**Stack:** Next.js 16 (App Router) + PayloadCMS 3 (embedded) · Postgres (Neon, Drizzle adapter — migrations required) · better-auth · Tailwind v4 · Base UI · TanStack Form · Turborepo + pnpm workspaces · Biome · Vitest · Storybook
 
 ---
 
@@ -60,6 +62,15 @@ Full conventions are loaded via the `typescript-conventions` skill (`~/.claude/s
 | No `@ts-ignore` — use `@ts-expect-error` with description | Biome error |
 
 Conventions that require discipline (not auto-enforced): readonly preference, boolean naming prefixes (`is`, `has`, `should`…), explicit return types on exports, `as const satisfies` for constants, null vs undefined semantics, generic `T` prefix, single-object argument pattern, prefer ts-pattern over `switch`/chained `if-else`.
+
+### Testing philosophy
+
+**Coverage gates logic; wiring and markup are verified by the compiler and E2E.** Write tests that are pointed and necessary — never "just to have a test." A test that asserts a component's markup or copy is brittle and tests nothing the compiler wouldn't already catch; it raises the cost of change while lowering signal.
+
+This is encoded in the coverage setup, not just a guideline: the CI coverage job globs **`packages/*/coverage/lcov.info`** only, and only the pure-logic packages opt in (`utils`, `logger`, `emails`, `rules-engine`, `observability`, `db-seed`). **`apps/web` is intentionally not coverage-gated** — the app layer is verified by judgment plus the E2E suite, so there is no patch-coverage pressure to test route wiring or presentational components.
+
+- **Test** (unit/integration): pure functions, data shaping (`lib/`), server actions and route handlers (`actions/`, `route.ts` — branching, auth, error paths), hooks, the rules engine, and components with real *behavior* (conditional rendering, state, validation, a11y semantics). Test behavior through user-observable outcomes (Testing Library) — never snapshots.
+- **Don't unit-test**: `page.tsx` / `layout.tsx` / `loading.tsx` / `error.tsx` (wiring — `tsc` + `next typegen` prove the imports, E2E proves the route) or pure presentational components with no branches. Push logic out of `page.tsx` into a testable `lib/` function instead, mirroring the `get-*-data.ts` pattern.
 
 ### Package structure
 - Types: PascalCase subdirectories — `src/HeaderAuth/`, `src/ActionResult/`
