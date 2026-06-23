@@ -26,7 +26,6 @@ const webServerEnv: Record<string, string> = {
   DATABASE_URL: dbUri,
   PAYLOAD_MIGRATING: "true",
   BASE_URL: baseUrl,
-  BETTER_AUTH_URL: baseUrl,
 }
 
 const isCi = !!process.env.CI
