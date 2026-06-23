@@ -1,0 +1,21 @@
+version: 2
+updates:
+  # Keep the SHA-pinned GitHub Actions current. Dependabot rewrites the pinned
+  # SHA and the trailing `# vX.Y.Z` comment together, and groups all bumps into
+  # a single weekly PR so the pins never silently drift out of date. The pins
+  # live both in the workflow (checkout) and in the composite actions under
+  # tooling/github, so every directory holding a `uses:` is scanned.
+  - package-ecosystem: github-actions
+    directories:
+      - /
+      - /tooling/github/setup
+      - /tooling/github/ci/coverage
+      - /tooling/github/ci/e2e
+    schedule:
+      interval: weekly
+    groups:
+      github-actions:
+        patterns:
+          - '*'
+    commit-message:
+      prefix: ci
