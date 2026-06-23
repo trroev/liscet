@@ -6,6 +6,12 @@ on:
     branches: [main]
   pull_request:
 
+# Cancel superseded in-flight runs on the same PR/branch, but never cancel a
+# push-to-main run (a follow-up push must not abort the post-merge run).
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
 env:
   ACT: "${{ false }}"
   # Vercel Remote Cache — turbo reads these from the environment automatically.
@@ -29,8 +35,9 @@ jobs:
   generate-types:
     runs-on: ubuntu-latest
     name: Generate Types
+    timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
       - name: Generate Types
         if: env.ACT != 'true'
         uses: ./tooling/github/ci/generate-types
@@ -38,8 +45,9 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     name: Lint
+    timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
       - name: Lint
         if: env.ACT != 'true'
         uses: ./tooling/github/ci/lint
@@ -47,8 +55,9 @@ jobs:
   typecheck:
     runs-on: ubuntu-latest
     name: Typecheck
+    timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
           fetch-depth: 0
       - name: Typecheck
@@ -58,8 +67,9 @@ jobs:
   test:
     runs-on: ubuntu-latest
     name: Test
+    timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
           fetch-depth: 0
       - name: Test
@@ -69,8 +79,9 @@ jobs:
   coverage:
     runs-on: ubuntu-latest
     name: Coverage
+    timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
           fetch-depth: 0
       - name: Coverage
@@ -80,6 +91,7 @@ jobs:
   e2e:
     runs-on: ubuntu-latest
     name: E2E
+    timeout-minutes: 20
     services:
       postgres:
         image: postgres:16
@@ -99,12 +111,9 @@ jobs:
       BETTER_AUTH_URL: http://localhost:3000
       BASE_URL: http://localhost:3000
       PAYLOAD_SECRET: e2e-payload-secret-min-32-characters-long
-      CLOUDINARY_CLOUD_NAME: e2e-cloud
-      CLOUDINARY_API_KEY: e2e-key
-      CLOUDINARY_API_SECRET: e2e-secret
       DATABASE_URL: postgres://postgres:postgres@localhost:5432/e2e
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
       - name: Strip committed DATABASE_URL
         if: env.ACT != 'true'
         shell: bash
