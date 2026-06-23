@@ -2,14 +2,8 @@
 
 import "@testing-library/jest-dom/vitest"
 
-import { userEvent } from "@repo/testing/render"
-import {
-  cleanup,
-  render,
-  screen,
-  waitFor,
-  within,
-} from "@testing-library/react"
+import { renderWithProviders, userEvent } from "@repo/testing/render"
+import { cleanup, screen, waitFor, within } from "@testing-library/react"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
 const { deleteAccount, nav } = vi.hoisted(() => ({
@@ -44,7 +38,7 @@ describe("DeleteAccountDialog", () => {
 
   it("should block submission when the password is empty", async () => {
     const user = userEvent.setup()
-    render(<DeleteAccountDialog />)
+    renderWithProviders(<DeleteAccountDialog />)
 
     const dialog = await openDialog(user)
     await user.click(dialog.getByRole("button", { name: "Delete account" }))
@@ -59,7 +53,7 @@ describe("DeleteAccountDialog", () => {
       message: "Incorrect password.",
     })
     const user = userEvent.setup()
-    render(<DeleteAccountDialog />)
+    renderWithProviders(<DeleteAccountDialog />)
 
     const dialog = await openDialog(user)
     await user.type(dialog.getByLabelText("Password"), "wrong")
@@ -77,7 +71,7 @@ describe("DeleteAccountDialog", () => {
       data: { deletedAt: "2026-06-12T00:00:00.000Z" },
     })
     const user = userEvent.setup()
-    render(<DeleteAccountDialog />)
+    renderWithProviders(<DeleteAccountDialog />)
 
     const dialog = await openDialog(user)
     await user.type(dialog.getByLabelText("Password"), "hunter22")

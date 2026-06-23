@@ -10,6 +10,7 @@ import Link from "next/link"
 import { useEffect, useRef, useState } from "react"
 import { match } from "ts-pattern"
 import { z } from "zod"
+import { FormError, useActionForm } from "~/lib/use-action-form"
 import {
   LICENSE_OPTION_VALUES,
   LICENSE_OPTIONS,
@@ -18,6 +19,7 @@ import {
 import { formatSlug, validateSlugFormat } from "../../lib/slug"
 import type {
   CheckSlugAvailabilityResult,
+  CompleteOnboardingData,
   CompleteOnboardingInput,
   CompleteOnboardingResult,
 } from "../../lib/types"
@@ -74,8 +76,32 @@ export const OnboardingFormView = ({
   onSubmit,
 }: OnboardingFormViewProps): React.JSX.Element => {
   const [step, setStep] = useState<Step>(1)
-  const [serverError, setServerError] = useState<string | undefined>()
   const [slugStatus, setSlugStatus] = useState<SlugStatus>({ kind: "idle" })
+
+  const { clearServerError, serverError, submit } = useActionForm<
+    CompleteOnboardingData,
+    CompleteOnboardingResult
+  >({
+    onError: ({ code, suggestion }) => {
+      if (
+        code === "SLUG_TAKEN" ||
+        code === "SLUG_RESERVED" ||
+        code === "SLUG_INVALID"
+      ) {
+        setSlugStatus({
+          kind: "unavailable",
+          reason: code === "SLUG_RESERVED" ? "reserved" : "taken",
+          suggestion,
+        })
+        setStep(1)
+        return true
+      }
+      return false
+    },
+    onSuccess: ({ userSlug }) => {
+      onNavigate(`/${userSlug}`)
+    },
+  })
 
   const form = useForm({
     defaultValues: {
@@ -87,35 +113,15 @@ export const OnboardingFormView = ({
     },
     validators: { onChange: onboardingSchema },
     onSubmit: async ({ value }) => {
-      setServerError(undefined)
-      const result = await onSubmit({
-        expiresAt: value.expiresAt,
-        issuedAt: value.issuedAt,
-        licenseNumber: value.licenseNumber,
-        licenseOption: value.licenseOption as LicenseOptionValue,
-        slug: value.slug,
-      })
-      match(result)
-        .with({ status: "success" }, ({ data }) => {
-          onNavigate(`/${data.userSlug}`)
+      await submit(() =>
+        onSubmit({
+          expiresAt: value.expiresAt,
+          issuedAt: value.issuedAt,
+          licenseNumber: value.licenseNumber,
+          licenseOption: value.licenseOption as LicenseOptionValue,
+          slug: value.slug,
         })
-        .with({ status: "error" }, ({ code, message, suggestion }) => {
-          if (
-            code === "SLUG_TAKEN" ||
-            code === "SLUG_RESERVED" ||
-            code === "SLUG_INVALID"
-          ) {
-            setSlugStatus({
-              kind: "unavailable",
-              reason: code === "SLUG_RESERVED" ? "reserved" : "taken",
-              suggestion,
-            })
-            setStep(1)
-            return
-          }
-          setServerError(message)
-        })
-        .exhaustive()
+      )
     },
   })
 
@@ -181,7 +187,7 @@ export const OnboardingFormView = ({
     if (!canAdvance) {
       return
     }
-    setServerError(undefined)
+    clearServerError()
     setStep((current) =>
       match<Step, Step>(current)
         .with(1, () => 2)
@@ -192,7 +198,7 @@ export const OnboardingFormView = ({
   }
 
   const goBack = (): void => {
-    setServerError(undefined)
+    clearServerError()
     setStep((current) =>
       match<Step, Step>(current)
         .with(1, () => 1)
@@ -396,15 +402,7 @@ export const OnboardingFormView = ({
           </>
         )}
 
-        {serverError && (
-          <p
-            aria-live="polite"
-            className="font-sans text-body-sm text-destructive"
-            role="alert"
-          >
-            {serverError}
-          </p>
-        )}
+        <FormError message={serverError} />
 
         <div className="flex items-center gap-3">
           {step > 1 && (

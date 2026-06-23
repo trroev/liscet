@@ -6,10 +6,15 @@ import { Input } from "@repo/ui/components/Input"
 import { Select } from "@repo/ui/components/Select"
 import { useForm } from "@tanstack/react-form"
 import { useState } from "react"
-import { match } from "ts-pattern"
+import { DASHBOARD_QUERY_KEY } from "~/lib/query-keys"
+import { FormError, useActionForm } from "~/lib/use-action-form"
 import { COURSE_FORMATS, type CourseFormatValue } from "../../lib/course-format"
 import { logCourseSchema } from "../../lib/schema"
-import type { LogCourseInput, LogCourseResult } from "../../lib/types"
+import type {
+  LogCourseData,
+  LogCourseInput,
+  LogCourseResult,
+} from "../../lib/types"
 import { TagInput } from "../TagInput"
 
 const CERTIFICATE_ACCEPT = "application/pdf,image/jpeg,image/png,image/webp"
@@ -28,8 +33,11 @@ export const LogCourseFormView = ({
   onSubmit,
   onSuccess,
 }: LogCourseFormViewProps): React.JSX.Element => {
-  const [serverError, setServerError] = useState<string | undefined>()
   const [certificate, setCertificate] = useState<File | null>(null)
+  const { serverError, submit } = useActionForm<LogCourseData>({
+    onSuccess,
+    queryKeys: [DASHBOARD_QUERY_KEY],
+  })
 
   const form = useForm({
     defaultValues: {
@@ -42,20 +50,11 @@ export const LogCourseFormView = ({
     },
     validators: { onChange: logCourseSchema },
     onSubmit: async ({ value }) => {
-      setServerError(undefined)
       const parsed = logCourseSchema.safeParse(value)
       if (!parsed.success) {
         return
       }
-      const result = await onSubmit({ ...parsed.data, certificate })
-      match(result)
-        .with({ status: "success" }, () => {
-          onSuccess()
-        })
-        .with({ status: "error" }, ({ message }) => {
-          setServerError(message)
-        })
-        .exhaustive()
+      await submit(() => onSubmit({ ...parsed.data, certificate }))
     },
   })
 
@@ -186,15 +185,7 @@ export const LogCourseFormView = ({
         />
       </Field>
 
-      {serverError && (
-        <p
-          aria-live="polite"
-          className="font-sans text-body-sm text-destructive"
-          role="alert"
-        >
-          {serverError}
-        </p>
-      )}
+      <FormError message={serverError} />
 
       <form.Subscribe
         selector={(state) => ({

@@ -5,10 +5,12 @@ import { Dialog } from "@repo/ui/components/Dialog"
 import { Field } from "@repo/ui/components/Field"
 import { Input } from "@repo/ui/components/Input"
 import { useForm } from "@tanstack/react-form"
-import { useState } from "react"
-import { match } from "ts-pattern"
 import { z } from "zod"
-import { deleteAccount } from "../../actions/delete-account"
+import { FormError, useActionForm } from "~/lib/use-action-form"
+import {
+  type DeleteAccountData,
+  deleteAccount,
+} from "../../actions/delete-account"
 
 const deleteAccountSchema = z.object({
   password: z.string().min(1, "Password is required."),
@@ -19,22 +21,17 @@ export type DeleteAccountFormProps = {
 }
 
 export const DeleteAccountForm = ({ onDeleted }: DeleteAccountFormProps) => {
-  const [serverError, setServerError] = useState<string | undefined>()
+  const { serverError, submit } = useActionForm<DeleteAccountData>({
+    onSuccess: () => {
+      onDeleted()
+    },
+  })
 
   const form = useForm({
     defaultValues: { password: "" },
     validators: { onChange: deleteAccountSchema },
     onSubmit: async ({ value }) => {
-      setServerError(undefined)
-      const result = await deleteAccount({ password: value.password })
-      match(result)
-        .with({ status: "error" }, ({ message }) => {
-          setServerError(message)
-        })
-        .with({ status: "success" }, () => {
-          onDeleted()
-        })
-        .exhaustive()
+      await submit(() => deleteAccount({ password: value.password }))
     },
   })
 
@@ -71,15 +68,7 @@ export const DeleteAccountForm = ({ onDeleted }: DeleteAccountFormProps) => {
           </Field>
         )}
       </form.Field>
-      {serverError && (
-        <p
-          aria-live="polite"
-          className="font-sans text-body-sm text-destructive"
-          role="alert"
-        >
-          {serverError}
-        </p>
-      )}
+      <FormError message={serverError} />
       <div className="flex justify-end gap-2">
         <Dialog.Close render={<Button variant="ghost">Cancel</Button>} />
         <form.Subscribe

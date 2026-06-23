@@ -6,11 +6,9 @@ import { Field } from "@repo/ui/components/Field"
 import { Input } from "@repo/ui/components/Input"
 import { Select } from "@repo/ui/components/Select"
 import { useForm } from "@tanstack/react-form"
-import { useQueryClient } from "@tanstack/react-query"
-import { useState } from "react"
-import { match } from "ts-pattern"
 import { z } from "zod"
 import { DASHBOARD_QUERY_KEY, LICENSES_QUERY_KEY } from "~/lib/query-keys"
+import { FormError, useActionForm } from "~/lib/use-action-form"
 import { updateLicense } from "../../actions/update-license"
 import { toDateInputValue } from "../../lib/format"
 import {
@@ -38,8 +36,12 @@ export const EditLicenseForm = ({
   license,
   onSaved,
 }: EditLicenseFormProps): React.JSX.Element => {
-  const queryClient = useQueryClient()
-  const [serverError, setServerError] = useState<string | undefined>()
+  const { serverError, submit } = useActionForm<LicenseView>({
+    onSuccess: () => {
+      onSaved()
+    },
+    queryKeys: [LICENSES_QUERY_KEY, DASHBOARD_QUERY_KEY],
+  })
 
   const form = useForm({
     defaultValues: {
@@ -48,24 +50,13 @@ export const EditLicenseForm = ({
     },
     validators: { onChange: editLicenseSchema },
     onSubmit: async ({ value }) => {
-      setServerError(undefined)
-      const result = await updateLicense({
-        expiresAt: value.expiresAt,
-        licenseId: license.id,
-        renewalCycleMonths: Number(value.renewalCycleMonths),
-      })
-      await match(result)
-        .with({ status: "error" }, ({ message }) => {
-          setServerError(message)
+      await submit(() =>
+        updateLicense({
+          expiresAt: value.expiresAt,
+          licenseId: license.id,
+          renewalCycleMonths: Number(value.renewalCycleMonths),
         })
-        .with({ status: "success" }, async () => {
-          await Promise.all([
-            queryClient.invalidateQueries({ queryKey: LICENSES_QUERY_KEY }),
-            queryClient.invalidateQueries({ queryKey: DASHBOARD_QUERY_KEY }),
-          ])
-          onSaved()
-        })
-        .exhaustive()
+      )
     },
   })
 
@@ -125,15 +116,7 @@ export const EditLicenseForm = ({
         )}
       </form.Field>
 
-      {serverError && (
-        <p
-          aria-live="polite"
-          className="font-sans text-body-sm text-destructive"
-          role="alert"
-        >
-          {serverError}
-        </p>
-      )}
+      <FormError message={serverError} />
 
       <div className="flex justify-end gap-2">
         <Dialog.Close render={<Button variant="ghost">Cancel</Button>} />

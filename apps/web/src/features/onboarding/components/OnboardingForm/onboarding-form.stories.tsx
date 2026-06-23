@@ -1,9 +1,14 @@
 import { preview } from "@repo/storybook-config/preview"
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import type {
   CheckSlugAvailabilityResult,
   CompleteOnboardingResult,
 } from "../../lib/types"
 import { OnboardingFormView } from "./onboarding-form.view"
+
+const queryClient = new QueryClient({
+  defaultOptions: { queries: { retry: false } },
+})
 
 const submitNoOp = (): Promise<CompleteOnboardingResult> =>
   Promise.resolve({
@@ -39,6 +44,13 @@ const meta = preview.meta({
     onSubmit: submitNoOp,
   },
   component: OnboardingFormView,
+  decorators: [
+    (Story) => (
+      <QueryClientProvider client={queryClient}>
+        <Story />
+      </QueryClientProvider>
+    ),
+  ],
   parameters: { layout: "fullscreen" },
   title: "Features/Onboarding/OnboardingForm",
 })

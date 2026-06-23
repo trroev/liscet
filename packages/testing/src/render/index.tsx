@@ -1,5 +1,6 @@
 import type { User } from "@repo/auth"
 import { SessionProvider } from "@repo/auth/session"
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import {
   type RenderOptions,
   type RenderResult,
@@ -25,9 +26,14 @@ const buildWrapper = (
   initialUser: User | null,
   Outer?: ComponentType<{ children: ReactNode }>
 ): ComponentType<{ children: ReactNode }> => {
+  const queryClient = new QueryClient({
+    defaultOptions: { queries: { retry: false } },
+  })
   const Wrapper = ({ children }: { children: ReactNode }) => {
     const inner = (
-      <SessionProvider initialUser={initialUser}>{children}</SessionProvider>
+      <QueryClientProvider client={queryClient}>
+        <SessionProvider initialUser={initialUser}>{children}</SessionProvider>
+      </QueryClientProvider>
     )
     return Outer ? <Outer>{inner}</Outer> : inner
   }

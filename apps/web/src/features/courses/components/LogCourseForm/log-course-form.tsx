@@ -1,8 +1,6 @@
 "use client"
 
-import { useQueryClient } from "@tanstack/react-query"
 import { useRouter } from "next/navigation"
-import { DASHBOARD_QUERY_KEY } from "~/lib/query-keys"
 import { logCourse } from "../../actions/log-course"
 import type { LogCourseInput, LogCourseResult } from "../../lib/types"
 import { LogCourseFormView } from "./log-course-form.view"
@@ -35,12 +33,10 @@ export const LogCourseForm = ({
   onSubmit = submitViaFormData,
 }: LogCourseFormProps): React.JSX.Element => {
   const router = useRouter()
-  const queryClient = useQueryClient()
   return (
     <LogCourseFormView
       onSubmit={onSubmit}
       onSuccess={() => {
-        queryClient.invalidateQueries({ queryKey: DASHBOARD_QUERY_KEY })
         router.push(`/${userSlug}`)
       }}
     />
