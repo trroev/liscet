@@ -12,6 +12,15 @@ env:
   # Workflow-level env flows into composite actions (the secrets context does not).
   TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
   TURBO_TEAM: ${{ vars.TURBO_TEAM }}
+  # `--affected` base/head — turbo reads these automatically (same flow as TURBO_TOKEN).
+  # Defined once here so the typecheck/test/coverage jobs share one consistent base
+  # and there is no per-action drift. On a PR, diff HEAD against the PR base; on a push
+  # to main, diff against the previous commit. workflow_dispatch leaves BASE empty, so
+  # turbo safely falls back to "all packages affected". Jobs that don't use --affected
+  # (generate-types, lint, e2e) ignore these. Requires fetch-depth: 0 so the base SHA
+  # is present for `git merge-base`.
+  TURBO_SCM_BASE: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.event.before }}
+  TURBO_SCM_HEAD: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
 
 permissions:
   contents: read
@@ -41,7 +50,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
         with:
-          fetch-depth: 2
+          fetch-depth: 0
       - name: Typecheck
         if: env.ACT != 'true'
         uses: ./tooling/github/ci/typecheck
@@ -52,7 +61,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
         with:
-          fetch-depth: 2
+          fetch-depth: 0
       - name: Test
         if: env.ACT != 'true'
         uses: ./tooling/github/ci/test
@@ -63,7 +72,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
         with:
-          fetch-depth: 2
+          fetch-depth: 0
       - name: Coverage
         if: env.ACT != 'true'
         uses: ./tooling/github/ci/coverage
