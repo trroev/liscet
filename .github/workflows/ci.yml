@@ -6,12 +6,27 @@ on:
     branches: [main]
   pull_request:
 
+# Cancel superseded in-flight runs on the same PR/branch, but never cancel a
+# push-to-main run (a follow-up push must not abort the post-merge run).
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
 env:
   ACT: "${{ false }}"
   # Vercel Remote Cache — turbo reads these from the environment automatically.
   # Workflow-level env flows into composite actions (the secrets context does not).
   TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
   TURBO_TEAM: ${{ vars.TURBO_TEAM }}
+  # `--affected` base/head — turbo reads these automatically (same flow as TURBO_TOKEN).
+  # Defined once here so the typecheck/test/coverage jobs share one consistent base
+  # and there is no per-action drift. On a PR, diff HEAD against the PR base; on a push
+  # to main, diff against the previous commit. workflow_dispatch leaves BASE empty, so
+  # turbo safely falls back to "all packages affected". Jobs that don't use --affected
+  # (generate-types, lint, e2e) ignore these. Requires fetch-depth: 0 so the base SHA
+  # is present for `git merge-base`.
+  TURBO_SCM_BASE: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.event.before }}
+  TURBO_SCM_HEAD: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
 
 permissions:
   contents: read
@@ -20,8 +35,9 @@ jobs:
   generate-types:
     runs-on: ubuntu-latest
     name: Generate Types
+    timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
       - name: Generate Types
         if: env.ACT != 'true'
         uses: ./tooling/github/ci/generate-types
@@ -29,8 +45,9 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     name: Lint
+    timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
       - name: Lint
         if: env.ACT != 'true'
         uses: ./tooling/github/ci/lint
@@ -38,10 +55,11 @@ jobs:
   typecheck:
     runs-on: ubuntu-latest
     name: Typecheck
+    timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
-          fetch-depth: 2
+          fetch-depth: 0
       - name: Typecheck
         if: env.ACT != 'true'
         uses: ./tooling/github/ci/typecheck
@@ -49,10 +67,11 @@ jobs:
   test:
     runs-on: ubuntu-latest
     name: Test
+    timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
-          fetch-depth: 2
+          fetch-depth: 0
       - name: Test
         if: env.ACT != 'true'
         uses: ./tooling/github/ci/test
@@ -60,10 +79,11 @@ jobs:
   coverage:
     runs-on: ubuntu-latest
     name: Coverage
+    timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
-          fetch-depth: 2
+          fetch-depth: 0
       - name: Coverage
         if: env.ACT != 'true'
         uses: ./tooling/github/ci/coverage
@@ -71,6 +91,7 @@ jobs:
   e2e:
     runs-on: ubuntu-latest
     name: E2E
+    timeout-minutes: 20
     services:
       postgres:
         image: postgres:16
@@ -90,12 +111,9 @@ jobs:
       BETTER_AUTH_URL: http://localhost:3000
       BASE_URL: http://localhost:3000
       PAYLOAD_SECRET: e2e-payload-secret-min-32-characters-long
-      CLOUDINARY_CLOUD_NAME: e2e-cloud
-      CLOUDINARY_API_KEY: e2e-key
-      CLOUDINARY_API_SECRET: e2e-secret
       DATABASE_URL: postgres://postgres:postgres@localhost:5432/e2e
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
       - name: Strip committed DATABASE_URL
         if: env.ACT != 'true'
         shell: bash

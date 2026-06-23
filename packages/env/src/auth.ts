@@ -1,16 +1,14 @@
 import { createEnv } from "@t3-oss/env-nextjs"
 import { z } from "zod"
-import { baseEnvOptions } from "./shared"
+import { baseEnvOptions, resolveBaseUrl } from "./shared"
+
+resolveBaseUrl()
 
 const env = createEnv({
   ...baseEnvOptions,
   experimental__runtimeEnv: {
     BETTER_AUTH_SECRET: process.env.BETTER_AUTH_SECRET,
-    BETTER_AUTH_URL:
-      process.env.BETTER_AUTH_URL ??
-      (process.env.VERCEL_URL
-        ? `https://${process.env.VERCEL_URL}`
-        : undefined),
+    BETTER_AUTH_URL: process.env.BETTER_AUTH_URL ?? process.env.BASE_URL,
   },
   server: {
     BETTER_AUTH_SECRET: z.string(),
