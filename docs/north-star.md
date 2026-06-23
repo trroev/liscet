@@ -30,7 +30,7 @@ CEU tracker for mental health professionals. Helps licensees track continuing ed
 ## Compliance posture
 
 - **HIPAA: not applicable.** No PHI. Liscet tracks practitioner PII (name, email, license info, certificates). To keep it that way: no free-form note fields, no client-identifying data accepted anywhere.
-- **CCPA + GDPR: comply globally** regardless of user location. Privacy policy generated via Termly or iubenda. Subprocessor list maintained at `/legal/subprocessors`.
+- **CCPA + GDPR: comply globally** regardless of user location. For launch, formal ToS/Privacy infrastructure is dropped in favor of a single disclaimer at `/legal/disclaimer`; revisit a full privacy policy + subprocessor list if scale warrants it.
 - **Minimal PII surface.** Collect only what the product requires. No DOB, no phone, no address.
 
 ---
@@ -95,7 +95,7 @@ app/
                               /{userSlug}/licenses        license management
                               /{userSlug}/settings/...    two-pane settings shell (Account, …)
   admin/                    Payload admin, separate auth, /admin/login
-  legal/                    /legal/terms, /legal/privacy, /legal/subprocessors
+  legal/                    /legal/disclaimer
 ```
 
 There is **no `/app` URL segment.** `(app)` is a parenthesized route group for the authed layout and does not appear in the URL. Mirroring Linear (`linear.app/{workspace}/...`), the practitioner's onboarding-chosen slug is the first segment of every authenticated path. The slug is reserved-word- and uniqueness-checked at creation; account/profile management lives in the settings shell at `/{userSlug}/settings/account` (there is no standalone `/profile` route).
@@ -275,11 +275,10 @@ Adopt as we go: **Vitest** for unit (rules engine first — that's where bugs co
 
 ## Legal
 
-- **ToS + Privacy + Cookie policy** via Termly or iubenda. Lawyer review pre-launch if budget allows.
-- **"Not a substitute for state board verification" disclaimer** surfaced in: ToS, onboarding, footer of renewal emails.
+- **Single disclaimer** at `/legal/disclaimer` (no formal ToS/Privacy/Cookie policy for launch). Revisit Termly/iubenda + lawyer review only if scale warrants it.
+- **"Not a substitute for state board verification" disclaimer** surfaced in: the disclaimer page, onboarding, footer of renewal emails.
 - **Self-serve account deletion.** Settings → confirm with password → soft-delete 30 days → hard-delete via cron, cascading to all related rows + Vercel Blob certificates.
 - **Self-serve data export.** Single button generates JSON dump, emailed as signed download link.
-- **Subprocessors list** maintained at `/legal/subprocessors` with last-updated date.
 
 ---
 

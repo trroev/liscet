@@ -16,9 +16,7 @@ type SitemapRoute = {
 // (/about, /pricing, /contact, and any future ones) are enumerated below.
 const STATIC_ROUTES = [
   { path: "/", changeFrequency: "monthly", priority: 1.0 },
-  { path: "/legal/terms", changeFrequency: "yearly", priority: 0.3 },
-  { path: "/legal/privacy", changeFrequency: "yearly", priority: 0.3 },
-  { path: "/legal/subprocessors", changeFrequency: "yearly", priority: 0.3 },
+  { path: "/legal/disclaimer", changeFrequency: "yearly", priority: 0.3 },
 ] as const satisfies ReadonlyArray<SitemapRoute>
 
 const toUrl = (path: string): string =>
