@@ -6,9 +6,7 @@ export type SiteFooterProps = {
 }
 
 const LEGAL_LINKS = [
-  { href: "/legal/terms", label: "Terms" },
-  { href: "/legal/privacy", label: "Privacy" },
-  { href: "/legal/subprocessors", label: "Subprocessors" },
+  { href: "/legal/disclaimer", label: "Disclaimer" },
 ] as const
 
 export const SiteFooter = ({ className }: SiteFooterProps) => (

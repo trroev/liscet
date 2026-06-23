@@ -436,19 +436,12 @@ export const OnboardingFormView = ({
 
         <p className="font-sans text-body-sm text-text-muted">
           Liscet helps you track CEUs. You are responsible for verifying
-          compliance with your state board. By continuing, you agree to our{" "}
+          compliance with your state board. See our{" "}
           <Link
             className="underline hover:text-text-primary"
-            href="/legal/terms"
+            href="/legal/disclaimer"
           >
-            Terms
-          </Link>{" "}
-          and{" "}
-          <Link
-            className="underline hover:text-text-primary"
-            href="/legal/privacy"
-          >
-            Privacy Policy
+            disclaimer
           </Link>
           .
         </p>
