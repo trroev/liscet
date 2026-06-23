@@ -32,6 +32,21 @@ chore(deps): install ts-pattern in packages/utils
 
 A Husky pre-commit hook runs `biome check --write` on staged `.ts`/`.tsx`/`.json` files via lint-staged, followed by `turbo run typecheck --affected`. **Never bypass the hook with `git commit --no-verify`** — fix the underlying lint or type error instead.
 
+### Branch protection (trunk-based, as-code)
+
+The repo uses **trunk-based development**: `main` is the single long-lived branch, feature branches are short-lived and PR straight into `main` (squash-merged for a linear history), and releases are cut as tags. There is no long-lived `dev` branch.
+
+Protection is **managed as code**, not click-ops — committed JSON under `.github/rulesets/`, applied idempotently by `pnpm rulesets:apply` (`scripts/apply-rulesets.mjs`, which reconciles by ruleset `name` via `gh api`). A UI-configured ruleset would be invisible in a fork and lost on re-clone; the JSON is reviewable, versioned, and reproducible. Re-run `pnpm rulesets:apply` after editing any ruleset; `--dry-run` prints the planned create/update actions without writing.
+
+Because GitHub ruleset **bypass is all-or-nothing per ruleset**, "an admin may merge solo but may never skip CI or signing" requires **two rulesets on `main`**:
+
+- **`main: merge protection`** — *no bypass actors* (binds admins too): the six CI checks (`Generate Types`, `Lint`, `Typecheck`, `Test`, `Coverage`, `E2E`) must pass and be up-to-date, plus required signed commits, required linear history, and blocked force-push + deletion.
+- **`main: review`** — *bypass: repo admin, `pull_request` only*: PR required with 1 approving review, stale approvals dismissed on push, all conversations resolved. The admin bypass keeps the single-maintainer flow unblocked (GitHub forbids self-approval) **without** weakening the non-bypassable CI/signing guarantee above.
+
+A third ruleset, **`tags: protection`** (`refs/tags/**`, no bypass), blocks tag deletion and non-fast-forward updates so cut releases are immutable.
+
+The script also pins repo merge settings to **squash-only** (`allow_merge_commit: false`, `allow_rebase_merge: false`) so the merge button can never produce a merge commit the linear-history rule would reject. The required-check names must exactly match the job `name:` values in `.github/workflows/ci.yml` — if a job is renamed, update the ruleset JSON in the same change. Requiring signed commits means contributors must register an SSH/GPG **signing** key on GitHub and enable local signing (`commit.gpgsign`).
+
 ### TypeScript
 Full conventions are loaded via the `typescript-conventions` skill (`~/.claude/skills/typescript-conventions/`). Key rules enforced by Biome:
 
