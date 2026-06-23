@@ -4,7 +4,7 @@ import { scopeSentry } from "@repo/observability"
 import type { User } from "@repo/payload/payload-types"
 import { getPayload, type Payload } from "payload"
 import type { z } from "zod"
-import { getCurrentViewer } from "~/lib/queries/current-viewer"
+import { viewer } from "~/lib/queries/current-viewer"
 import { withErrorPolicy } from "~/lib/server-action"
 import config from "~/payload.config"
 
@@ -67,11 +67,11 @@ export function authedAction(
 
   return (input: unknown): Promise<unknown> =>
     withErrorPolicy(async () => {
-      const viewer = await getCurrentViewer()
-      if (viewer?.kind !== "user") {
+      const current = await viewer()
+      if (!current?.user) {
         return UNAUTHENTICATED
       }
-      scopeSentry({ practitionerId: viewer.user.id })
+      scopeSentry({ practitionerId: current.user.id })
 
       let resolvedInput = input
       if (schema) {
@@ -83,6 +83,6 @@ export function authedAction(
       }
 
       const payload = await getPayload({ config })
-      return handler({ input: resolvedInput, payload, user: viewer.user })
+      return handler({ input: resolvedInput, payload, user: current.user })
     })
 }

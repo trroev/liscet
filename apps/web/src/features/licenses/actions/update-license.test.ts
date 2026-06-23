@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import type { UpdateLicenseInput } from "./update-license"
 
-const getCurrentViewer = vi.fn()
+const viewer = vi.fn()
 const findByID = vi.fn()
 const update = vi.fn()
 
@@ -13,11 +13,11 @@ vi.mock("payload", () => ({
 
 vi.mock("~/payload.config", () => ({ default: {} }))
 
-vi.mock("~/lib/queries/current-viewer", () => ({ getCurrentViewer }))
+vi.mock("~/lib/queries/current-viewer", () => ({ viewer }))
 
 const stubViewer = (userId = "user-1"): void => {
-  getCurrentViewer.mockResolvedValueOnce({
-    kind: "user",
+  viewer.mockResolvedValueOnce({
+    session: { id: userId },
     user: { id: userId },
   })
 }
@@ -31,13 +31,13 @@ const validInput: UpdateLicenseInput = {
 describe("updateLicense", () => {
   beforeEach(() => {
     vi.resetModules()
-    getCurrentViewer.mockReset()
+    viewer.mockReset()
     findByID.mockReset()
     update.mockReset()
   })
 
   it("rejects unauthenticated requests", async () => {
-    getCurrentViewer.mockResolvedValueOnce(null)
+    viewer.mockResolvedValueOnce(null)
     const { updateLicense } = await import("./update-license")
     const result = await updateLicense(validInput)
     expect(result.status).toBe("error")

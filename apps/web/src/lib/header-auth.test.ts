@@ -1,27 +1,23 @@
 import { beforeEach, describe, expect, it, vi } from "vitest"
 
-const getSession = vi.fn()
-const getPayloadUserByBetterAuthId = vi.fn()
+const viewer = vi.fn()
 const warn = vi.fn()
 const withMetadata = vi.fn(() => ({ warn }))
 
 vi.mock("server-only", () => ({}))
-vi.mock("next/headers", () => ({ headers: vi.fn(async () => new Headers()) }))
-vi.mock("~/features/auth/auth.server", () => ({
-  auth: { api: { getSession } },
-}))
 vi.mock("~/features/auth/actions/sign-out", () => ({ signOutAction: vi.fn() }))
-vi.mock("~/lib/queries/payload-user-by-better-auth-id", () => ({
-  getPayloadUserByBetterAuthId,
-}))
+vi.mock("~/lib/queries/current-viewer", () => ({ viewer }))
 vi.mock("@repo/logger", () => ({
   createLogger: () => ({ withMetadata }),
 }))
 
 const { resolveHeaderAuth } = await import("./header-auth")
 
-const stubSession = (user: { id: string; name?: string; email: string }) => {
-  getSession.mockResolvedValueOnce({ user })
+const stubViewer = (
+  session: { id: string; name?: string; email: string },
+  user: { avatar?: unknown } | null
+): void => {
+  viewer.mockResolvedValueOnce({ session, user })
 }
 
 beforeEach(() => {
@@ -29,20 +25,19 @@ beforeEach(() => {
 })
 
 describe("resolveHeaderAuth", () => {
-  it("returns anonymous when no session exists", async () => {
-    getSession.mockResolvedValueOnce(null)
+  it("returns anonymous when no viewer exists", async () => {
+    viewer.mockResolvedValueOnce(null)
 
     const result = await resolveHeaderAuth()
 
     expect(result).toEqual({ status: "anonymous" })
-    expect(getPayloadUserByBetterAuthId).not.toHaveBeenCalled()
   })
 
   it("returns signed-in using the session name and the Payload user's avatar", async () => {
-    stubSession({ email: "ada@example.com", id: "ba-1", name: "Ada Lovelace" })
-    getPayloadUserByBetterAuthId.mockResolvedValueOnce({
-      avatar: { url: "https://cdn.example.com/ada.png" },
-    })
+    stubViewer(
+      { email: "ada@example.com", id: "ba-1", name: "Ada Lovelace" },
+      { avatar: { url: "https://cdn.example.com/ada.png" } }
+    )
 
     const result = await resolveHeaderAuth()
 
@@ -56,12 +51,10 @@ describe("resolveHeaderAuth", () => {
   })
 
   it("stays signed-in with a null avatar and warns when no Payload user resolves", async () => {
-    stubSession({
-      email: "grace@example.com",
-      id: "ba-2",
-      name: "Grace Hopper",
-    })
-    getPayloadUserByBetterAuthId.mockResolvedValueOnce(null)
+    stubViewer(
+      { email: "grace@example.com", id: "ba-2", name: "Grace Hopper" },
+      null
+    )
 
     const result = await resolveHeaderAuth()
 
@@ -76,8 +69,7 @@ describe("resolveHeaderAuth", () => {
   })
 
   it("falls back to the session email for the display name", async () => {
-    stubSession({ email: "linus@example.com", id: "ba-3" })
-    getPayloadUserByBetterAuthId.mockResolvedValueOnce(null)
+    stubViewer({ email: "linus@example.com", id: "ba-3" }, null)
 
     const result = await resolveHeaderAuth()
 

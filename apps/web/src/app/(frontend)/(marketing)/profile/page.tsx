@@ -1,18 +1,11 @@
-import { headers } from "next/headers"
 import { redirect } from "next/navigation"
-import { auth } from "~/features/auth/auth.server"
-import { getPayloadUserByBetterAuthId } from "~/lib/queries/payload-user-by-better-auth-id"
+import { requireViewer } from "~/lib/queries/current-viewer"
 
 export default async function ProfilePage(): Promise<never> {
-  const session = await auth.api.getSession({ headers: await headers() })
-  if (!session) {
-    redirect("/sign-in?callbackUrl=/profile")
-  }
+  const { slug } = await requireViewer({
+    callbackUrl: "/profile",
+    onboarded: true,
+  })
 
-  const payloadUser = await getPayloadUserByBetterAuthId(session.user.id)
-  if (!payloadUser?.slug) {
-    redirect("/onboarding")
-  }
-
-  redirect(`/${payloadUser.slug}/settings/account`)
+  redirect(`/${slug}/settings/account`)
 }

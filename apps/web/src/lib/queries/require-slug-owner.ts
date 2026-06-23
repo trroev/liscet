@@ -1,10 +1,9 @@
 import "server-only"
 
-import type { User } from "@repo/payload/payload-types"
 import { notFound, redirect } from "next/navigation"
 import { getPayload } from "payload"
 import config from "~/payload.config"
-import { requireOnboardedViewer } from "./require-onboarded-viewer"
+import { type OnboardedViewer, requireViewer } from "./current-viewer"
 
 const slugBelongsToAnotherUser = async (slug: string): Promise<boolean> => {
   const payload = await getPayload({ config })
@@ -19,21 +18,21 @@ const slugBelongsToAnotherUser = async (slug: string): Promise<boolean> => {
 
 /**
  * Page-level guard for `/{userSlug}` screens. Requires an onboarded viewer
- * (via `requireOnboardedViewer`), then verifies the route's slug belongs to
- * them: another user's slug redirects to the viewer's own space, and an
- * unknown slug renders not-found.
+ * (via `requireViewer({ onboarded: true })`), then verifies the route's slug
+ * belongs to them: another user's slug redirects to the viewer's own space, and
+ * an unknown slug renders not-found.
  */
 export const requireSlugOwner = async ({
   userSlug,
 }: {
   userSlug: string
-}): Promise<{ user: User; slug: string }> => {
-  const { user, slug } = await requireOnboardedViewer()
-  if (userSlug === slug) {
-    return { slug, user }
+}): Promise<OnboardedViewer> => {
+  const current = await requireViewer({ onboarded: true })
+  if (userSlug === current.slug) {
+    return current
   }
   if (await slugBelongsToAnotherUser(userSlug)) {
-    redirect(`/${slug}`)
+    redirect(`/${current.slug}`)
   }
   notFound()
 }

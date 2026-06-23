@@ -3,12 +3,10 @@ import "server-only"
 import { createLogger } from "@repo/logger"
 import type { User } from "@repo/payload/payload-types"
 import type { HeaderAuth, SignedInAuth } from "@repo/types/HeaderAuth"
-import { headers } from "next/headers"
 import { match, P } from "ts-pattern"
 import { signOutAction } from "~/features/auth/actions/sign-out"
-import { auth } from "~/features/auth/auth.server"
 import { buildInitials } from "~/lib/build-initials"
-import { getPayloadUserByBetterAuthId } from "~/lib/queries/payload-user-by-better-auth-id"
+import { viewer } from "~/lib/queries/current-viewer"
 
 const log = createLogger({ name: "lib.header-auth" })
 
@@ -60,27 +58,21 @@ export const buildSignedInAuth = ({
  * downgrading the chrome to `anonymous` and lying about authentication state.
  */
 export const resolveHeaderAuth = async (): Promise<HeaderAuth> => {
-  const session = await auth.api.getSession({ headers: await headers() })
-  if (!session) {
+  const current = await viewer()
+  if (!current) {
     return { status: "anonymous" }
   }
-  const payloadUser = await getPayloadUserByBetterAuthId(session.user.id)
-  return match(payloadUser)
+  const displayName = current.session.name ?? current.session.email
+  return match(current.user)
     .with(P.nullish, () => {
       log
-        .withMetadata({ betterAuthId: session.user.id })
+        .withMetadata({ betterAuthId: current.session.id })
         .warn(
           "better-auth session has no matching Payload user; rendering signed-in with a degraded avatar"
         )
-      return buildSignedInAuth({
-        displayName: session.user.name ?? session.user.email,
-        avatar: null,
-      })
+      return buildSignedInAuth({ displayName, avatar: null })
     })
     .otherwise((user) =>
-      buildSignedInAuth({
-        displayName: session.user.name ?? session.user.email,
-        avatar: user.avatar,
-      })
+      buildSignedInAuth({ displayName, avatar: user.avatar })
     )
 }

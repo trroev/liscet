@@ -1,13 +1,13 @@
 import { beforeEach, describe, expect, it, vi } from "vitest"
 
-const getCurrentViewer = vi.fn()
+const viewer = vi.fn()
 const scanUploadedFile = vi.fn()
 const uploadCertificateBlob = vi.fn()
 const create = vi.fn()
 
 vi.mock("server-only", () => ({}))
 
-vi.mock("~/lib/queries/current-viewer", () => ({ getCurrentViewer }))
+vi.mock("~/lib/queries/current-viewer", () => ({ viewer }))
 
 vi.mock("@repo/payload/hooks/virusScan", () => ({ scanUploadedFile }))
 
@@ -33,7 +33,7 @@ const makeFile = (
 }
 
 const stubViewer = (id = "user-1"): void => {
-  getCurrentViewer.mockResolvedValueOnce({ kind: "user", user: { id } })
+  viewer.mockResolvedValueOnce({ session: { id }, user: { id } })
 }
 
 const validFormData = (): FormData => {
@@ -50,7 +50,7 @@ const validFormData = (): FormData => {
 
 describe("logCourse", () => {
   beforeEach(() => {
-    getCurrentViewer.mockReset()
+    viewer.mockReset()
     scanUploadedFile.mockReset()
     scanUploadedFile.mockResolvedValue({ clean: true })
     uploadCertificateBlob.mockReset()
@@ -60,7 +60,7 @@ describe("logCourse", () => {
   })
 
   it("rejects unauthenticated requests", async () => {
-    getCurrentViewer.mockResolvedValueOnce(null)
+    viewer.mockResolvedValueOnce(null)
     const result = await logCourse(validFormData())
     expect(result).toEqual({
       code: "UNAUTHENTICATED",

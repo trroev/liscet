@@ -1,7 +1,4 @@
 import type { Metadata } from "next"
-import { headers } from "next/headers"
-import { redirect } from "next/navigation"
-import { auth } from "~/features/auth/auth.server"
 import { SignOutButton } from "~/features/auth/components/SignOutButton"
 import { AccountPane } from "~/features/settings/components/AccountPane"
 import { requireSlugOwner } from "~/lib/queries/require-slug-owner"
@@ -16,12 +13,7 @@ export default async function AccountSettingsPage({
   params: Promise<{ userSlug: string }>
 }) {
   const { userSlug } = await params
-  const { user } = await requireSlugOwner({ userSlug })
-
-  const session = await auth.api.getSession({ headers: await headers() })
-  if (!session) {
-    redirect("/sign-in")
-  }
+  const { session, user } = await requireSlugOwner({ userSlug })
 
   const avatarUrl =
     typeof user.avatar === "object" && user.avatar
@@ -32,8 +24,8 @@ export default async function AccountSettingsPage({
     <AccountPane
       avatarUrl={avatarUrl}
       deletedAt={user.deletedAt ? new Date(user.deletedAt) : null}
-      email={session.user.email}
-      memberSince={new Date(session.user.createdAt)}
+      email={session.email}
+      memberSince={new Date(session.createdAt)}
       signOutSlot={<SignOutButton />}
     />
   )

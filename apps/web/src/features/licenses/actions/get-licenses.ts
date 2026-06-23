@@ -2,7 +2,7 @@
 
 import "server-only"
 
-import { requireOnboardedViewer } from "~/lib/queries/require-onboarded-viewer"
+import { requireViewer } from "~/lib/queries/current-viewer"
 import { getLicensesData } from "../lib/get-licenses-data"
 import type { LicensesData } from "../lib/types"
 
@@ -14,6 +14,6 @@ export type { LicensesData, LicenseView } from "../lib/types"
  * the action is self-securing.
  */
 export const getLicenses = async (): Promise<LicensesData> => {
-  const { user } = await requireOnboardedViewer()
+  const { user } = await requireViewer({ onboarded: true })
   return getLicensesData(user.id)
 }

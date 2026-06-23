@@ -2,7 +2,7 @@
 
 import "server-only"
 
-import { requireOnboardedViewer } from "~/lib/queries/require-onboarded-viewer"
+import { requireViewer } from "~/lib/queries/current-viewer"
 import { getDashboardData } from "../lib/get-dashboard-data"
 import type { DashboardData } from "../lib/types"
 
@@ -14,6 +14,6 @@ export type { DashboardData, LicenseSummaryView } from "../lib/types"
  * invalidation trigger). Re-resolves the viewer so the action is self-securing.
  */
 export const getDashboardSummary = async (): Promise<DashboardData> => {
-  const { user } = await requireOnboardedViewer()
+  const { user } = await requireViewer({ onboarded: true })
   return getDashboardData(user.id, new Date())
 }

@@ -4,6 +4,7 @@ import { createAuth } from "@repo/auth"
 import { captureException } from "@sentry/nextjs"
 import { getPayload } from "payload"
 import { match } from "ts-pattern"
+import { getPayloadUserByBetterAuthId } from "~/lib/queries/payload-user-by-better-auth-id"
 
 // Report sync failures to Sentry without blocking the BetterAuth operation.
 const safe =
@@ -55,14 +56,9 @@ export const auth = createAuth({
         // Keyed by betterAuthId — email is the field that may be changing.
         after: safe(async (user) => {
           const payload = await getPayload({ config })
-          const existing = await payload.find({
-            collection: "users",
-            where: { betterAuthId: { equals: user.id } },
-            limit: 1,
-          })
-          const [existingUser] = existing.docs
+          const existingUser = await getPayloadUserByBetterAuthId(user.id)
           await match(existingUser)
-            .with(undefined, () =>
+            .with(null, () =>
               payload.create({
                 collection: "users",
                 data: {
@@ -84,15 +80,10 @@ export const auth = createAuth({
       delete: {
         after: safe(async (user) => {
           const payload = await getPayload({ config })
-          const existing = await payload.find({
-            collection: "users",
-            where: { betterAuthId: { equals: user.id } },
-            limit: 1,
-          })
-          const [existingUser] = existing.docs
+          const existingUser = await getPayloadUserByBetterAuthId(user.id)
           // The users beforeDelete hook cascades to Licenses + Courses.
           await match(existingUser)
-            .with(undefined, () => Promise.resolve())
+            .with(null, () => Promise.resolve())
             .otherwise((found) =>
               payload.delete({ collection: "users", id: found.id })
             )

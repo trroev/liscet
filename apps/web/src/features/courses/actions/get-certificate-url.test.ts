@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest"
 
-const getCurrentViewer = vi.fn()
+const viewer = vi.fn()
 const certificateFor = vi.fn()
 const practitionerData = vi.fn(() => ({ certificateFor }))
 const presignCertificateUrl = vi.fn()
@@ -13,15 +13,15 @@ vi.mock("payload", () => ({
 
 vi.mock("~/payload.config", () => ({ default: {} }))
 
-vi.mock("~/lib/queries/current-viewer", () => ({ getCurrentViewer }))
+vi.mock("~/lib/queries/current-viewer", () => ({ viewer }))
 
 vi.mock("@repo/payload/queries/practitioner-data", () => ({ practitionerData }))
 
 vi.mock("../lib/certificate-blob", () => ({ presignCertificateUrl }))
 
 const stubViewer = (userId = "user-1"): void => {
-  getCurrentViewer.mockResolvedValueOnce({
-    kind: "user",
+  viewer.mockResolvedValueOnce({
+    session: { id: userId },
     user: { id: userId },
   })
 }
@@ -29,13 +29,13 @@ const stubViewer = (userId = "user-1"): void => {
 describe("getCertificateUrl", () => {
   beforeEach(() => {
     vi.resetModules()
-    getCurrentViewer.mockReset()
+    viewer.mockReset()
     certificateFor.mockReset()
     presignCertificateUrl.mockReset()
   })
 
   it("rejects unauthenticated requests", async () => {
-    getCurrentViewer.mockResolvedValueOnce(null)
+    viewer.mockResolvedValueOnce(null)
     const { getCertificateUrl } = await import("./get-certificate-url")
 
     const result = await getCertificateUrl("course-1")

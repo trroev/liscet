@@ -11,14 +11,14 @@ import {
 import type React from "react"
 import { ThemeToggle } from "~/features/settings/components/ThemeToggle"
 import { buildSignedInAuth } from "~/lib/header-auth"
-import { requireOnboardedViewer } from "~/lib/queries/require-onboarded-viewer"
+import { requireViewer } from "~/lib/queries/current-viewer"
 
 export default async function UserSlugLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
-  const { user, slug } = await requireOnboardedViewer()
+  const { user, slug } = await requireViewer({ onboarded: true })
 
   const auth = buildSignedInAuth({
     displayName: user.displayName ?? user.email,

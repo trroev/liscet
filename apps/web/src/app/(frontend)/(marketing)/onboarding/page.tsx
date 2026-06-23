@@ -1,7 +1,7 @@
 import type { Metadata } from "next"
 import { redirect } from "next/navigation"
 import { OnboardingForm } from "~/features/onboarding/components/OnboardingForm"
-import { getCurrentViewer } from "~/lib/queries/current-viewer"
+import { requireViewer } from "~/lib/queries/current-viewer"
 
 export const metadata: Metadata = {
   title: "Set up your account",
@@ -9,12 +9,9 @@ export const metadata: Metadata = {
 }
 
 export default async function OnboardingPage() {
-  const viewer = await getCurrentViewer()
-  if (viewer?.kind !== "user") {
-    redirect("/sign-in?callbackUrl=/onboarding")
+  const { user } = await requireViewer({ callbackUrl: "/onboarding" })
+  if (user.slug) {
+    redirect(`/${user.slug}`)
   }
-  if (viewer.user.slug) {
-    redirect(`/${viewer.user.slug}`)
-  }
-  return <OnboardingForm initialSlug={viewer.user.displayName ?? ""} />
+  return <OnboardingForm initialSlug={user.displayName ?? ""} />
 }

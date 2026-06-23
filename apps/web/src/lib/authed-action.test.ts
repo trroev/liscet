@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { z } from "zod"
 
-const getCurrentViewer = vi.fn()
+const viewer = vi.fn()
 const getPayload = vi.fn()
 const captureException = vi.fn()
 const scopeSentry = vi.fn()
@@ -9,7 +9,7 @@ const scopeSentry = vi.fn()
 vi.mock("server-only", () => ({}))
 vi.mock("~/payload.config", () => ({ default: {} }))
 vi.mock("payload", () => ({ getPayload }))
-vi.mock("~/lib/queries/current-viewer", () => ({ getCurrentViewer }))
+vi.mock("~/lib/queries/current-viewer", () => ({ viewer }))
 vi.mock("@sentry/nextjs", () => ({ captureException }))
 vi.mock("@repo/observability", () => ({ scopeSentry }))
 vi.mock("next/navigation", () => ({ unstable_rethrow: vi.fn() }))
@@ -24,7 +24,7 @@ beforeEach(() => {
 })
 
 const stubUser = (id = "user-1"): void => {
-  getCurrentViewer.mockResolvedValueOnce({ kind: "user", user: { id } })
+  viewer.mockResolvedValueOnce({ session: { id }, user: { id } })
 }
 
 describe("authedAction", () => {
@@ -45,7 +45,7 @@ describe("authedAction", () => {
   })
 
   it("returns UNAUTHENTICATED without invoking the handler when no user", async () => {
-    getCurrentViewer.mockResolvedValueOnce(null)
+    viewer.mockResolvedValueOnce(null)
     const handler = vi.fn()
     const action = authedAction(handler)
 
@@ -61,8 +61,8 @@ describe("authedAction", () => {
     expect(scopeSentry).not.toHaveBeenCalled()
   })
 
-  it("treats an admin viewer as unauthenticated for product actions", async () => {
-    getCurrentViewer.mockResolvedValueOnce({ kind: "admin", admin: {} })
+  it("treats a session without a Payload user as unauthenticated for product actions", async () => {
+    viewer.mockResolvedValueOnce({ session: { id: "ba-1" }, user: null })
     const handler = vi.fn()
     const action = authedAction(handler)
 

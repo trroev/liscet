@@ -1,16 +1,14 @@
 import { SessionProvider } from "@repo/auth/session"
 import { env } from "@repo/env/app"
 import type { Metadata, Viewport } from "next"
-import { headers } from "next/headers"
 import { ThemeProvider } from "next-themes"
 import type React from "react"
 import { FeedbackButton } from "~/components/FeedbackButton"
 import { PostHogProvider } from "~/components/PostHogProvider"
 import { QueryProvider } from "~/components/QueryProvider"
 import { SentryUser } from "~/components/SentryUser"
-import { auth } from "~/features/auth/auth.server"
 import { geist, geistMono } from "~/fonts"
-import { getPayloadUserByBetterAuthId } from "~/lib/queries/payload-user-by-better-auth-id"
+import { viewer } from "~/lib/queries/current-viewer"
 
 import "../globals.css"
 
@@ -38,10 +36,7 @@ export default async function FrontendLayout({
 }: {
   children: React.ReactNode
 }) {
-  const session = await auth.api.getSession({ headers: await headers() })
-  const practitioner = session?.user
-    ? await getPayloadUserByBetterAuthId(session.user.id)
-    : null
+  const current = await viewer()
 
   return (
     <html
@@ -57,10 +52,10 @@ export default async function FrontendLayout({
           disableTransitionOnChange
           enableSystem
         >
-          <SessionProvider initialUser={session?.user ?? null}>
+          <SessionProvider initialUser={current?.session ?? null}>
             <QueryProvider>
-              <SentryUser practitionerId={practitioner?.id ?? null} />
-              {session ? (
+              <SentryUser practitionerId={current?.user?.id ?? null} />
+              {current ? (
                 <PostHogProvider>
                   {children}
                   <FeedbackButton />
