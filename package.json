@@ -23,6 +23,7 @@
     "lint:fix": "pnpm exec ultracite fix",
     "migrate": "cd apps/web && dotenvx run --convention=nextjs -- node ../../scripts/migrate-deploy.mjs",
     "preinstall": "only-allow pnpm",
+    "rulesets:apply": "node scripts/apply-rulesets.mjs",
     "test": "turbo run test",
     "typecheck": "turbo run typecheck",
     "prepare": "husky"

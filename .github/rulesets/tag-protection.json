@@ -1,0 +1,13 @@
+{
+  "name": "tags: protection",
+  "target": "tag",
+  "enforcement": "active",
+  "bypass_actors": [],
+  "conditions": {
+    "ref_name": {
+      "include": ["refs/tags/**"],
+      "exclude": []
+    }
+  },
+  "rules": [{ "type": "non_fast_forward" }, { "type": "deletion" }]
+}
