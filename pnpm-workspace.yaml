@@ -42,6 +42,7 @@ catalog:
   react-dom: ^19.2.0
   schema-dts: ^2.0.0
   slugify: ^1.6.9
+  sonner: ^2.0.7
   storybook: ^10.3.6
   tailwindcss: ^4.2.4
   ts-pattern: ^5.9.0
