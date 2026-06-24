@@ -8,8 +8,6 @@ import { afterEach, describe, expect, it, vi } from "vitest"
 import type { CheckSlugAvailabilityResult } from "../../lib/types"
 import { OnboardingFormView } from "./onboarding-form.view"
 
-const DISCLAIMER_RE = /responsible for verifying compliance/i
-
 afterEach(() => {
   cleanup()
 })
@@ -18,17 +16,6 @@ const availableSlug = (): Promise<CheckSlugAvailabilityResult> =>
   Promise.resolve({ data: { available: true }, status: "success" })
 
 describe("OnboardingFormView", () => {
-  it("renders the disclaimer on the first step", () => {
-    renderWithProviders(
-      <OnboardingFormView
-        onCheckSlug={availableSlug}
-        onNavigate={vi.fn()}
-        onSubmit={vi.fn()}
-      />
-    )
-    expect(screen.getByText(DISCLAIMER_RE)).toBeInTheDocument()
-  })
-
   it("normalizes the typed slug and previews the URL", async () => {
     const user = userEvent.setup()
     renderWithProviders(

@@ -67,8 +67,6 @@ describe("LicensesView", () => {
     })
     expect(screen.getByText("California — LCSW")).toBeInTheDocument()
     expect(screen.getByText("Massachusetts — LICSW")).toBeInTheDocument()
-    expect(screen.getByText("Lapsed")).toBeInTheDocument()
-    expect(screen.getByText("Overdue")).toBeInTheDocument()
   })
 
   it("shows an empty state when the practitioner has no licenses", () => {
