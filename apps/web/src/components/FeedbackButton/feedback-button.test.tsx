@@ -52,8 +52,8 @@ describe("FeedbackButton", () => {
     await user.type(dialog.getByLabelText("Feedback"), "great app")
     await user.click(dialog.getByRole("button", { name: "Send" }))
 
-    expect(capture).toHaveBeenCalledWith("survey sent", {
-      $survey_response: "great app",
+    expect(capture).toHaveBeenCalledWith("feedback submitted", {
+      feedback: "great app",
     })
     expect(success).toHaveBeenCalledOnce()
     await waitFor(() => {

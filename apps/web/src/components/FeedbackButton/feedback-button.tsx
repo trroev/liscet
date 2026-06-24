@@ -24,7 +24,7 @@ export const FeedbackButton = (): ReactNode => {
       return
     }
     try {
-      posthog.capture("survey sent", { $survey_response: trimmed })
+      posthog.capture("feedback submitted", { feedback: trimmed })
     } catch (error) {
       log.withError(error).error("failed to capture feedback")
       toast.error("Couldn't send feedback", {
