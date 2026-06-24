@@ -1,5 +1,6 @@
 import { SessionProvider } from "@repo/auth/session"
 import { env } from "@repo/env/app"
+import { Toaster } from "@repo/ui/components/Toast"
 import type { Metadata, Viewport } from "next"
 import { ThemeProvider } from "next-themes"
 import type React from "react"
@@ -65,6 +66,7 @@ export default async function FrontendLayout({
               )}
             </QueryProvider>
           </SessionProvider>
+          <Toaster />
         </ThemeProvider>
       </body>
     </html>
