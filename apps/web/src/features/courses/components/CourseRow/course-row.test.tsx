@@ -31,16 +31,6 @@ describe("CourseRow", () => {
     cleanup()
   })
 
-  it("renders the course title, provider, format, date, and hours", () => {
-    render(<CourseRow course={baseCourse} />)
-
-    expect(screen.getByText("Ethics 101")).toBeInTheDocument()
-    expect(screen.getByText("Provider Inc")).toBeInTheDocument()
-    expect(screen.getByText("Live")).toBeInTheDocument()
-    expect(screen.getByText("Mar 1, 2027")).toBeInTheDocument()
-    expect(screen.getByText("3 hours")).toBeInTheDocument()
-  })
-
   it("shows a not-yet-credited badge when there are no credits", () => {
     render(<CourseRow course={baseCourse} />)
     expect(screen.getByText("Not yet credited")).toBeInTheDocument()

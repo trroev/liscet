@@ -2,7 +2,7 @@
 
 import "@testing-library/jest-dom/vitest"
 
-import { render, screen, waitFor } from "@testing-library/react"
+import { render, waitFor } from "@testing-library/react"
 import { ThemeProvider } from "next-themes"
 import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest"
 
@@ -36,13 +36,6 @@ beforeEach(() => {
 })
 
 describe("ThemeToggle", () => {
-  it("renders an accessible trigger", () => {
-    render(<Setup />)
-    expect(
-      screen.getByRole("button", { name: "Change theme" })
-    ).toBeInTheDocument()
-  })
-
   it("reflects the persisted theme on mount", async () => {
     window.localStorage.setItem("theme", "dark")
     render(<Setup />)

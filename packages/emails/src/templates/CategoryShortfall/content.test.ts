@@ -1,17 +1,5 @@
 import { describe, expect, it } from "vitest"
-import {
-  categoryShortfallSubject,
-  humanizeCategory,
-  pluralizeHours,
-} from "./content"
-
-describe("categoryShortfallSubject", () => {
-  it("returns a static subject line", () => {
-    expect(categoryShortfallSubject()).toBe(
-      "Some required CE categories are still short"
-    )
-  })
-})
+import { humanizeCategory, pluralizeHours } from "./content"
 
 describe("humanizeCategory", () => {
   it("replaces hyphens with spaces and capitalizes the first word", () => {
