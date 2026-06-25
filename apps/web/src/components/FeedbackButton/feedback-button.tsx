@@ -29,6 +29,8 @@ export const FeedbackButton = (): ReactNode => {
       log.withError(error).error("failed to capture feedback")
       toast.error("Couldn't send feedback", {
         description: "Something went wrong. Please try again.",
+        closeButton: true,
+        duration: Number.POSITIVE_INFINITY,
       })
       return
     }

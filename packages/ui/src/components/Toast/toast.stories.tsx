@@ -24,6 +24,8 @@ const Triggers = () => (
       onClick={() =>
         toast.error("Something went wrong", {
           description: "We couldn't save your changes. Try again.",
+          closeButton: true,
+          duration: Number.POSITIVE_INFINITY,
         })
       }
       type="button"
