@@ -6,9 +6,11 @@ import { renderWithProviders, userEvent } from "@repo/testing/render"
 import { cleanup, screen, waitFor, within } from "@testing-library/react"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
-const { uploadAvatar, removeAvatar, nav } = vi.hoisted(() => ({
+const { uploadAvatar, removeAvatar, success, error, nav } = vi.hoisted(() => ({
   uploadAvatar: vi.fn(),
   removeAvatar: vi.fn(),
+  success: vi.fn(),
+  error: vi.fn(),
   nav: {
     push: vi.fn(),
     replace: vi.fn(),
@@ -41,6 +43,16 @@ vi.mock("@sentry/nextjs", () => ({
   captureException: vi.fn(),
 }))
 
+vi.mock("@repo/ui/components/Toast", () => ({
+  toast: { success, error },
+}))
+
+vi.mock("@repo/logger", () => ({
+  createLogger: () => ({
+    withMetadata: () => ({ error: vi.fn() }),
+  }),
+}))
+
 vi.mock("../../actions/avatar", () => ({
   uploadAvatar,
   removeAvatar,
@@ -62,6 +74,8 @@ const makeFile = (name: string, type: string, sizeBytes: number): File => {
 beforeEach(() => {
   uploadAvatar.mockReset()
   removeAvatar.mockReset()
+  success.mockReset()
+  error.mockReset()
   nav.refresh.mockReset()
 })
 
@@ -119,5 +133,25 @@ describe("AvatarManager", () => {
     ).toBeInTheDocument()
     expect(uploadAvatar).not.toHaveBeenCalled()
     expect(dialog.getByRole("button", { name: "Upload photo" })).toBeDisabled()
+  })
+
+  it("surfaces an error toast when removing the photo fails", async () => {
+    removeAvatar.mockResolvedValueOnce({
+      status: "error",
+      message: "boom",
+    })
+    const user = userEvent.setup()
+
+    renderWithProviders(
+      <AvatarManager avatarUrl="https://cdn.example/a.jpg" email="u@e.co" />
+    )
+
+    await user.click(screen.getByRole("button", { name: "Remove photo" }))
+
+    await waitFor(() => {
+      expect(error).toHaveBeenCalledOnce()
+    })
+    expect(nav.refresh).not.toHaveBeenCalled()
+    expect(success).not.toHaveBeenCalled()
   })
 })
