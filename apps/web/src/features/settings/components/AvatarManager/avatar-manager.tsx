@@ -13,21 +13,9 @@ import { ErrorBoundary } from "react-error-boundary"
 import { match } from "ts-pattern"
 import { WidgetErrorFallback } from "~/components/WidgetErrorFallback"
 import { removeAvatar, uploadAvatar } from "../../actions/avatar"
+import { AVATAR_MIME_TYPES, avatarFileSchema } from "../../lib/avatar-upload"
 
 const log = createLogger({ name: "settings.avatar-manager" })
-
-const MAX_AVATAR_BYTES = 5 * 1024 * 1024
-
-const ALLOWED_AVATAR_MIME_TYPES = [
-  "image/jpeg",
-  "image/png",
-  "image/webp",
-] as const satisfies ReadonlyArray<string>
-
-type AllowedAvatarMimeType = (typeof ALLOWED_AVATAR_MIME_TYPES)[number]
-
-const isAllowedMimeType = (value: string): value is AllowedAvatarMimeType =>
-  (ALLOWED_AVATAR_MIME_TYPES as ReadonlyArray<string>).includes(value)
 
 type AvatarManagerProps = {
   avatarUrl: string | null
@@ -84,14 +72,12 @@ const AvatarManagerInner = ({ avatarUrl, email }: AvatarManagerProps) => {
     if (!file) {
       return
     }
-    if (file.size > MAX_AVATAR_BYTES) {
-      setStatus({ kind: "error", message: "Image must be under 5 MB." })
-      return
-    }
-    if (!isAllowedMimeType(file.type)) {
+    const parsed = avatarFileSchema.safeParse(file)
+    if (!parsed.success) {
       setStatus({
         kind: "error",
-        message: "Image must be JPEG, PNG, or WebP.",
+        message:
+          parsed.error.issues[0]?.message ?? "Choose a valid avatar image.",
       })
       return
     }
@@ -170,7 +156,7 @@ const AvatarManagerInner = ({ avatarUrl, email }: AvatarManagerProps) => {
                   <span>Click to choose an image</span>
                 </label>
                 <input
-                  accept={ALLOWED_AVATAR_MIME_TYPES.join(",")}
+                  accept={AVATAR_MIME_TYPES.join(",")}
                   className="sr-only"
                   id={fileInputId}
                   onChange={(e) => handleFileChange(e.target.files?.[0])}

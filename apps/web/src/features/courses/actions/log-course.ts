@@ -4,23 +4,10 @@ import "server-only"
 
 import { scanUploadedFile } from "@repo/payload/hooks/virusScan"
 import { authedAction } from "~/lib/authed-action"
-import { fileIntake } from "~/lib/file-intake"
 import { uploadCertificateBlob } from "../lib/certificate-blob"
+import { certificateFileSchema } from "../lib/certificate-upload"
 import { logCourseSchema } from "../lib/schema"
 import type { LogCourseResult } from "../lib/types"
-
-const CERTIFICATE_MIME_TYPES = [
-  "application/pdf",
-  "image/jpeg",
-  "image/png",
-  "image/webp",
-] as const satisfies ReadonlyArray<string>
-
-const certificateFileSchema = fileIntake({
-  maxBytes: 10 * 1024 * 1024,
-  mimeTypes: CERTIFICATE_MIME_TYPES,
-  label: "certificate",
-})
 
 export const logCourse = authedAction<FormData, LogCourseResult>(
   async ({ user, payload, input: formData }) => {

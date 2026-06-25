@@ -8,6 +8,7 @@ import { useForm } from "@tanstack/react-form"
 import { useState } from "react"
 import { DASHBOARD_QUERY_KEY } from "~/lib/query-keys"
 import { FormError, useActionForm } from "~/lib/use-action-form"
+import { CERTIFICATE_MIME_TYPES } from "../../lib/certificate-upload"
 import { COURSE_FORMATS, type CourseFormatValue } from "../../lib/course-format"
 import { logCourseSchema } from "../../lib/schema"
 import type {
@@ -16,8 +17,6 @@ import type {
   LogCourseResult,
 } from "../../lib/types"
 import { TagInput } from "../TagInput"
-
-const CERTIFICATE_ACCEPT = "application/pdf,image/jpeg,image/png,image/webp"
 
 const fieldError = (meta: {
   isTouched: boolean
@@ -177,7 +176,7 @@ export const LogCourseFormView = ({
 
       <Field hint="PDF or image, up to 10 MB." label="Certificate (optional)">
         <input
-          accept={CERTIFICATE_ACCEPT}
+          accept={CERTIFICATE_MIME_TYPES.join(",")}
           className="block w-full font-sans text-body-sm text-text-secondary file:mr-3 file:cursor-pointer file:rounded-md file:border file:border-border file:bg-surface file:px-3 file:py-2 file:font-sans file:text-body-sm file:text-text-primary hover:file:bg-background"
           id="certificate"
           onChange={(event) => setCertificate(event.target.files?.[0] ?? null)}
