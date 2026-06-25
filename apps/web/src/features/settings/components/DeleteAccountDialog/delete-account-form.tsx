@@ -4,6 +4,7 @@ import { Button } from "@repo/ui/components/Button"
 import { Dialog } from "@repo/ui/components/Dialog"
 import { Field } from "@repo/ui/components/Field"
 import { Input } from "@repo/ui/components/Input"
+import { toast } from "@repo/ui/components/Toast"
 import { useForm } from "@tanstack/react-form"
 import { z } from "zod"
 import { FormError, useActionForm } from "~/lib/use-action-form"
@@ -17,13 +18,16 @@ const deleteAccountSchema = z.object({
 })
 
 export type DeleteAccountFormProps = {
-  onDeleted: () => void
+  onDeleted: VoidFunction
 }
 
 export const DeleteAccountForm = ({ onDeleted }: DeleteAccountFormProps) => {
   const { serverError, submit } = useActionForm<DeleteAccountData>({
     onSuccess: () => {
       onDeleted()
+      toast.success("Account scheduled for deletion", {
+        description: "You can cancel from the banner until it's permanent.",
+      })
     },
   })
 

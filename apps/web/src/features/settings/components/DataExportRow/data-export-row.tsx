@@ -1,15 +1,13 @@
 "use client"
 
 import { Button } from "@repo/ui/components/Button"
+import { toast } from "@repo/ui/components/Toast"
 import { useState, useTransition } from "react"
 import { match } from "ts-pattern"
 import { requestDataExport } from "../../actions/request-data-export"
 import { SettingsRow } from "../SettingsRow"
 
-type RequestState =
-  | { kind: "idle" }
-  | { kind: "sent" }
-  | { kind: "error"; message: string }
+type RequestState = { kind: "idle" } | { kind: "error"; message: string }
 
 export const DataExportRow = () => {
   const [isPending, startTransition] = useTransition()
@@ -26,7 +24,13 @@ export const DataExportRow = () => {
             kind: "error",
             message,
           }))
-          .with({ status: "success" }, () => ({ kind: "sent" }))
+          .with({ status: "success" }, () => {
+            toast.success("Export on its way", {
+              description:
+                "We emailed you a download link — it expires in 24 hours.",
+            })
+            return { kind: "idle" }
+          })
           .exhaustive()
       )
     })
@@ -42,11 +46,6 @@ export const DataExportRow = () => {
           {isPending ? "Preparing export…" : "Export data"}
         </Button>
       </SettingsRow>
-      {requestState.kind === "sent" && (
-        <p aria-live="polite" className="pb-4 text-body-sm text-text-secondary">
-          We emailed you a download link — it expires in 24 hours.
-        </p>
-      )}
       {requestState.kind === "error" && (
         <p
           aria-live="polite"
