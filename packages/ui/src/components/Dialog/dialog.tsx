@@ -63,7 +63,7 @@ export const DialogDescription = ({
   ...props
 }: DialogDescriptionProps) => (
   <BaseDialog.Description
-    className={cn("mt-2 text-body text-text-secondary", className)}
+    className={cn("text-body text-text-secondary", className)}
     {...props}
   />
 )
