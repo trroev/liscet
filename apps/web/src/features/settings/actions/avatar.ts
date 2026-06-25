@@ -6,21 +6,9 @@ import type { ActionResult } from "@repo/types/ActionResult"
 import { match, P } from "ts-pattern"
 import type { z } from "zod"
 import { authedAction } from "~/lib/authed-action"
-import { fileIntake } from "~/lib/file-intake"
 import { createMediaAsset, deleteMediaAsset } from "~/lib/queries/media"
 import { updateUserAvatar } from "../api/update-user-avatar"
-
-const AVATAR_MIME_TYPES = [
-  "image/jpeg",
-  "image/png",
-  "image/webp",
-] as const satisfies ReadonlyArray<string>
-
-const avatarFileSchema = fileIntake({
-  maxBytes: 5 * 1024 * 1024,
-  mimeTypes: AVATAR_MIME_TYPES,
-  label: "avatar",
-})
+import { avatarFileSchema } from "../lib/avatar-upload"
 
 type AvatarFile = z.infer<typeof avatarFileSchema>
 

@@ -4,11 +4,12 @@ import "server-only"
 
 import { z } from "zod"
 import { authedAction } from "~/lib/authed-action"
+import { findLicenseOption } from "../lib/license-options"
 import {
-  findLicenseOption,
-  LICENSE_OPTION_VALUES,
-  type LicenseOptionValue,
-} from "../lib/license-options"
+  EXPIRY_AFTER_ISSUE_ERROR,
+  isExpiryAfterIssue,
+  onboardingFields,
+} from "../lib/schema"
 import {
   formatSlug,
   isReservedSlug,
@@ -31,22 +32,13 @@ export type {
 
 const inputSchema = z
   .object({
-    expiresAt: z.iso.date("Enter a valid expiration date."),
-    issuedAt: z.iso.date("Enter a valid issue date."),
-    licenseNumber: z.string().trim().min(1, "Enter your license number."),
-    licenseOption: z.enum(
-      LICENSE_OPTION_VALUES as ReadonlyArray<LicenseOptionValue>,
-      "Select a state and license type."
-    ),
+    ...onboardingFields,
     slug: z
       .string()
       .min(SLUG_MIN_LENGTH, "Slug is too short.")
       .max(SLUG_MAX_LENGTH, "Slug is too long."),
   })
-  .refine((data) => Date.parse(data.expiresAt) > Date.parse(data.issuedAt), {
-    message: "Expiration date must be after the issue date.",
-    path: ["expiresAt"],
-  })
+  .refine(isExpiryAfterIssue, EXPIRY_AFTER_ISSUE_ERROR)
 
 const isUniqueConstraintViolation = (error: unknown): boolean => {
   if (error instanceof Error) {

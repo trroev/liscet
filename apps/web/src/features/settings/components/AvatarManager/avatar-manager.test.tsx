@@ -129,7 +129,7 @@ describe("AvatarManager", () => {
     await user.upload(fileInput, oversize)
 
     expect(
-      await dialog.findByText("Image must be under 5 MB.")
+      await dialog.findByText("Avatar must be under 5 MB.")
     ).toBeInTheDocument()
     expect(uploadAvatar).not.toHaveBeenCalled()
     expect(dialog.getByRole("button", { name: "Upload photo" })).toBeDisabled()
