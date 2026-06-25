@@ -1,6 +1,7 @@
 "use client"
 
 import { Button } from "@repo/ui/components/Button"
+import { toast } from "@repo/ui/components/Toast"
 import { useRouter } from "next/navigation"
 import { useState, useTransition } from "react"
 import { match } from "ts-pattern"
@@ -29,6 +30,9 @@ export const DeletionBanner = ({ deletedAt }: DeletionBannerProps) => {
         })
         .with({ status: "success" }, () => {
           router.refresh()
+          toast.success("Account deletion cancelled", {
+            description: "Your account is active again.",
+          })
         })
         .exhaustive()
     })

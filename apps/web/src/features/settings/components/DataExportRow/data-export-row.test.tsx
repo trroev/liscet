@@ -3,15 +3,20 @@
 import "@testing-library/jest-dom/vitest"
 
 import { userEvent } from "@repo/testing/render"
-import { cleanup, render, screen } from "@testing-library/react"
+import { cleanup, render, screen, waitFor } from "@testing-library/react"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
-const { requestDataExport } = vi.hoisted(() => ({
+const { requestDataExport, success } = vi.hoisted(() => ({
   requestDataExport: vi.fn(),
+  success: vi.fn(),
 }))
 
 vi.mock("../../actions/request-data-export", () => ({
   requestDataExport,
+}))
+
+vi.mock("@repo/ui/components/Toast", () => ({
+  toast: { success },
 }))
 
 import { DataExportRow } from "./data-export-row"
@@ -19,6 +24,7 @@ import { DataExportRow } from "./data-export-row"
 describe("DataExportRow", () => {
   beforeEach(() => {
     requestDataExport.mockReset()
+    success.mockReset()
   })
 
   afterEach(() => {
@@ -35,11 +41,9 @@ describe("DataExportRow", () => {
 
     await user.click(screen.getByRole("button", { name: "Export data" }))
 
-    expect(
-      await screen.findByText(
-        "We emailed you a download link — it expires in 24 hours."
-      )
-    ).toBeInTheDocument()
+    await waitFor(() => {
+      expect(success).toHaveBeenCalledOnce()
+    })
     expect(requestDataExport).toHaveBeenCalledTimes(1)
   })
 

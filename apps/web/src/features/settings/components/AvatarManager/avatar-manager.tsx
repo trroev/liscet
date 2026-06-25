@@ -1,9 +1,11 @@
 "use client"
 
 import { RiUploadLine } from "@remixicon/react"
+import { createLogger } from "@repo/logger"
 import { Avatar } from "@repo/ui/components/Avatar"
 import { Button } from "@repo/ui/components/Button"
 import { Dialog } from "@repo/ui/components/Dialog"
+import { toast } from "@repo/ui/components/Toast"
 import { captureException } from "@sentry/nextjs"
 import { useRouter } from "next/navigation"
 import { useEffect, useId, useRef, useState, useTransition } from "react"
@@ -11,6 +13,8 @@ import { ErrorBoundary } from "react-error-boundary"
 import { match } from "ts-pattern"
 import { WidgetErrorFallback } from "~/components/WidgetErrorFallback"
 import { removeAvatar, uploadAvatar } from "../../actions/avatar"
+
+const log = createLogger({ name: "settings.avatar-manager" })
 
 const MAX_AVATAR_BYTES = 5 * 1024 * 1024
 
@@ -114,6 +118,7 @@ const AvatarManagerInner = ({ avatarUrl, email }: AvatarManagerProps) => {
         resetDialog()
         setIsOpen(false)
         router.refresh()
+        toast.success("Photo updated")
       })
       .exhaustive()
   }
@@ -124,8 +129,14 @@ const AvatarManagerInner = ({ avatarUrl, email }: AvatarManagerProps) => {
       match(result)
         .with({ status: "success" }, () => {
           router.refresh()
+          toast.success("Photo removed")
         })
-        .with({ status: "error" }, () => undefined)
+        .with({ status: "error" }, ({ message }) => {
+          log.withMetadata({ message }).error("failed to remove avatar")
+          toast.error("Couldn't remove photo", {
+            description: "Something went wrong. Please try again.",
+          })
+        })
         .exhaustive()
     })
   }
