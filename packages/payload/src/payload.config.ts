@@ -102,6 +102,7 @@ export function createPayloadConfig({ baseDir }: CreatePayloadConfigOptions) {
     globals: [Homepage],
     plugins: [
       vercelBlobStorage({
+        addRandomSuffix: true,
         collections: { media: true },
         enabled: hasVercelBlobToken,
         token: blobEnv.BLOB_READ_WRITE_TOKEN,
