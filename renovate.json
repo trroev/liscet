@@ -10,6 +10,7 @@
   "minimumReleaseAge": "3 days",
   "prConcurrentLimit": 5,
   "semanticCommitScope": "deps",
+  "postUpdateOptions": ["pnpmDedupe"],
   "dependencyDashboard": true,
   "automergeType": "pr",
   "automergeStrategy": "squash",
