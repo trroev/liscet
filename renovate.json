@@ -1,0 +1,90 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:recommended",
+    ":semanticCommits",
+    "helpers:pinGitHubActionDigests"
+  ],
+  "timezone": "America/Detroit",
+  "schedule": ["before 6am on monday"],
+  "minimumReleaseAge": "3 days",
+  "prConcurrentLimit": 5,
+  "semanticCommitScope": "deps",
+  "dependencyDashboard": true,
+  "automergeType": "pr",
+  "automergeStrategy": "squash",
+  "platformAutomerge": true,
+  "vulnerabilityAlerts": {
+    "enabled": true
+  },
+  "osvVulnerabilityAlerts": true,
+  "lockFileMaintenance": {
+    "enabled": true,
+    "schedule": ["before 6am on the first day of the month"],
+    "automerge": true,
+    "semanticCommitType": "chore"
+  },
+  "packageRules": [
+    {
+      "description": "Default: every dep bump is a build() commit; nothing automerges unless a rule below opts it in.",
+      "matchPackageNames": ["*"],
+      "semanticCommitType": "build"
+    },
+    {
+      "description": "Payload core + all plugins move in lockstep and can regenerate the committed payload-types (git diff gate) or require a migration. Always human-reviewed.",
+      "matchPackageNames": ["payload", "@payloadcms/**"],
+      "groupName": "payload",
+      "automerge": false
+    },
+    {
+      "description": "Drizzle/pg touch the DB schema and can require a migration. Always human-reviewed.",
+      "matchPackageNames": ["drizzle-orm", "drizzle-kit", "pg", "@types/pg"],
+      "groupName": "db",
+      "automerge": false
+    },
+    {
+      "description": "React/Next framework peers — runtime, framework-level. Always human-reviewed.",
+      "matchPackageNames": [
+        "react",
+        "react-dom",
+        "next",
+        "@types/react",
+        "@types/react-dom"
+      ],
+      "groupName": "react-next",
+      "automerge": false
+    },
+    {
+      "description": "Testing toolchain — devDependencies gated by the suite. Automerge minor/patch.",
+      "matchPackageNames": [
+        "vitest",
+        "@vitest/**",
+        "@testing-library/**",
+        "@types/jest-axe",
+        "jest-axe",
+        "jsdom"
+      ],
+      "groupName": "testing",
+      "matchUpdateTypes": ["minor", "patch"],
+      "automerge": true
+    },
+    {
+      "description": "Storybook — devDependency, but SB 10.3.6 has bitten us (CSF factory globalTypes). Group, and hold at patch-only automerge.",
+      "matchPackageNames": ["storybook", "@storybook/**"],
+      "groupName": "storybook",
+      "matchUpdateTypes": ["patch"],
+      "automerge": true
+    },
+    {
+      "description": "GitHub Actions (consolidated from dependabot.yml). Group, and automerge minor/patch. Digests are SHA-pinned via helpers:pinGitHubActionDigests.",
+      "matchManagers": ["github-actions"],
+      "groupName": "github-actions",
+      "semanticCommitType": "ci"
+    },
+    {
+      "matchManagers": ["github-actions"],
+      "matchUpdateTypes": ["minor", "patch", "digest", "pin"],
+      "automerge": true
+    }
+  ]
+}
