@@ -47,7 +47,7 @@ catalog:
   tailwindcss: ^4.2.4
   ts-pattern: ^5.9.0
   typescript: ^6.0.3
-  vitest: ^3.2.4
+  vitest: ^4.0.0
   zod: ^4.3.6
 
 # Make `pnpm add` write a catalog reference for deps the catalog already owns,
