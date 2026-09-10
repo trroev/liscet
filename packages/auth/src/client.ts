@@ -1,6 +1,7 @@
 import { captureException } from "@repo/observability"
 import { createAuthClient } from "better-auth/react"
 import { friendlyAuthMessage, GENERIC_AUTH_ERROR_MESSAGE } from "./errors"
+import type { SocialProvider } from "./social-providers"
 
 const rawAuthClient = createAuthClient()
 
@@ -50,8 +51,17 @@ type SignUpEmailParams = {
   password: string
 }
 
+type SignInSocialParams = {
+  provider: SocialProvider
+  callbackURL: string
+}
+
 type SignInEmailData = Awaited<
   ReturnType<typeof rawAuthClient.signIn.email>
+>["data"]
+
+type SignInSocialData = Awaited<
+  ReturnType<typeof rawAuthClient.signIn.social>
 >["data"]
 
 type SignUpEmailData = Awaited<
@@ -63,6 +73,10 @@ export const authClient = {
   signIn: {
     email: (params: SignInEmailParams): Promise<AuthResult<SignInEmailData>> =>
       toAuthResult(rawAuthClient.signIn.email(params)),
+    social: (
+      params: SignInSocialParams
+    ): Promise<AuthResult<SignInSocialData>> =>
+      toAuthResult(rawAuthClient.signIn.social(params)),
   },
   signUp: {
     email: (params: SignUpEmailParams): Promise<AuthResult<SignUpEmailData>> =>

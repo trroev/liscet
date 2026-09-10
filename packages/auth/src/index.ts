@@ -5,6 +5,7 @@ import { drizzleAdapter } from "better-auth/adapters/drizzle"
 import { drizzle } from "drizzle-orm/node-postgres"
 import { Pool } from "pg"
 import { account, session, user, verification } from "./schema"
+import { SOCIAL_PROVIDERS } from "./social-providers"
 
 const schema = { account, session, user, verification }
 
@@ -24,6 +25,18 @@ export function createAuth(
     secret: env.BETTER_AUTH_SECRET,
     baseURL: env.BETTER_AUTH_URL,
     emailAndPassword: { enabled: true },
+    socialProviders: {
+      google: {
+        clientId: env.GOOGLE_CLIENT_ID,
+        clientSecret: env.GOOGLE_CLIENT_SECRET,
+      },
+    },
+    account: {
+      accountLinking: {
+        enabled: true,
+        trustedProviders: [...SOCIAL_PROVIDERS],
+      },
+    },
     ...extraOptions,
   })
 }

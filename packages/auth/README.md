@@ -13,8 +13,9 @@ Consumed by `apps/web` and `@repo/testing` (for `renderWithProviders`).
 | Subpath | Owns |
 |---|---|
 | `@repo/auth` | `createAuth(extraOptions?)`, the shared `auth` singleton, `Session` / `User` types |
-| `@repo/auth/client` | `authClient`, `signIn*`, `signUp*`, `signOut`, `AuthResult<T>` |
+| `@repo/auth/client` | `authClient` (`signIn.email`, `signIn.social`, `signUp.email`), `AuthResult<T>` |
 | `@repo/auth/session` | `<SessionProvider>` (client), `useSession()` |
+| `@repo/auth/social-providers` | `SOCIAL_PROVIDERS`, `SocialProvider` — the OAuth providers enabled and trusted for linking |
 
 ## Usage
 
@@ -43,7 +44,13 @@ import { SessionProvider } from "@repo/auth/session"
 ## Constraints
 
 - `DATABASE_URL` is validated by [`@repo/env/database`](../env/README.md) and
-  `BETTER_AUTH_SECRET` / `BETTER_AUTH_URL` by [`@repo/env/auth`](../env/README.md).
+  `BETTER_AUTH_SECRET` / `BETTER_AUTH_URL` / `GOOGLE_CLIENT_ID` /
+  `GOOGLE_CLIENT_SECRET` by [`@repo/env/auth`](../env/README.md).
   Importing this package eagerly opens a Postgres pool — Node-only.
+- Google is the only social provider. `account.accountLinking` is enabled with
+  `trustedProviders: SOCIAL_PROVIDERS`, so a Google sign-in whose **verified**
+  email matches an existing email/password user links to that user instead of
+  creating a duplicate. Only add providers that guarantee a verified-email
+  claim to `SOCIAL_PROVIDERS`.
 - Server actions invoked from the client rely on Next.js 16's same-origin /
   `Origin`-header CSRF check; no custom CSRF token layer.
