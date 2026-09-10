@@ -512,6 +512,9 @@ importers:
       typescript:
         specifier: 'catalog:'
         version: 6.0.3
+      vitest:
+        specifier: 'catalog:'
+        version: 3.2.7(@types/debug@4.1.13)(@types/node@22.20.2)(happy-dom@20.9.0)(jiti@2.6.1)(jsdom@29.1.1(@noble/hashes@2.2.0))(lightningcss@1.33.0)(msw@2.14.6(@types/node@22.20.2)(typescript@6.0.3))(sass@1.77.4)(terser@5.51.2)(tsx@4.21.0)(yaml@2.9.0)
 
   packages/chrome:
     dependencies:

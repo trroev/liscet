@@ -1,6 +1,43 @@
 export const GENERIC_AUTH_ERROR_MESSAGE =
   "Something went wrong. Please try again."
 
+/**
+ * Accepts any `string` (codes that arrive at runtime from better-auth or the
+ * query string) while rejecting a string literal that is not one of the known
+ * codes, so a typo at a literal call site is a compile error.
+ */
+type AcceptedCode<
+  TInput extends string,
+  TCode extends string,
+> = string extends TInput ? string : TInput extends TCode ? TInput : never
+
+export type FriendlyMessageLookup<TCode extends string> = <
+  TInput extends string,
+>(input: {
+  code: (TInput & AcceptedCode<TInput, TCode>) | undefined
+  fallback?: string
+}) => string
+
+/**
+ * Builds a lookup from an error code to user-facing copy. Unknown or missing
+ * codes resolve to the per-call `fallback` when given, otherwise the builder's.
+ */
+export const createFriendlyMessageLookup =
+  <const TMessages extends Record<string, string>>({
+    messages,
+    fallback: defaultFallback,
+  }: {
+    messages: TMessages
+    fallback: string
+  }): FriendlyMessageLookup<keyof TMessages & string> =>
+  ({ code, fallback }) => {
+    const message =
+      code !== undefined && Object.hasOwn(messages, code)
+        ? messages[code]
+        : undefined
+    return message ?? fallback ?? defaultFallback
+  }
+
 const FRIENDLY_AUTH_MESSAGES = {
   INVALID_EMAIL_OR_PASSWORD: "The email or password you entered is incorrect.",
   INVALID_PASSWORD: "The email or password you entered is incorrect.",
@@ -13,23 +50,12 @@ const FRIENDLY_AUTH_MESSAGES = {
   INVALID_EMAIL: "Enter a valid email address.",
 } as const satisfies Record<string, string>
 
-type KnownAuthErrorCode = keyof typeof FRIENDLY_AUTH_MESSAGES
-
-const isKnownAuthErrorCode = (code: string): code is KnownAuthErrorCode =>
-  code in FRIENDLY_AUTH_MESSAGES
-
-export const friendlyAuthMessage = ({
-  code,
-  fallback,
-}: {
-  code: string | undefined
-  fallback?: string
-}): string => {
-  if (code && isKnownAuthErrorCode(code)) {
-    return FRIENDLY_AUTH_MESSAGES[code]
-  }
-  return fallback ?? GENERIC_AUTH_ERROR_MESSAGE
-}
+export const friendlyAuthMessage: FriendlyMessageLookup<
+  keyof typeof FRIENDLY_AUTH_MESSAGES
+> = createFriendlyMessageLookup({
+  messages: FRIENDLY_AUTH_MESSAGES,
+  fallback: GENERIC_AUTH_ERROR_MESSAGE,
+})
 
 /**
  * Messages for the `?error=` codes better-auth appends to `errorCallbackURL`
@@ -49,16 +75,9 @@ const FRIENDLY_OAUTH_MESSAGES = {
   please_restart_the_process: "Sign-in expired. Please try again.",
 } as const satisfies Record<string, string>
 
-type KnownOAuthErrorCode = keyof typeof FRIENDLY_OAUTH_MESSAGES
-
-const isKnownOAuthErrorCode = (code: string): code is KnownOAuthErrorCode =>
-  code in FRIENDLY_OAUTH_MESSAGES
-
-export const friendlyOAuthErrorMessage = ({
-  code,
-}: {
-  code: string
-}): string =>
-  isKnownOAuthErrorCode(code)
-    ? FRIENDLY_OAUTH_MESSAGES[code]
-    : GENERIC_AUTH_ERROR_MESSAGE
+export const friendlyOAuthErrorMessage: FriendlyMessageLookup<
+  keyof typeof FRIENDLY_OAUTH_MESSAGES
+> = createFriendlyMessageLookup({
+  messages: FRIENDLY_OAUTH_MESSAGES,
+  fallback: GENERIC_AUTH_ERROR_MESSAGE,
+})
