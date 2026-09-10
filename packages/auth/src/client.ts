@@ -54,6 +54,7 @@ type SignUpEmailParams = {
 type SignInSocialParams = {
   provider: SocialProvider
   callbackURL: string
+  errorCallbackURL: string
 }
 
 type SignInEmailData = Awaited<

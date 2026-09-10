@@ -10,10 +10,28 @@ import {
 } from "@repo/testing/msw"
 import { renderWithProviders, userEvent } from "@repo/testing/render"
 import { cleanup, screen, waitFor } from "@testing-library/react"
-import { afterEach, describe, expect, it } from "vitest"
-import { SocialSignInButton } from "./social-sign-in-button"
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
+
+const { nav } = vi.hoisted(() => ({
+  nav: {
+    pathname: "/sign-in",
+    searchParams: new URLSearchParams(),
+  },
+}))
+
+vi.mock("next/navigation", () => ({
+  usePathname: () => nav.pathname,
+  useSearchParams: () => nav.searchParams,
+}))
+
+const { SocialSignInButton } = await import("./social-sign-in-button")
 
 const GOOGLE_AUTH_URL = "https://accounts.google.com/o/oauth2/v2/auth?state=x"
+
+beforeEach(() => {
+  nav.pathname = "/sign-in"
+  nav.searchParams = new URLSearchParams()
+})
 
 afterEach(() => {
   server.events.removeAllListeners()
@@ -42,6 +60,7 @@ describe("SocialSignInButton", () => {
     expect(bodies[0]).toMatchObject({
       provider: "google",
       callbackURL: "/dashboard",
+      errorCallbackURL: "/sign-in",
     })
     expect(screen.queryByRole("alert")).not.toBeInTheDocument()
     expect(screen.getByRole("button", { name: "Redirecting…" })).toBeDisabled()
@@ -74,5 +93,32 @@ describe("SocialSignInButton", () => {
     expect(
       screen.getByRole("button", { name: "Continue with Google" })
     ).toBeEnabled()
+  })
+
+  it("shows a friendly message for the OAuth error code returned to the page", () => {
+    nav.searchParams = new URLSearchParams({ error: "access_denied" })
+
+    renderWithProviders(
+      <SocialSignInButton callbackUrl="/onboarding" provider="google" />
+    )
+
+    expect(screen.getByRole("alert")).toHaveTextContent(
+      "Sign-in was cancelled before finishing."
+    )
+    expect(
+      screen.getByRole("button", { name: "Continue with Google" })
+    ).toBeEnabled()
+  })
+
+  it("falls back to the generic message for an unknown OAuth error code", () => {
+    nav.searchParams = new URLSearchParams({ error: "something_else" })
+
+    renderWithProviders(
+      <SocialSignInButton callbackUrl="/onboarding" provider="google" />
+    )
+
+    expect(screen.getByRole("alert")).toHaveTextContent(
+      "Something went wrong. Please try again."
+    )
   })
 })

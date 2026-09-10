@@ -2,8 +2,10 @@
 
 import { type RemixiconComponentType, RiGoogleFill } from "@remixicon/react"
 import { authClient } from "@repo/auth/client"
+import { friendlyOAuthErrorMessage } from "@repo/auth/errors"
 import type { SocialProvider } from "@repo/auth/social-providers"
 import { Button } from "@repo/ui/components/Button"
+import { usePathname, useSearchParams } from "next/navigation"
 import { useState } from "react"
 import { match } from "ts-pattern"
 
@@ -26,12 +28,19 @@ export const SocialSignInButton = ({
   callbackUrl,
 }: SocialSignInButtonProps) => {
   const Icon = PROVIDER_ICONS[provider]
+  const pathname = usePathname()
+  const oauthErrorCode = useSearchParams().get("error")
   const [isRedirecting, setIsRedirecting] = useState(false)
-  const [serverError, setServerError] = useState<string | undefined>()
+  const [serverError, setServerError] = useState<string | undefined>(() =>
+    oauthErrorCode === null
+      ? undefined
+      : friendlyOAuthErrorMessage({ code: oauthErrorCode })
+  )
 
   /**
    * On success better-auth navigates the browser to the provider, so the
    * pending state is left on to avoid flashing back before the page unloads.
+   * Failures after that point come back to this page as `?error=<code>`.
    */
   const handleClick = async (): Promise<void> => {
     setServerError(undefined)
@@ -39,6 +48,7 @@ export const SocialSignInButton = ({
     const result = await authClient.signIn.social({
       provider,
       callbackURL: callbackUrl,
+      errorCallbackURL: pathname,
     })
     match(result)
       .with({ status: "error" }, ({ friendlyMessage }) => {

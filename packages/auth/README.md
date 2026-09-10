@@ -14,6 +14,7 @@ Consumed by `apps/web` and `@repo/testing` (for `renderWithProviders`).
 |---|---|
 | `@repo/auth` | `createAuth(extraOptions?)`, the shared `auth` singleton, `Session` / `User` types |
 | `@repo/auth/client` | `authClient` (`signIn.email`, `signIn.social`, `signUp.email`), `AuthResult<T>` |
+| `@repo/auth/errors` | `friendlyAuthMessage`, `friendlyOAuthErrorMessage`, `GENERIC_AUTH_ERROR_MESSAGE` |
 | `@repo/auth/session` | `<SessionProvider>` (client), `useSession()` |
 | `@repo/auth/social-providers` | `SOCIAL_PROVIDERS`, `SocialProvider` — the OAuth providers offered on the auth forms |
 
@@ -53,5 +54,9 @@ import { SessionProvider } from "@repo/auth/session"
   email, so a Google sign-in with a matching verified email joins the existing
   user instead of creating a duplicate. Do not add `trustedProviders` — a
   trusted provider links even on an unverified email.
+- Google is configured with `prompt: "select_account"` so users with several
+  Google accounts always choose one. Failures after the redirect to Google come
+  back to the page that started the flow as `?error=<code>`; map codes to copy
+  with `friendlyOAuthErrorMessage`.
 - Server actions invoked from the client rely on Next.js 16's same-origin /
   `Origin`-header CSRF check; no custom CSRF token layer.

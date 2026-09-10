@@ -164,6 +164,7 @@ describe("SignInForm", () => {
     expect(bodies[0]).toMatchObject({
       provider: "google",
       callbackURL: "/dashboard",
+      errorCallbackURL: "/sign-in",
     })
     expect(nav.push).not.toHaveBeenCalled()
   })
