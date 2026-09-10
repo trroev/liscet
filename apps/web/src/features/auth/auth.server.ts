@@ -5,6 +5,7 @@ import { captureException } from "@sentry/nextjs"
 import { getPayload } from "payload"
 import { match } from "ts-pattern"
 import { getPayloadUserByBetterAuthId } from "~/lib/queries/payload-user-by-better-auth-id"
+import { buildPractitionerSyncData } from "./lib/build-practitioner-sync-data"
 
 // Report sync failures to Sentry without blocking the BetterAuth operation.
 const safe =
@@ -38,8 +39,7 @@ export const auth = createAuth({
                 collection: "users",
                 data: {
                   betterAuthId: user.id,
-                  displayName: user.name ?? "",
-                  email: user.email,
+                  ...buildPractitionerSyncData({ user }),
                 },
               })
             )
@@ -63,8 +63,7 @@ export const auth = createAuth({
                 collection: "users",
                 data: {
                   betterAuthId: user.id,
-                  displayName: user.name ?? "",
-                  email: user.email,
+                  ...buildPractitionerSyncData({ user }),
                 },
               })
             )
@@ -72,7 +71,7 @@ export const auth = createAuth({
               payload.update({
                 collection: "users",
                 id: found.id,
-                data: { displayName: user.name ?? "", email: user.email },
+                data: buildPractitionerSyncData({ user }),
               })
             )
         }),
