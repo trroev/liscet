@@ -5,7 +5,22 @@ import { getPayload } from "payload"
 import { match } from "ts-pattern"
 import { getPayloadUserByBetterAuthId } from "~/lib/queries/payload-user-by-better-auth-id"
 import config from "~/payload.config"
-import { buildPractitionerSyncData } from "./lib/build-practitioner-sync-data"
+import {
+  buildPractitionerSyncData,
+  type PractitionerSyncSource,
+} from "./lib/build-practitioner-sync-data"
+
+type LinkableUser = Readonly<PractitionerSyncSource & { id: string }>
+
+/**
+ * The full record for creating or linking a practitioner: the better-auth
+ * identity plus the synced profile. The update path writes the profile alone,
+ * since `betterAuthId` is the key it was looked up by.
+ */
+const toLinkedPractitioner = ({ user }: { user: LinkableUser }) => ({
+  betterAuthId: user.id,
+  ...buildPractitionerSyncData({ user }),
+})
 
 // Report sync failures to Sentry without blocking the BetterAuth operation.
 const safe =
@@ -37,20 +52,14 @@ export const auth = createAuth({
             .with(undefined, () =>
               payload.create({
                 collection: "users",
-                data: {
-                  betterAuthId: user.id,
-                  ...buildPractitionerSyncData({ user }),
-                },
+                data: toLinkedPractitioner({ user }),
               })
             )
             .otherwise((found) =>
               payload.update({
                 collection: "users",
                 id: found.id,
-                data: {
-                  betterAuthId: user.id,
-                  ...buildPractitionerSyncData({ user }),
-                },
+                data: toLinkedPractitioner({ user }),
               })
             )
         }),
@@ -64,10 +73,7 @@ export const auth = createAuth({
             .with(null, () =>
               payload.create({
                 collection: "users",
-                data: {
-                  betterAuthId: user.id,
-                  ...buildPractitionerSyncData({ user }),
-                },
+                data: toLinkedPractitioner({ user }),
               })
             )
             .otherwise((found) =>

@@ -2,7 +2,7 @@
  * The subset of a better-auth user needed to mirror profile fields into the
  * Payload `users` record.
  */
-type PractitionerSyncSource = {
+export type PractitionerSyncSource = {
   name?: string | null
   email: string
   image?: string | null
