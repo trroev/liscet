@@ -11,7 +11,7 @@ export type AuthFormLayoutProps = {
 export const AuthFormLayout = ({
   callbackUrl,
   children,
-}: AuthFormLayoutProps) => (
+}: AuthFormLayoutProps): React.JSX.Element => (
   <div className="flex flex-col gap-6">
     {children}
     <AuthDivider />

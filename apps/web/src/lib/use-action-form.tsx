@@ -88,8 +88,9 @@ export type FormErrorProps = {
 }
 
 /**
- * The single rendering of a form's server-error message, shared across every
- * form that submits through {@link useActionForm}.
+ * The single rendering of a form's server-error message, shared by every
+ * form in the app whether it submits through {@link useActionForm} or holds
+ * its own server error.
  */
 export const FormError = ({
   message,
