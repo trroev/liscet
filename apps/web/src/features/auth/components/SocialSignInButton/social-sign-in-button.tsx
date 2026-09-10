@@ -8,6 +8,7 @@ import { Button } from "@repo/ui/components/Button"
 import { usePathname, useSearchParams } from "next/navigation"
 import { useState } from "react"
 import { match } from "ts-pattern"
+import { FormError } from "~/lib/use-action-form"
 
 const PROVIDER_LABELS = {
   google: "Continue with Google",
@@ -71,15 +72,7 @@ export const SocialSignInButton = ({
         <Icon aria-hidden="true" className="size-4" />
         {isRedirecting ? "Redirecting…" : PROVIDER_LABELS[provider]}
       </Button>
-      {serverError && (
-        <p
-          aria-live="polite"
-          className="font-sans text-body-sm text-destructive"
-          role="alert"
-        >
-          {serverError}
-        </p>
-      )}
+      <FormError message={serverError} />
     </div>
   )
 }

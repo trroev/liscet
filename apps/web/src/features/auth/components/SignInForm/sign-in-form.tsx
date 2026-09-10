@@ -4,13 +4,13 @@ import { authClient } from "@repo/auth/client"
 import { Button } from "@repo/ui/components/Button"
 import { Field } from "@repo/ui/components/Field"
 import { Input } from "@repo/ui/components/Input"
-import { Separator } from "@repo/ui/components/Separator"
 import { useForm } from "@tanstack/react-form"
 import { useRouter, useSearchParams } from "next/navigation"
 import { useState } from "react"
 import { match } from "ts-pattern"
 import { z } from "zod"
-import { SocialSignInButton } from "../SocialSignInButton"
+import { FormError } from "~/lib/use-action-form"
+import { AuthFormLayout } from "../AuthFormLayout"
 
 const signInSchema = z.object({
   email: z.email("Enter a valid email address."),
@@ -48,7 +48,7 @@ export const SignInForm = () => {
   })
 
   return (
-    <div className="flex flex-col gap-6">
+    <AuthFormLayout callbackUrl={callbackUrl}>
       <form
         className="flex flex-col gap-4"
         noValidate
@@ -104,15 +104,7 @@ export const SignInForm = () => {
             </Field>
           )}
         </form.Field>
-        {serverError && (
-          <p
-            aria-live="polite"
-            className="font-sans text-body-sm text-destructive"
-            role="alert"
-          >
-            {serverError}
-          </p>
-        )}
+        <FormError message={serverError} />
         <form.Subscribe
           selector={(state) => ({
             canSubmit: state.canSubmit,
@@ -126,12 +118,6 @@ export const SignInForm = () => {
           )}
         </form.Subscribe>
       </form>
-      <div className="flex items-center gap-3">
-        <Separator className="flex-1" />
-        <span className="font-sans text-body-sm text-text-muted">or</span>
-        <Separator className="flex-1" />
-      </div>
-      <SocialSignInButton callbackUrl={callbackUrl} provider="google" />
-    </div>
+    </AuthFormLayout>
   )
 }
