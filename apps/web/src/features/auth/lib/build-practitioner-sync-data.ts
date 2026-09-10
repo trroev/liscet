@@ -28,7 +28,7 @@ export type PractitionerSyncData = {
 export const buildPractitionerSyncData = ({
   user,
 }: {
-  user: PractitionerSyncSource
+  user: Readonly<PractitionerSyncSource>
 }): PractitionerSyncData => {
   const data: PractitionerSyncData = {
     displayName: user.name ?? "",
