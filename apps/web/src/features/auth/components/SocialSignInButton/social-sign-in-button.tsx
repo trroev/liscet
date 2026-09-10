@@ -3,13 +3,17 @@
 import { authClient } from "@repo/auth/client"
 import type { SocialProvider } from "@repo/auth/social-providers"
 import { Button } from "@repo/ui/components/Button"
-import { useState } from "react"
+import { type ComponentType, useState } from "react"
 import { match } from "ts-pattern"
-import { GoogleIcon } from "./google-icon"
+import { GoogleIcon, type GoogleIconProps } from "./google-icon"
 
 const PROVIDER_LABELS = {
   google: "Continue with Google",
 } as const satisfies Record<SocialProvider, string>
+
+const PROVIDER_ICONS = {
+  google: GoogleIcon,
+} as const satisfies Record<SocialProvider, ComponentType<GoogleIconProps>>
 
 export type SocialSignInButtonProps = {
   provider: SocialProvider
@@ -21,6 +25,7 @@ export const SocialSignInButton = ({
   provider,
   callbackUrl,
 }: SocialSignInButtonProps) => {
+  const Icon = PROVIDER_ICONS[provider]
   const [isRedirecting, setIsRedirecting] = useState(false)
   const [serverError, setServerError] = useState<string | undefined>()
 
@@ -53,7 +58,7 @@ export const SocialSignInButton = ({
         type="button"
         variant="outline"
       >
-        <GoogleIcon className="size-4" />
+        <Icon className="size-4" />
         {isRedirecting ? "Redirecting…" : PROVIDER_LABELS[provider]}
       </Button>
       {serverError && (

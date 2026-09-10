@@ -8,6 +8,7 @@ import {
   authErrorHandler,
   authSignInSocialHandler,
   authSignUpHandler,
+  captureAuthRequestBodies,
   server,
 } from "@repo/testing/msw"
 import { renderWithProviders, userEvent } from "@repo/testing/render"
@@ -74,16 +75,6 @@ afterEach(() => {
   cleanup()
 })
 
-const captureSocialSignInBodies = (): Array<Record<string, unknown>> => {
-  const bodies: Array<Record<string, unknown>> = []
-  server.events.on("request:start", async ({ request }) => {
-    if (request.url.endsWith("/api/auth/sign-in/social")) {
-      bodies.push((await request.clone().json()) as Record<string, unknown>)
-    }
-  })
-  return bodies
-}
-
 describe("SignUpForm", () => {
   it("creates an account and redirects to onboarding", async () => {
     server.use(authSignUpHandler(buildSessionPayload()))
@@ -131,7 +122,7 @@ describe("SignUpForm", () => {
         redirect: true,
       })
     )
-    const bodies = captureSocialSignInBodies()
+    const bodies = captureAuthRequestBodies({ server, path: "sign-in/social" })
     const user = userEvent.setup()
 
     renderWithProviders(<SignUpForm />)
