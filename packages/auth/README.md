@@ -55,8 +55,11 @@ import { SessionProvider } from "@repo/auth/session"
   user instead of creating a duplicate. Do not add `trustedProviders` — a
   trusted provider links even on an unverified email.
 - Google is configured with `prompt: "select_account"` so users with several
-  Google accounts always choose one. Failures after the redirect to Google come
-  back to the page that started the flow as `?error=<code>`; map codes to copy
-  with `friendlyOAuthErrorMessage`.
+  Google accounts always choose one. Most failures after the redirect to Google
+  (a cancelled consent, an unlinkable account, a missing email) come back to the
+  page that started the flow as `?error=<code>`; map codes to copy with
+  `friendlyOAuthErrorMessage`. Failures before better-auth can read its state
+  (`state_mismatch`, `please_restart_the_process`) land on better-auth's default
+  `/api/auth/error` page instead, so those entries in the map are defensive.
 - Server actions invoked from the client rely on Next.js 16's same-origin /
   `Origin`-header CSRF check; no custom CSRF token layer.
