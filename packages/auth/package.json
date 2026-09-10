@@ -12,6 +12,7 @@
     "./social-providers": "./src/social-providers.ts"
   },
   "scripts": {
+    "test": "vitest run",
     "typecheck": "tsc --noEmit",
     "db:generate": "pnpm dlx @better-auth/cli generate --config ./src/index.ts --output ./src/schema.ts",
     "db:push": "drizzle-kit push",
@@ -36,6 +37,7 @@
     "@types/react": "catalog:",
     "drizzle-kit": "catalog:",
     "react": "catalog:",
-    "typescript": "catalog:"
+    "typescript": "catalog:",
+    "vitest": "catalog:"
   }
 }
