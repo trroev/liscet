@@ -18,6 +18,14 @@ export const authGetSessionHandler = (payload: SessionPayload | null) =>
 export const authSignInHandler = (payload: SessionPayload) =>
   http.post(`${AUTH_BASE}/sign-in/email`, () => HttpResponse.json(payload))
 
+export type SocialSignInPayload = {
+  url: string
+  redirect: boolean
+}
+
+export const authSignInSocialHandler = (payload: SocialSignInPayload) =>
+  http.post(`${AUTH_BASE}/sign-in/social`, () => HttpResponse.json(payload))
+
 export const authSignUpHandler = (payload: SessionPayload) =>
   http.post(`${AUTH_BASE}/sign-up/email`, () => HttpResponse.json(payload))
 

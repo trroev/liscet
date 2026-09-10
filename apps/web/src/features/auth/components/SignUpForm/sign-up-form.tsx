@@ -4,11 +4,13 @@ import { authClient } from "@repo/auth/client"
 import { Button } from "@repo/ui/components/Button"
 import { Field } from "@repo/ui/components/Field"
 import { Input } from "@repo/ui/components/Input"
+import { Separator } from "@repo/ui/components/Separator"
 import { useForm } from "@tanstack/react-form"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
 import { match } from "ts-pattern"
 import { z } from "zod"
+import { SocialSignInButton } from "../SocialSignInButton"
 
 const signUpSchema = z
   .object({
@@ -52,129 +54,137 @@ export const SignUpForm = () => {
   })
 
   return (
-    <form
-      className="flex flex-col gap-4"
-      noValidate
-      onSubmit={(e) => {
-        e.preventDefault()
-        e.stopPropagation()
-        form.handleSubmit()
-      }}
-    >
-      <form.Field name="name">
-        {(field) => (
-          <Field
-            error={
-              field.state.meta.isTouched
-                ? field.state.meta.errors[0]?.message
-                : undefined
-            }
-            label="Name"
-          >
-            <Input
-              autoComplete="name"
-              id="name"
-              name={field.name}
-              onBlur={field.handleBlur}
-              onChange={(e) => field.handleChange(e.target.value)}
-              required
-              type="text"
-              value={field.state.value}
-            />
-          </Field>
-        )}
-      </form.Field>
-      <form.Field name="email">
-        {(field) => (
-          <Field
-            error={
-              field.state.meta.isTouched
-                ? field.state.meta.errors[0]?.message
-                : undefined
-            }
-            label="Email"
-          >
-            <Input
-              autoComplete="email"
-              id="email"
-              name={field.name}
-              onBlur={field.handleBlur}
-              onChange={(e) => field.handleChange(e.target.value)}
-              required
-              type="email"
-              value={field.state.value}
-            />
-          </Field>
-        )}
-      </form.Field>
-      <form.Field name="password">
-        {(field) => (
-          <Field
-            error={
-              field.state.meta.isTouched
-                ? field.state.meta.errors[0]?.message
-                : undefined
-            }
-            hint="At least 8 characters."
-            label="Password"
-          >
-            <Input
-              autoComplete="new-password"
-              id="password"
-              name={field.name}
-              onBlur={field.handleBlur}
-              onChange={(e) => field.handleChange(e.target.value)}
-              required
-              type="password"
-              value={field.state.value}
-            />
-          </Field>
-        )}
-      </form.Field>
-      <form.Field name="confirmPassword">
-        {(field) => (
-          <Field
-            error={
-              field.state.meta.isTouched
-                ? field.state.meta.errors[0]?.message
-                : undefined
-            }
-            label="Confirm password"
-          >
-            <Input
-              autoComplete="new-password"
-              id="confirmPassword"
-              name={field.name}
-              onBlur={field.handleBlur}
-              onChange={(e) => field.handleChange(e.target.value)}
-              required
-              type="password"
-              value={field.state.value}
-            />
-          </Field>
-        )}
-      </form.Field>
-      {serverError && (
-        <p
-          aria-live="polite"
-          className="font-sans text-body-sm text-destructive"
-          role="alert"
-        >
-          {serverError}
-        </p>
-      )}
-      <form.Subscribe
-        selector={(state) => ({
-          canSubmit: state.canSubmit,
-          isSubmitting: state.isSubmitting,
-        })}
+    <div className="flex flex-col gap-6">
+      <form
+        className="flex flex-col gap-4"
+        noValidate
+        onSubmit={(e) => {
+          e.preventDefault()
+          e.stopPropagation()
+          form.handleSubmit()
+        }}
       >
-        {({ canSubmit, isSubmitting }) => (
-          <Button disabled={!canSubmit || isSubmitting} type="submit">
-            {isSubmitting ? "Creating account…" : "Create account"}
-          </Button>
+        <form.Field name="name">
+          {(field) => (
+            <Field
+              error={
+                field.state.meta.isTouched
+                  ? field.state.meta.errors[0]?.message
+                  : undefined
+              }
+              label="Name"
+            >
+              <Input
+                autoComplete="name"
+                id="name"
+                name={field.name}
+                onBlur={field.handleBlur}
+                onChange={(e) => field.handleChange(e.target.value)}
+                required
+                type="text"
+                value={field.state.value}
+              />
+            </Field>
+          )}
+        </form.Field>
+        <form.Field name="email">
+          {(field) => (
+            <Field
+              error={
+                field.state.meta.isTouched
+                  ? field.state.meta.errors[0]?.message
+                  : undefined
+              }
+              label="Email"
+            >
+              <Input
+                autoComplete="email"
+                id="email"
+                name={field.name}
+                onBlur={field.handleBlur}
+                onChange={(e) => field.handleChange(e.target.value)}
+                required
+                type="email"
+                value={field.state.value}
+              />
+            </Field>
+          )}
+        </form.Field>
+        <form.Field name="password">
+          {(field) => (
+            <Field
+              error={
+                field.state.meta.isTouched
+                  ? field.state.meta.errors[0]?.message
+                  : undefined
+              }
+              hint="At least 8 characters."
+              label="Password"
+            >
+              <Input
+                autoComplete="new-password"
+                id="password"
+                name={field.name}
+                onBlur={field.handleBlur}
+                onChange={(e) => field.handleChange(e.target.value)}
+                required
+                type="password"
+                value={field.state.value}
+              />
+            </Field>
+          )}
+        </form.Field>
+        <form.Field name="confirmPassword">
+          {(field) => (
+            <Field
+              error={
+                field.state.meta.isTouched
+                  ? field.state.meta.errors[0]?.message
+                  : undefined
+              }
+              label="Confirm password"
+            >
+              <Input
+                autoComplete="new-password"
+                id="confirmPassword"
+                name={field.name}
+                onBlur={field.handleBlur}
+                onChange={(e) => field.handleChange(e.target.value)}
+                required
+                type="password"
+                value={field.state.value}
+              />
+            </Field>
+          )}
+        </form.Field>
+        {serverError && (
+          <p
+            aria-live="polite"
+            className="font-sans text-body-sm text-destructive"
+            role="alert"
+          >
+            {serverError}
+          </p>
         )}
-      </form.Subscribe>
-    </form>
+        <form.Subscribe
+          selector={(state) => ({
+            canSubmit: state.canSubmit,
+            isSubmitting: state.isSubmitting,
+          })}
+        >
+          {({ canSubmit, isSubmitting }) => (
+            <Button disabled={!canSubmit || isSubmitting} type="submit">
+              {isSubmitting ? "Creating account…" : "Create account"}
+            </Button>
+          )}
+        </form.Subscribe>
+      </form>
+      <div className="flex items-center gap-3">
+        <Separator className="flex-1" />
+        <span className="font-sans text-body-sm text-text-muted">or</span>
+        <Separator className="flex-1" />
+      </div>
+      <SocialSignInButton callbackUrl="/onboarding" provider="google" />
+    </div>
   )
 }
