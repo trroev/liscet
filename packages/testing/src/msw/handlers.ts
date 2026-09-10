@@ -1,5 +1,6 @@
 import type { User } from "@repo/auth"
 import { HttpResponse, http, type JsonBodyType } from "msw"
+import type { SetupServer } from "msw/node"
 
 const AUTH_BASE = "/api/auth"
 
@@ -17,6 +18,34 @@ export const authGetSessionHandler = (payload: SessionPayload | null) =>
 
 export const authSignInHandler = (payload: SessionPayload) =>
   http.post(`${AUTH_BASE}/sign-in/email`, () => HttpResponse.json(payload))
+
+export type SocialSignInPayload = {
+  url: string
+  redirect: boolean
+}
+
+export const authSignInSocialHandler = (payload: SocialSignInPayload) =>
+  http.post(`${AUTH_BASE}/sign-in/social`, () => HttpResponse.json(payload))
+
+/**
+ * Collects the JSON bodies of every request to `/api/auth/<path>` made after
+ * this call. Callers own listener cleanup via `server.events.removeAllListeners()`.
+ */
+export const captureAuthRequestBodies = ({
+  server,
+  path,
+}: {
+  server: SetupServer
+  path: string
+}): Array<Record<string, unknown>> => {
+  const bodies: Array<Record<string, unknown>> = []
+  server.events.on("request:start", async ({ request }) => {
+    if (request.url.endsWith(`${AUTH_BASE}/${path}`)) {
+      bodies.push((await request.clone().json()) as Record<string, unknown>)
+    }
+  })
+  return bodies
+}
 
 export const authSignUpHandler = (payload: SessionPayload) =>
   http.post(`${AUTH_BASE}/sign-up/email`, () => HttpResponse.json(payload))

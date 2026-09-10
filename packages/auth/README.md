@@ -13,8 +13,10 @@ Consumed by `apps/web` and `@repo/testing` (for `renderWithProviders`).
 | Subpath | Owns |
 |---|---|
 | `@repo/auth` | `createAuth(extraOptions?)`, the shared `auth` singleton, `Session` / `User` types |
-| `@repo/auth/client` | `authClient`, `signIn*`, `signUp*`, `signOut`, `AuthResult<T>` |
+| `@repo/auth/client` | `authClient` (`signIn.email`, `signIn.social`, `signUp.email`), `AuthResult<T>` |
+| `@repo/auth/errors` | `friendlyAuthMessage`, `friendlyOAuthErrorMessage`, `GENERIC_AUTH_ERROR_MESSAGE` |
 | `@repo/auth/session` | `<SessionProvider>` (client), `useSession()` |
+| `@repo/auth/social-providers` | `SOCIAL_PROVIDERS`, `SocialProvider` — the OAuth providers offered on the auth forms |
 
 ## Usage
 
@@ -43,7 +45,21 @@ import { SessionProvider } from "@repo/auth/session"
 ## Constraints
 
 - `DATABASE_URL` is validated by [`@repo/env/database`](../env/README.md) and
-  `BETTER_AUTH_SECRET` / `BETTER_AUTH_URL` by [`@repo/env/auth`](../env/README.md).
+  `BETTER_AUTH_SECRET` / `BETTER_AUTH_URL` / `GOOGLE_CLIENT_ID` /
+  `GOOGLE_CLIENT_SECRET` by [`@repo/env/auth`](../env/README.md).
   Importing this package eagerly opens a Postgres pool — Node-only.
+- Google is the only social provider. `account.accountLinking` is enabled
+  **without** `trustedProviders`: better-auth links an OAuth account to an
+  existing email/password user only when the provider reports a **verified**
+  email, so a Google sign-in with a matching verified email joins the existing
+  user instead of creating a duplicate. Do not add `trustedProviders` — a
+  trusted provider links even on an unverified email.
+- Google is configured with `prompt: "select_account"` so users with several
+  Google accounts always choose one. Most failures after the redirect to Google
+  (a cancelled consent, an unlinkable account, a missing email) come back to the
+  page that started the flow as `?error=<code>`; map codes to copy with
+  `friendlyOAuthErrorMessage`. Failures before better-auth can read its state
+  (`state_mismatch`, `please_restart_the_process`) land on better-auth's default
+  `/api/auth/error` page instead, so those entries in the map are defensive.
 - Server actions invoked from the client rely on Next.js 16's same-origin /
   `Origin`-header CSRF check; no custom CSRF token layer.

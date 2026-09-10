@@ -4,7 +4,13 @@ import "@testing-library/jest-dom/vitest"
 
 import { buildUser } from "@repo/testing/factories"
 import type { SessionPayload } from "@repo/testing/msw"
-import { authErrorHandler, authSignUpHandler, server } from "@repo/testing/msw"
+import {
+  authErrorHandler,
+  authSignInSocialHandler,
+  authSignUpHandler,
+  captureAuthRequestBodies,
+  server,
+} from "@repo/testing/msw"
 import { renderWithProviders, userEvent } from "@repo/testing/render"
 import { cleanup, screen, waitFor } from "@testing-library/react"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
@@ -65,6 +71,7 @@ beforeEach(() => {
 })
 
 afterEach(() => {
+  server.events.removeAllListeners()
   cleanup()
 })
 
@@ -105,6 +112,55 @@ describe("SignUpForm", () => {
     expect(
       await screen.findByText("An account with that email already exists.")
     ).toBeInTheDocument()
+    expect(nav.push).not.toHaveBeenCalled()
+  })
+
+  it("starts Google sign-up with onboarding as the callback", async () => {
+    server.use(
+      authSignInSocialHandler({
+        url: "https://accounts.google.com/o/oauth2/v2/auth",
+        redirect: true,
+      })
+    )
+    const bodies = captureAuthRequestBodies({ server, path: "sign-in/social" })
+    const user = userEvent.setup()
+
+    renderWithProviders(<SignUpForm />)
+
+    await user.click(
+      screen.getByRole("button", { name: "Continue with Google" })
+    )
+
+    await waitFor(() => {
+      expect(bodies).toHaveLength(1)
+    })
+    expect(bodies[0]).toMatchObject({
+      provider: "google",
+      callbackURL: "/onboarding",
+      errorCallbackURL: "/sign-up",
+    })
+    expect(nav.push).not.toHaveBeenCalled()
+  })
+
+  it("shows the error message when Google sign-up cannot start", async () => {
+    server.use(
+      authErrorHandler({
+        path: "sign-in/social",
+        status: 400,
+        body: { code: "PROVIDER_NOT_FOUND", message: "Provider not found" },
+      })
+    )
+    const user = userEvent.setup()
+
+    renderWithProviders(<SignUpForm />)
+
+    await user.click(
+      screen.getByRole("button", { name: "Continue with Google" })
+    )
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "Provider not found"
+    )
     expect(nav.push).not.toHaveBeenCalled()
   })
 })

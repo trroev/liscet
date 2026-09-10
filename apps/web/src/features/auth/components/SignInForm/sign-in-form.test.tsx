@@ -4,7 +4,13 @@ import "@testing-library/jest-dom/vitest"
 
 import { buildUser } from "@repo/testing/factories"
 import type { SessionPayload } from "@repo/testing/msw"
-import { authErrorHandler, authSignInHandler, server } from "@repo/testing/msw"
+import {
+  authErrorHandler,
+  authSignInHandler,
+  authSignInSocialHandler,
+  captureAuthRequestBodies,
+  server,
+} from "@repo/testing/msw"
 import { renderWithProviders, userEvent } from "@repo/testing/render"
 import { cleanup, screen, waitFor } from "@testing-library/react"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
@@ -59,6 +65,7 @@ beforeEach(() => {
 })
 
 afterEach(() => {
+  server.events.removeAllListeners()
   cleanup()
 })
 
@@ -131,6 +138,81 @@ describe("SignInForm", () => {
     expect(
       await screen.findByText("Enter a valid email address.")
     ).toBeInTheDocument()
+    expect(nav.push).not.toHaveBeenCalled()
+  })
+
+  it("starts Google sign-in with the safe callbackUrl", async () => {
+    nav.searchParams = new URLSearchParams({ callbackUrl: "/dashboard" })
+    server.use(
+      authSignInSocialHandler({
+        url: "https://accounts.google.com/o/oauth2/v2/auth",
+        redirect: true,
+      })
+    )
+    const bodies = captureAuthRequestBodies({ server, path: "sign-in/social" })
+    const user = userEvent.setup()
+
+    renderWithProviders(<SignInForm />)
+
+    await user.click(
+      screen.getByRole("button", { name: "Continue with Google" })
+    )
+
+    await waitFor(() => {
+      expect(bodies).toHaveLength(1)
+    })
+    expect(bodies[0]).toMatchObject({
+      provider: "google",
+      callbackURL: "/dashboard",
+      errorCallbackURL: "/sign-in",
+    })
+    expect(nav.push).not.toHaveBeenCalled()
+  })
+
+  it("falls back to onboarding for Google sign-in when the callbackUrl is off-origin", async () => {
+    nav.searchParams = new URLSearchParams({
+      callbackUrl: "https://evil.example/phish",
+    })
+    server.use(
+      authSignInSocialHandler({
+        url: "https://accounts.google.com/o/oauth2/v2/auth",
+        redirect: true,
+      })
+    )
+    const bodies = captureAuthRequestBodies({ server, path: "sign-in/social" })
+    const user = userEvent.setup()
+
+    renderWithProviders(<SignInForm />)
+
+    await user.click(
+      screen.getByRole("button", { name: "Continue with Google" })
+    )
+
+    await waitFor(() => {
+      expect(bodies).toHaveLength(1)
+    })
+    expect(bodies[0]).toMatchObject({ callbackURL: "/onboarding" })
+  })
+
+  it("shows the error message when Google sign-in cannot start", async () => {
+    server.use(
+      authErrorHandler({
+        path: "sign-in/social",
+        status: 400,
+        body: { code: "PROVIDER_NOT_FOUND", message: "Provider not found" },
+      })
+    )
+    const user = userEvent.setup()
+
+    renderWithProviders(<SignInForm />)
+
+    await user.click(
+      screen.getByRole("button", { name: "Continue with Google" })
+    )
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "Provider not found"
+    )
     expect(nav.push).not.toHaveBeenCalled()
   })
 })
