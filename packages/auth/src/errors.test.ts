@@ -6,6 +6,12 @@ import {
   GENERIC_AUTH_ERROR_MESSAGE,
 } from "./errors"
 
+/**
+ * Widens a literal to `string` so the lookup takes its runtime-code path
+ * instead of tripping the compile-time check for misspelled literals.
+ */
+const asRuntimeCode = (code: string): string => code
+
 describe("createFriendlyMessageLookup", () => {
   const lookup = createFriendlyMessageLookup({
     messages: { known: "Known copy." },
@@ -17,20 +23,20 @@ describe("createFriendlyMessageLookup", () => {
   })
 
   it("returns the builder fallback for unknown or missing codes", () => {
-    const unknownCode: string = "nope"
+    const unknownCode = asRuntimeCode("nope")
     expect(lookup({ code: unknownCode })).toBe("Default copy.")
     expect(lookup({ code: undefined })).toBe("Default copy.")
   })
 
   it("prefers a per-call fallback over the builder fallback", () => {
-    const unknownCode: string = "nope"
+    const unknownCode = asRuntimeCode("nope")
     expect(lookup({ code: unknownCode, fallback: "Call copy." })).toBe(
       "Call copy."
     )
   })
 
   it("ignores inherited object keys", () => {
-    const prototypeKey: string = "constructor"
+    const prototypeKey = asRuntimeCode("constructor")
     expect(lookup({ code: prototypeKey })).toBe("Default copy.")
   })
 
@@ -48,7 +54,7 @@ describe("friendlyAuthMessage", () => {
   })
 
   it("falls back to the server message, then the generic copy", () => {
-    const unknownCode: string = "SOMETHING_ELSE"
+    const unknownCode = asRuntimeCode("SOMETHING_ELSE")
     expect(
       friendlyAuthMessage({ code: unknownCode, fallback: "Server said no." })
     ).toBe("Server said no.")
@@ -66,7 +72,7 @@ describe("friendlyOAuthErrorMessage", () => {
   })
 
   it("falls back to the generic copy for unknown codes", () => {
-    const unknownCode: string = "mystery"
+    const unknownCode = asRuntimeCode("mystery")
     expect(friendlyOAuthErrorMessage({ code: unknownCode })).toBe(
       GENERIC_AUTH_ERROR_MESSAGE
     )
