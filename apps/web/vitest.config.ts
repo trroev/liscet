@@ -14,7 +14,6 @@ export default mergeConfig(sharedConfig, {
   resolve: {
     alias: {
       "~": path.resolve(dirname, "./src"),
-      "@payload-config": path.resolve(dirname, "./src/payload.config.ts"),
     },
   },
   test: {

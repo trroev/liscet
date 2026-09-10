@@ -1,17 +1,30 @@
 import { beforeEach, describe, expect, it, vi } from "vitest"
 
+type SyncHook = { after: (user: unknown) => Promise<void> }
+
+type SyncHooks = {
+  user: { create: SyncHook; update: SyncHook; delete: SyncHook }
+}
+
+type CapturedAuthOptions = { databaseHooks: SyncHooks }
+
 const create = vi.fn()
 const update = vi.fn()
 const find = vi.fn()
 const deleteDoc = vi.fn()
 const captureException = vi.fn()
 const getPayloadUserByBetterAuthId = vi.fn()
+
+let capturedOptions: CapturedAuthOptions | undefined
 const createAuth = vi.fn(
-  (options: Record<string, unknown>): Record<string, unknown> => options
+  (options: CapturedAuthOptions): CapturedAuthOptions => {
+    capturedOptions = options
+    return options
+  }
 )
 
 vi.mock("server-only", () => ({}))
-vi.mock("@payload-config", () => ({ default: {} }))
+vi.mock("~/payload.config", () => ({ default: {} }))
 
 vi.mock("payload", () => ({
   getPayload: vi.fn(async () => ({ create, update, find, delete: deleteDoc })),
@@ -25,17 +38,12 @@ vi.mock("~/lib/queries/payload-user-by-better-auth-id", () => ({
 
 vi.mock("@repo/auth", () => ({ createAuth }))
 
-type SyncHooks = {
-  user: {
-    create: { after: (user: unknown) => Promise<void> }
-    update: { after: (user: unknown) => Promise<void> }
-    delete: { after: (user: unknown) => Promise<void> }
-  }
-}
-
 const loadHooks = async (): Promise<SyncHooks> => {
-  const { auth } = await import("./auth.server")
-  return (auth as unknown as { databaseHooks: SyncHooks }).databaseHooks
+  await import("./auth.server")
+  if (!capturedOptions) {
+    throw new Error("createAuth was not invoked by auth.server")
+  }
+  return capturedOptions.databaseHooks
 }
 
 const googleUser = {
@@ -45,15 +53,16 @@ const googleUser = {
   image: "https://lh3.googleusercontent.com/a/ada",
 }
 
-const passwordUser = {
-  id: "ba-user-2",
-  name: "Grace Hopper",
-  email: "grace@example.com",
+const syncedProfile = {
+  displayName: "Ada Lovelace",
+  email: "ada@example.com",
+  imageUrl: "https://lh3.googleusercontent.com/a/ada",
 }
 
 describe("auth.server sync hooks", () => {
   beforeEach(() => {
     vi.resetModules()
+    capturedOptions = undefined
     create.mockReset()
     update.mockReset()
     find.mockReset()
@@ -71,32 +80,11 @@ describe("auth.server sync hooks", () => {
 
       expect(create).toHaveBeenCalledWith({
         collection: "users",
-        data: {
-          betterAuthId: "ba-user-1",
-          displayName: "Ada Lovelace",
-          email: "ada@example.com",
-          imageUrl: "https://lh3.googleusercontent.com/a/ada",
-        },
+        data: { betterAuthId: "ba-user-1", ...syncedProfile },
       })
     })
 
-    it("should create a new practitioner without an imageUrl for password sign-up", async () => {
-      find.mockResolvedValueOnce({ docs: [] })
-      const hooks = await loadHooks()
-
-      await hooks.user.create.after(passwordUser)
-
-      expect(create).toHaveBeenCalledWith({
-        collection: "users",
-        data: {
-          betterAuthId: "ba-user-2",
-          displayName: "Grace Hopper",
-          email: "grace@example.com",
-        },
-      })
-    })
-
-    it("should link an existing email-matched user by betterAuthId only", async () => {
+    it("should link an email-matched practitioner and carry the avatar url", async () => {
       find.mockResolvedValueOnce({ docs: [{ id: "payload-user-1" }] })
       const hooks = await loadHooks()
 
@@ -106,13 +94,13 @@ describe("auth.server sync hooks", () => {
       expect(update).toHaveBeenCalledWith({
         collection: "users",
         id: "payload-user-1",
-        data: { betterAuthId: "ba-user-1" },
+        data: { betterAuthId: "ba-user-1", ...syncedProfile },
       })
     })
   })
 
   describe("update.after", () => {
-    it("should refresh the avatar url on the linked practitioner", async () => {
+    it("should refresh the profile on the linked practitioner", async () => {
       getPayloadUserByBetterAuthId.mockResolvedValueOnce({
         id: "payload-user-1",
       })
@@ -123,29 +111,7 @@ describe("auth.server sync hooks", () => {
       expect(update).toHaveBeenCalledWith({
         collection: "users",
         id: "payload-user-1",
-        data: {
-          displayName: "Ada Lovelace",
-          email: "ada@example.com",
-          imageUrl: "https://lh3.googleusercontent.com/a/ada",
-        },
-      })
-    })
-
-    it("should leave imageUrl untouched when the user has no image", async () => {
-      getPayloadUserByBetterAuthId.mockResolvedValueOnce({
-        id: "payload-user-2",
-      })
-      const hooks = await loadHooks()
-
-      await hooks.user.update.after(passwordUser)
-
-      expect(update).toHaveBeenCalledWith({
-        collection: "users",
-        id: "payload-user-2",
-        data: {
-          displayName: "Grace Hopper",
-          email: "grace@example.com",
-        },
+        data: syncedProfile,
       })
     })
 
@@ -158,12 +124,7 @@ describe("auth.server sync hooks", () => {
       expect(update).not.toHaveBeenCalled()
       expect(create).toHaveBeenCalledWith({
         collection: "users",
-        data: {
-          betterAuthId: "ba-user-1",
-          displayName: "Ada Lovelace",
-          email: "ada@example.com",
-          imageUrl: "https://lh3.googleusercontent.com/a/ada",
-        },
+        data: { betterAuthId: "ba-user-1", ...syncedProfile },
       })
     })
   })

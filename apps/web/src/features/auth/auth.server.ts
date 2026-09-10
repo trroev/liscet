@@ -1,10 +1,10 @@
 import "server-only"
-import config from "@payload-config"
 import { createAuth } from "@repo/auth"
 import { captureException } from "@sentry/nextjs"
 import { getPayload } from "payload"
 import { match } from "ts-pattern"
 import { getPayloadUserByBetterAuthId } from "~/lib/queries/payload-user-by-better-auth-id"
+import config from "~/payload.config"
 import { buildPractitionerSyncData } from "./lib/build-practitioner-sync-data"
 
 // Report sync failures to Sentry without blocking the BetterAuth operation.
@@ -47,7 +47,10 @@ export const auth = createAuth({
               payload.update({
                 collection: "users",
                 id: found.id,
-                data: { betterAuthId: user.id },
+                data: {
+                  betterAuthId: user.id,
+                  ...buildPractitionerSyncData({ user }),
+                },
               })
             )
         }),

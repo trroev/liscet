@@ -2,7 +2,7 @@
  * The subset of a better-auth user needed to mirror profile fields into the
  * Payload `users` record.
  */
-export type PractitionerSyncSource = {
+type PractitionerSyncSource = {
   name?: string | null
   email: string
   image?: string | null
@@ -10,20 +10,22 @@ export type PractitionerSyncSource = {
 
 /**
  * Profile fields written to the Payload `users` record on create/update sync.
- * `imageUrl` is present only when the source carries one, so a user without an
- * OAuth image (e.g. email/password) is never overwritten with an empty value.
  */
-export type PractitionerSyncData = {
+type PractitionerSyncData = {
   displayName: string
   email: string
-  imageUrl?: string
+  imageUrl?: string | null
 }
 
 /**
  * Maps a better-auth user onto the Payload profile fields, carrying the OAuth
- * avatar URL through when one is present. Null-safe: a missing or empty `image`
- * is omitted entirely rather than written as an empty string, so an existing
- * `imageUrl` is left intact on re-sync.
+ * avatar URL through to `imageUrl`.
+ *
+ * `image` follows the source's null/undefined semantics. `undefined` means the
+ * field was not part of this sync, so `imageUrl` is omitted and any stored value
+ * is left intact. `null` (or an empty string) means the OAuth image was
+ * intentionally cleared, so `null` is written to drop the now-stale URL rather
+ * than letting it persist indefinitely.
  */
 export const buildPractitionerSyncData = ({
   user,
@@ -34,5 +36,8 @@ export const buildPractitionerSyncData = ({
     displayName: user.name ?? "",
     email: user.email,
   }
-  return user.image ? { ...data, imageUrl: user.image } : data
+  if (user.image === undefined) {
+    return data
+  }
+  return { ...data, imageUrl: user.image || null }
 }

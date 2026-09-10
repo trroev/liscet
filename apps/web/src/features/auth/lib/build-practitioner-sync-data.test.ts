@@ -1,51 +1,52 @@
 import { describe, expect, it } from "vitest"
 import { buildPractitionerSyncData } from "./build-practitioner-sync-data"
 
+const email = "ada@example.com"
+
 describe("buildPractitionerSyncData", () => {
   it("should carry the OAuth image through as imageUrl when present", () => {
     const data = buildPractitionerSyncData({
       user: {
         name: "Ada Lovelace",
-        email: "ada@example.com",
+        email,
         image: "https://lh3.googleusercontent.com/a/ada",
       },
     })
 
     expect(data).toEqual({
       displayName: "Ada Lovelace",
-      email: "ada@example.com",
+      email,
       imageUrl: "https://lh3.googleusercontent.com/a/ada",
     })
   })
 
-  it("should omit imageUrl entirely when the user has no image", () => {
+  it("should omit imageUrl when image is not part of the sync", () => {
     const data = buildPractitionerSyncData({
-      user: { name: "Grace Hopper", email: "grace@example.com" },
+      user: { name: "Grace Hopper", email },
     })
 
-    expect(data).toEqual({
-      displayName: "Grace Hopper",
-      email: "grace@example.com",
-    })
+    expect(data).toEqual({ displayName: "Grace Hopper", email })
     expect(data).not.toHaveProperty("imageUrl")
   })
 
-  it("should treat a null or empty image as absent rather than writing an empty value", () => {
-    const fromNull = buildPractitionerSyncData({
-      user: { name: "Alan Turing", email: "alan@example.com", image: null },
-    })
-    const fromEmpty = buildPractitionerSyncData({
-      user: { name: "Alan Turing", email: "alan@example.com", image: "" },
+  it("should write null when the OAuth image was cleared", () => {
+    const data = buildPractitionerSyncData({
+      user: { name: "Alan Turing", email, image: null },
     })
 
-    expect(fromNull).not.toHaveProperty("imageUrl")
-    expect(fromEmpty).not.toHaveProperty("imageUrl")
+    expect(data.imageUrl).toBeNull()
+  })
+
+  it("should normalise an empty image string to null", () => {
+    const data = buildPractitionerSyncData({
+      user: { name: "Alan Turing", email, image: "" },
+    })
+
+    expect(data.imageUrl).toBeNull()
   })
 
   it("should fall back to an empty displayName when the user has no name", () => {
-    const data = buildPractitionerSyncData({
-      user: { name: null, email: "noname@example.com" },
-    })
+    const data = buildPractitionerSyncData({ user: { name: null, email } })
 
     expect(data.displayName).toBe("")
   })
