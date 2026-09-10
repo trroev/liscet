@@ -241,6 +241,10 @@ export interface User {
   betterAuthId?: string | null;
   displayName?: string | null;
   /**
+   * External avatar URL carried over from an OAuth provider (e.g. the Google profile picture). Null for email/password accounts, which use the uploaded avatar relation instead.
+   */
+  imageUrl?: string | null;
+  /**
    * URL slug — the first path segment of every authed screen (e.g. /{slug}). Set during onboarding and immutable thereafter; must be lowercase kebab-case and not reserved.
    */
   slug?: string | null;
@@ -643,6 +647,7 @@ export interface UsersSelect<T extends boolean = true> {
   email?: T;
   betterAuthId?: T;
   displayName?: T;
+  imageUrl?: T;
   slug?: T;
   timezone?: T;
   avatar?: T;

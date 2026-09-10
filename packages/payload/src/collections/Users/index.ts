@@ -46,6 +46,15 @@ export const Users: CollectionConfig = {
     {
       admin: {
         description:
+          "External avatar URL carried over from an OAuth provider (e.g. the Google profile picture). Null for email/password accounts, which use the uploaded avatar relation instead.",
+        readOnly: true,
+      },
+      name: "imageUrl",
+      type: "text",
+    },
+    {
+      admin: {
+        description:
           "URL slug — the first path segment of every authed screen (e.g. /{slug}). Set during onboarding and immutable thereafter; must be lowercase kebab-case and not reserved.",
       },
       index: true,

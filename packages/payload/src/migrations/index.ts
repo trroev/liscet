@@ -14,6 +14,7 @@ import * as migration_20260616_141229_co_telehealth_notification_types from './2
 import * as migration_20260616_194400_blob_pathname_on_media from './20260616_194400_blob_pathname_on_media';
 import * as migration_20260617_141532_homepage_global from './20260617_141532_homepage_global';
 import * as migration_20260617_150342_pages from './20260617_150342_pages';
+import * as migration_20260910_155609_imageUrl_on_users from './20260910_155609_imageUrl_on_users';
 
 export const migrations = [
   {
@@ -94,6 +95,11 @@ export const migrations = [
   {
     up: migration_20260617_150342_pages.up,
     down: migration_20260617_150342_pages.down,
-    name: '20260617_150342_pages'
+    name: '20260617_150342_pages',
+  },
+  {
+    up: migration_20260910_155609_imageUrl_on_users.up,
+    down: migration_20260910_155609_imageUrl_on_users.down,
+    name: '20260910_155609_imageUrl_on_users'
   },
 ];
