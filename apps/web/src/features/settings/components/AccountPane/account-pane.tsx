@@ -12,6 +12,7 @@ export type AccountPaneProps = {
   deletedAt: Date | null
   email: string
   memberSince: Date
+  providerImageUrl: string | null
   signOutSlot: React.ReactNode
 }
 
@@ -20,6 +21,7 @@ export const AccountPane = ({
   deletedAt,
   email,
   memberSince,
+  providerImageUrl,
   signOutSlot,
 }: AccountPaneProps) => (
   <div className="space-y-10">
@@ -27,7 +29,11 @@ export const AccountPane = ({
 
     <SettingsGroup title="Profile">
       <div className="py-4">
-        <AvatarManager avatarUrl={avatarUrl} email={email} />
+        <AvatarManager
+          avatarUrl={avatarUrl}
+          email={email}
+          providerImageUrl={providerImageUrl}
+        />
       </div>
       <SettingsRow label="Email">
         <span className="text-text-primary">{email}</span>

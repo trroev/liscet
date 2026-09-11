@@ -96,7 +96,9 @@ describe("AvatarManager", () => {
     })
     const user = userEvent.setup()
 
-    renderWithProviders(<AvatarManager avatarUrl={null} email="u@e.co" />)
+    renderWithProviders(
+      <AvatarManager avatarUrl={null} email="u@e.co" providerImageUrl={null} />
+    )
 
     const dialog = await openDialog(user)
 
@@ -120,7 +122,9 @@ describe("AvatarManager", () => {
   it("rejects an oversize file with the expected inline error", async () => {
     const user = userEvent.setup()
 
-    renderWithProviders(<AvatarManager avatarUrl={null} email="u@e.co" />)
+    renderWithProviders(
+      <AvatarManager avatarUrl={null} email="u@e.co" providerImageUrl={null} />
+    )
 
     const dialog = await openDialog(user)
 
@@ -143,7 +147,11 @@ describe("AvatarManager", () => {
     const user = userEvent.setup()
 
     renderWithProviders(
-      <AvatarManager avatarUrl="https://cdn.example/a.jpg" email="u@e.co" />
+      <AvatarManager
+        avatarUrl="https://cdn.example/a.jpg"
+        email="u@e.co"
+        providerImageUrl={null}
+      />
     )
 
     await user.click(screen.getByRole("button", { name: "Remove photo" }))
@@ -153,5 +161,22 @@ describe("AvatarManager", () => {
     })
     expect(nav.refresh).not.toHaveBeenCalled()
     expect(success).not.toHaveBeenCalled()
+  })
+
+  it("never offers a remove control for a provider image", () => {
+    renderWithProviders(
+      <AvatarManager
+        avatarUrl={null}
+        email="u@e.co"
+        providerImageUrl="https://lh3.googleusercontent.com/ada.png"
+      />
+    )
+
+    expect(
+      screen.getByRole("button", { name: "Change photo" })
+    ).toBeInTheDocument()
+    expect(
+      screen.queryByRole("button", { name: "Remove photo" })
+    ).not.toBeInTheDocument()
   })
 })

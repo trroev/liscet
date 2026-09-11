@@ -15,7 +15,7 @@ const { resolveHeaderAuth } = await import("./header-auth")
 
 const stubViewer = (
   session: { id: string; name?: string; email: string },
-  user: { avatar?: unknown } | null
+  user: { avatar?: unknown; imageUrl?: unknown } | null
 ): void => {
   viewer.mockResolvedValueOnce({ session, user })
 }
@@ -44,6 +44,53 @@ describe("resolveHeaderAuth", () => {
     expect(result).toMatchObject({
       avatarUrl: "https://cdn.example.com/ada.png",
       displayName: "Ada Lovelace",
+      initials: "AL",
+      status: "signed-in",
+    })
+    expect(warn).not.toHaveBeenCalled()
+  })
+
+  it("prefers the uploaded avatar over the OAuth imageUrl when both exist", async () => {
+    stubViewer(
+      { email: "ada@example.com", id: "ba-1", name: "Ada Lovelace" },
+      {
+        avatar: { url: "https://cdn.example.com/upload.png" },
+        imageUrl: "https://lh3.googleusercontent.com/ada.png",
+      }
+    )
+
+    const result = await resolveHeaderAuth()
+
+    expect(result).toMatchObject({
+      avatarUrl: "https://cdn.example.com/upload.png",
+      status: "signed-in",
+    })
+  })
+
+  it("falls back to the OAuth imageUrl when no avatar is uploaded", async () => {
+    stubViewer(
+      { email: "ada@example.com", id: "ba-1", name: "Ada Lovelace" },
+      { avatar: null, imageUrl: "https://lh3.googleusercontent.com/ada.png" }
+    )
+
+    const result = await resolveHeaderAuth()
+
+    expect(result).toMatchObject({
+      avatarUrl: "https://lh3.googleusercontent.com/ada.png",
+      status: "signed-in",
+    })
+  })
+
+  it("degrades to initials when neither an avatar nor an imageUrl exists", async () => {
+    stubViewer(
+      { email: "ada@example.com", id: "ba-1", name: "Ada Lovelace" },
+      { avatar: null, imageUrl: null }
+    )
+
+    const result = await resolveHeaderAuth()
+
+    expect(result).toMatchObject({
+      avatarUrl: null,
       initials: "AL",
       status: "signed-in",
     })

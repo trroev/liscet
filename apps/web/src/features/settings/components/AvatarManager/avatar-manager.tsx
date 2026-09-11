@@ -20,6 +20,7 @@ const log = createLogger({ name: "settings.avatar-manager" })
 type AvatarManagerProps = {
   avatarUrl: string | null
   email: string
+  providerImageUrl: string | null
 }
 
 type Selection = Readonly<{ file: File; previewUrl: string }>
@@ -32,7 +33,11 @@ type DialogStatus =
 const buildInitial = (email: string): string =>
   email.charAt(0).toUpperCase() || "?"
 
-const AvatarManagerInner = ({ avatarUrl, email }: AvatarManagerProps) => {
+const AvatarManagerInner = ({
+  avatarUrl,
+  email,
+  providerImageUrl,
+}: AvatarManagerProps) => {
   const router = useRouter()
   const fileInputId = useId()
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -133,7 +138,7 @@ const AvatarManagerInner = ({ avatarUrl, email }: AvatarManagerProps) => {
         alt="Profile photo"
         initials={buildInitial(email)}
         size="lg"
-        src={avatarUrl}
+        src={avatarUrl ?? providerImageUrl}
       />
 
       <div className="flex flex-col gap-2">

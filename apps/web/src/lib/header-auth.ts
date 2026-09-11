@@ -10,33 +10,46 @@ import { viewer } from "~/lib/queries/current-viewer"
 
 const log = createLogger({ name: "lib.header-auth" })
 
+type ResolveAvatarUrlInput = {
+  avatar: User["avatar"]
+  imageUrl: User["imageUrl"]
+}
+
 /**
- * Resolves the avatar URL from a Payload `users.avatar` relationship field,
- * which is a populated `Media` doc, an unpopulated id string, or null/undefined.
+ * Resolves the avatar URL for the chrome, preferring the uploaded
+ * `users.avatar` relationship (a populated `Media` doc, an unpopulated id
+ * string, or null/undefined) and falling back to the OAuth `users.imageUrl`
+ * when no upload resolves. Degrades to null when neither exists.
  */
-const resolveAvatarUrl = (avatar: User["avatar"]): string | null =>
+const resolveAvatarUrl = ({
+  avatar,
+  imageUrl,
+}: ResolveAvatarUrlInput): string | null =>
   match(avatar)
-    .with(P.nullish, P.string, () => null)
-    .otherwise((media) => media.url ?? null)
+    .with(P.nullish, P.string, () => imageUrl ?? null)
+    .otherwise((media) => media.url ?? imageUrl ?? null)
 
 export type BuildSignedInAuthInput = {
   displayName: string
   avatar: User["avatar"]
+  imageUrl: User["imageUrl"]
 }
 
 /**
- * Builds the `SignedInAuth` chrome state from a display name and avatar field,
- * wiring the shared sign-out action. Callers supply the display name because
- * its canonical source differs (better-auth session vs Payload user).
+ * Builds the `SignedInAuth` chrome state from a display name, avatar field, and
+ * OAuth image URL, wiring the shared sign-out action. Callers supply the
+ * display name because its canonical source differs (better-auth session vs
+ * Payload user).
  */
 export const buildSignedInAuth = ({
   displayName,
   avatar,
+  imageUrl,
 }: BuildSignedInAuthInput): SignedInAuth => ({
   status: "signed-in",
   displayName,
   initials: buildInitials(displayName),
-  avatarUrl: resolveAvatarUrl(avatar),
+  avatarUrl: resolveAvatarUrl({ avatar, imageUrl }),
   onSignOut: async () => {
     "use server"
     await signOutAction()
@@ -70,9 +83,13 @@ export const resolveHeaderAuth = async (): Promise<HeaderAuth> => {
         .warn(
           "better-auth session has no matching Payload user; rendering signed-in with a degraded avatar"
         )
-      return buildSignedInAuth({ displayName, avatar: null })
+      return buildSignedInAuth({ displayName, avatar: null, imageUrl: null })
     })
     .otherwise((user) =>
-      buildSignedInAuth({ displayName, avatar: user.avatar })
+      buildSignedInAuth({
+        displayName,
+        avatar: user.avatar,
+        imageUrl: user.imageUrl,
+      })
     )
 }
