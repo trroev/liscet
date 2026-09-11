@@ -26,6 +26,7 @@ export default async function AccountSettingsPage({
       deletedAt={user.deletedAt ? new Date(user.deletedAt) : null}
       email={session.email}
       memberSince={new Date(session.createdAt)}
+      providerImageUrl={user.imageUrl ?? null}
       signOutSlot={<SignOutButton />}
     />
   )

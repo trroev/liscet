@@ -23,6 +23,7 @@ export default async function UserSlugLayout({
   const auth = buildSignedInAuth({
     displayName: user.displayName ?? user.email,
     avatar: user.avatar,
+    imageUrl: user.imageUrl,
   })
 
   const navItems: ReadonlyArray<AppFrameNavItem> = [
