@@ -3,13 +3,13 @@
 import { authClient } from "@repo/auth/client"
 import { Button } from "@repo/ui/components/Button"
 import { Field } from "@repo/ui/components/Field"
+import { FormError } from "@repo/ui/components/FormError"
 import { Input } from "@repo/ui/components/Input"
 import { useForm } from "@tanstack/react-form"
 import { useRouter, useSearchParams } from "next/navigation"
 import { useState } from "react"
 import { match } from "ts-pattern"
 import { z } from "zod"
-import { FormError } from "~/lib/use-action-form"
 import { AuthFormLayout } from "../AuthFormLayout"
 
 const signInSchema = z.object({

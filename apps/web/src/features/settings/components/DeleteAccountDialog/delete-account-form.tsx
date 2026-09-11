@@ -3,11 +3,12 @@
 import { Button } from "@repo/ui/components/Button"
 import { Dialog } from "@repo/ui/components/Dialog"
 import { Field } from "@repo/ui/components/Field"
+import { FormError } from "@repo/ui/components/FormError"
 import { Input } from "@repo/ui/components/Input"
 import { toast } from "@repo/ui/components/Toast"
 import { useForm } from "@tanstack/react-form"
 import { z } from "zod"
-import { FormError, useActionForm } from "~/lib/use-action-form"
+import { useActionForm } from "~/lib/use-action-form"
 import {
   type DeleteAccountData,
   deleteAccount,

@@ -2,7 +2,6 @@
 
 import type { ActionResult } from "@repo/types/ActionResult"
 import { type QueryKey, useQueryClient } from "@tanstack/react-query"
-import type React from "react"
 import { useCallback, useState } from "react"
 import { match } from "ts-pattern"
 
@@ -82,25 +81,3 @@ export const useActionForm = <
 
   return { clearServerError, serverError, submit }
 }
-
-export type FormErrorProps = {
-  message: string | undefined
-}
-
-/**
- * The single rendering of a form's server-error message, shared by every
- * form in the app whether it submits through {@link useActionForm} or holds
- * its own server error.
- */
-export const FormError = ({
-  message,
-}: FormErrorProps): React.JSX.Element | null =>
-  message ? (
-    <p
-      aria-live="polite"
-      className="font-sans text-body-sm text-destructive"
-      role="alert"
-    >
-      {message}
-    </p>
-  ) : null
