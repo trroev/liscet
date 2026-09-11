@@ -66,6 +66,7 @@
     "@repo/storybook-config": "workspace:*",
     "@repo/testing": "workspace:*",
     "@repo/tsconfig": "workspace:*",
+    "@repo/vitest-config": "workspace:*",
     "@tailwindcss/postcss": "^4.2.4",
     "@testing-library/jest-dom": "catalog:",
     "@testing-library/react": "catalog:",

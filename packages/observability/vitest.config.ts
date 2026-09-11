@@ -1,10 +1,7 @@
-import { defineConfig } from "vitest/config"
+import { sharedConfig } from "@repo/vitest-config"
+import { mergeConfig } from "vitest/config"
 
-// Self-contained rather than extending `@repo/testing/vitest.shared`: that
-// package depends on `@repo/auth`, which depends on `@repo/observability`, so
-// importing it here would create a workspace dependency cycle. This config only
-// needs the Node environment and globals the tests rely on.
-export default defineConfig({
+export default mergeConfig(sharedConfig, {
   test: {
     coverage: {
       exclude: ["src/**/*.test.ts"],
@@ -12,8 +9,5 @@ export default defineConfig({
       provider: "v8",
       reporter: ["text", "html", "lcov"],
     },
-    environment: "node",
-    globals: true,
-    passWithNoTests: true,
   },
 })

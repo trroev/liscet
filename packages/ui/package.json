@@ -15,8 +15,8 @@
   },
   "devDependencies": {
     "@repo/storybook-config": "workspace:*",
-    "@repo/testing": "workspace:*",
     "@repo/tsconfig": "workspace:*",
+    "@repo/vitest-config": "workspace:*",
     "@storybook/addon-designs": "catalog:",
     "@storybook/nextjs-vite": "catalog:",
     "@testing-library/jest-dom": "catalog:",

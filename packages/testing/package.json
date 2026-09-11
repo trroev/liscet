@@ -5,7 +5,6 @@
   "license": "MIT",
   "type": "module",
   "exports": {
-    "./vitest.shared": "./vitest.shared.ts",
     "./render": "./src/render/index.tsx",
     "./factories": "./src/factories/index.ts",
     "./msw": "./src/msw/index.ts",
@@ -30,6 +29,7 @@
   },
   "devDependencies": {
     "@repo/tsconfig": "workspace:*",
+    "@repo/vitest-config": "workspace:*",
     "@testing-library/user-event": "catalog:",
     "@types/node": "catalog:",
     "@types/react": "catalog:",

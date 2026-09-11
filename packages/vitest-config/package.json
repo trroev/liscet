@@ -1,23 +1,22 @@
 {
-  "name": "@repo/rules-engine",
+  "name": "@repo/vitest-config",
   "version": "0.0.0",
   "private": true,
   "license": "MIT",
   "type": "module",
   "exports": {
-    "./*": "./src/*/index.ts"
+    ".": "./index.ts"
   },
   "scripts": {
-    "coverage": "vitest run --coverage",
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
     "clean": "rm -rf .turbo .next dist storybook-static coverage *.tsbuildinfo test-results playwright-report"
   },
+  "peerDependencies": {
+    "vitest": "catalog:"
+  },
   "devDependencies": {
-    "@repo/tsconfig": "workspace:*",
-    "@repo/vitest-config": "workspace:*",
-    "@repo/types": "workspace:*",
-    "@vitest/coverage-v8": "catalog:",
+    "@types/node": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:"
   }
