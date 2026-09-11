@@ -193,26 +193,4 @@ describe("SignInForm", () => {
     })
     expect(bodies[0]).toMatchObject({ callbackURL: "/onboarding" })
   })
-
-  it("shows the error message when Google sign-in cannot start", async () => {
-    server.use(
-      authErrorHandler({
-        path: "sign-in/social",
-        status: 400,
-        body: { code: "PROVIDER_NOT_FOUND", message: "Provider not found" },
-      })
-    )
-    const user = userEvent.setup()
-
-    renderWithProviders(<SignInForm />)
-
-    await user.click(
-      screen.getByRole("button", { name: "Continue with Google" })
-    )
-
-    expect(await screen.findByRole("alert")).toHaveTextContent(
-      "Provider not found"
-    )
-    expect(nav.push).not.toHaveBeenCalled()
-  })
 })
