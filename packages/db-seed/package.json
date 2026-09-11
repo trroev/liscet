@@ -22,8 +22,8 @@
     "payload": "catalog:"
   },
   "devDependencies": {
-    "@repo/testing": "workspace:*",
     "@repo/tsconfig": "workspace:*",
+    "@repo/vitest-config": "workspace:*",
     "@vitest/coverage-v8": "catalog:",
     "better-auth": "catalog:",
     "payload": "catalog:",

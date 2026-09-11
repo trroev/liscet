@@ -1,4 +1,4 @@
-import { sharedConfig } from "@repo/vitest-config"
 import { mergeConfig } from "vitest/config"
+import { sharedConfig } from "./index"
 
 export default mergeConfig(sharedConfig, {})

@@ -1,4 +1,4 @@
-import { sharedConfig } from "@repo/testing/vitest.shared"
+import { sharedConfig } from "@repo/vitest-config"
 import react from "@vitejs/plugin-react"
 import { mergeConfig } from "vitest/config"
 

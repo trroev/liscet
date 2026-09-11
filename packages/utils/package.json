@@ -13,8 +13,8 @@
     "clean": "rm -rf .turbo .next dist storybook-static coverage *.tsbuildinfo test-results playwright-report"
   },
   "devDependencies": {
-    "@repo/testing": "workspace:*",
     "@repo/tsconfig": "workspace:*",
+    "@repo/vitest-config": "workspace:*",
     "@repo/types": "workspace:*",
     "@vitest/coverage-v8": "catalog:",
     "typescript": "catalog:",
