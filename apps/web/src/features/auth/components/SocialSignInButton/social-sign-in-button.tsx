@@ -5,10 +5,10 @@ import { authClient } from "@repo/auth/client"
 import { friendlyOAuthErrorMessage } from "@repo/auth/errors"
 import type { SocialProvider } from "@repo/auth/social-providers"
 import { Button } from "@repo/ui/components/Button"
+import { FormError } from "@repo/ui/components/FormError"
 import { usePathname, useSearchParams } from "next/navigation"
 import { useState } from "react"
 import { match } from "ts-pattern"
-import { FormError } from "~/lib/use-action-form"
 
 const PROVIDER_LABELS = {
   google: "Continue with Google",
