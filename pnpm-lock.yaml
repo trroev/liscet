@@ -401,7 +401,7 @@ importers:
         version: 19.2.0(react@19.2.0)
       react-error-boundary:
         specifier: ^6.1.1
-        version: 6.1.1(react@19.2.0)
+        version: 6.1.5(@types/react@19.2.2)(react@19.2.0)
       react-schemaorg:
         specifier: ^2.0.1
         version: 2.0.1(react@19.2.0)(schema-dts@2.0.0(typescript@6.0.3))(typescript@6.0.3)
@@ -6402,10 +6402,14 @@ packages:
     peerDependencies:
       react: '>=16.13.1'
 
-  react-error-boundary@6.1.1:
-    resolution: {integrity: sha512-BrYwPOdXi5mqkk5lw+Uvt0ThHx32rCt3BkukS4X23A2AIWDPSGX6iaWTc0y9TU/mHDA/6qOSGel+B2ERkOvD1w==}
+  react-error-boundary@6.1.5:
+    resolution: {integrity: sha512-l2nk+KhgM6e79tAiHEs3tXTdiTW4ARniKYMQN+cLY5vQFpDOkxuXKIC4uIwYuIKoMpFQ6jEbQz9wBArUmq7GWA==}
     peerDependencies:
+      '@types/react': ^18.0.0 || ^19.0.0
       react: ^18.0.0 || ^19.0.0
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
 
   react-image-crop@10.1.8:
     resolution: {integrity: sha512-4rb8XtXNx7ZaOZarKKnckgz4xLMvds/YrU6mpJfGhGAsy2Mg4mIw1x+DCCGngVGq2soTBVVOxx2s/C6mTX9+pA==}
@@ -8649,7 +8653,7 @@ snapshots:
       '@lexical/utils': 0.41.0
       lexical: 0.41.0
 
-  '@lexical/react@0.41.0(react-dom@19.2.0(react@19.2.0))(react@19.2.0)(yjs@13.6.30)':
+  '@lexical/react@0.41.0(@types/react@19.2.2)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)(yjs@13.6.30)':
     dependencies:
       '@floating-ui/react': 0.27.19(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
       '@lexical/devtools-core': 0.41.0(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
@@ -8671,8 +8675,9 @@ snapshots:
       lexical: 0.41.0
       react: 19.2.0
       react-dom: 19.2.0(react@19.2.0)
-      react-error-boundary: 6.1.1(react@19.2.0)
+      react-error-boundary: 6.1.5(@types/react@19.2.2)(react@19.2.0)
     transitivePeerDependencies:
+      - '@types/react'
       - yjs
 
   '@lexical/rich-text@0.41.0':
@@ -9289,7 +9294,7 @@ snapshots:
       '@lexical/link': 0.41.0
       '@lexical/list': 0.41.0
       '@lexical/mark': 0.41.0
-      '@lexical/react': 0.41.0(react-dom@19.2.0(react@19.2.0))(react@19.2.0)(yjs@13.6.30)
+      '@lexical/react': 0.41.0(@types/react@19.2.2)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)(yjs@13.6.30)
       '@lexical/rich-text': 0.41.0
       '@lexical/selection': 0.41.0
       '@lexical/table': 0.41.0
@@ -9334,7 +9339,7 @@ snapshots:
       '@lexical/link': 0.41.0
       '@lexical/list': 0.41.0
       '@lexical/mark': 0.41.0
-      '@lexical/react': 0.41.0(react-dom@19.2.0(react@19.2.0))(react@19.2.0)(yjs@13.6.30)
+      '@lexical/react': 0.41.0(@types/react@19.2.2)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)(yjs@13.6.30)
       '@lexical/rich-text': 0.41.0
       '@lexical/selection': 0.41.0
       '@lexical/table': 0.41.0
@@ -13200,9 +13205,11 @@ snapshots:
       '@babel/runtime': 7.29.7
       react: 19.2.0
 
-  react-error-boundary@6.1.1(react@19.2.0):
+  react-error-boundary@6.1.5(@types/react@19.2.2)(react@19.2.0):
     dependencies:
       react: 19.2.0
+    optionalDependencies:
+      '@types/react': 19.2.2
 
   react-image-crop@10.1.8(react@19.2.0):
     dependencies:
